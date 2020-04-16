@@ -1,9 +1,7 @@
 package main
 
 import (
-	"crypto/rand"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,7 +14,10 @@ var (
 	profix = "/api/v1"
 )
 
+var	accessGrant *AccessGrant
+
 func main() {
+	accessGrant = NewAccessGrant()
 	r := mux.NewRouter()
 	r.HandleFunc("/oauth/token", oauthHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
 	r.HandleFunc(profix+"/{action}/", actionHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
@@ -41,16 +42,11 @@ func oauthHandler(w http.ResponseWriter, r *http.Request) {
 		CreatedAt   int64  `json:"created_at"`
 	}
 
-	n := 32
-	b := make([]byte, n)
-	if _, err := rand.Read(b); err != nil {
-		panic(err)
-	}
-	s := fmt.Sprintf("%x", b)
-	log.Println(s)
+	key, _ := accessGrant.Grant(nil)
+	log.Println(key)
 
 	token := &Token{
-		AccessToken: s,
+		AccessToken: key,
 		TokenType:   "bearer",
 		ExpiresIn:   7200,
 		CreatedAt:   time.Now().Unix(),
