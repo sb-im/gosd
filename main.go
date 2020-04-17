@@ -30,7 +30,9 @@ func main() {
 	r.HandleFunc("/oauth/token", oauthHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
 	r.HandleFunc(profix+"/plans/", planIndexHandler).Methods(http.MethodGet, http.MethodOptions)
 	r.HandleFunc(profix+"/plans/", planCreateHandler).Methods(http.MethodPost, http.MethodOptions)
-	r.HandleFunc(profix+"/plans/{id}", planIDHandler).Methods(http.MethodGet, http.MethodPut, http.MethodPatch, http.MethodOptions)
+	r.HandleFunc(profix+"/plans/{id}", planIDHandler).Methods(http.MethodGet, http.MethodOptions)
+	r.HandleFunc(profix+"/plans/{id}", planUpdateHandler).Methods(http.MethodPut, http.MethodPatch, http.MethodOptions)
+
 	r.HandleFunc(profix+"/{action}/", actionHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
 	r.Use(mux.CORSMethodMiddleware(r))
 
@@ -136,24 +138,15 @@ func planIDHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func planCreateHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	if r.Method == http.MethodOptions {
-		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
-		return
-	}
-	//bb := make([]byte, 4096)
-	//r.Body.Read(bb)
-	//fmt.Println(string(bb))
+func file2path(r *http.Request) map[string]string {
+	params := make(map[string]string)
 
-	rparams := make(map[string]string)
-
-	mediaType, params, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	mediaType, mimeParams, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil {
 		log.Fatal(err)
 	}
 	if strings.HasPrefix(mediaType, "multipart/") {
-		mr := multipart.NewReader(r.Body, params["boundary"])
+		mr := multipart.NewReader(r.Body, mimeParams["boundary"])
 		for {
 			p, err := mr.NextPart()
 			if err == io.EOF {
@@ -174,24 +167,84 @@ func planCreateHandler(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					log.Fatal(err)
 				}
-				rparams[p.FormName()] = filepath
+				params[p.FormName()] = filepath
 			} else {
-				rparams[p.FormName()] = string(slurp)
+				params[p.FormName()] = string(slurp)
 			}
 
 		}
 	}
 
-	//fmt.Println(rparams)
+	return params
+}
+
+func planCreateHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	if r.Method == http.MethodOptions {
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
+		return
+	}
+
+	params := file2path(r)
+
+	node_id, err := strconv.Atoi(params["node_id"])
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	cycle_types_id, err := strconv.Atoi(params["cycle_types_id"])
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	plan := &Plan{
-		Name:           rparams["name"],
-		Description:    rparams["description"],
-		File:           rparams["file"],
-		Node_id:        rparams["node_id"],
-		Cycle_types_id: rparams["cycle_types_id"],
+		Name:           params["name"],
+		Description:    params["description"],
+		File:           params["file"],
+		Node_id:        node_id,
+		Cycle_types_id: cycle_types_id,
 	}
 
 	plan.Create()
+
+	b, err := json.Marshal(plan)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(b)
+}
+
+func planUpdateHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	if r.Method == http.MethodOptions {
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
+		return
+	}
+
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	plan := &Plan{}
+	plan.Find(id)
+
+	params := file2path(r)
+
+	for _, key := range []string{"name", "description", "file"} {
+		db.Model(&plan).Update(key, params[key])
+	}
+
+	for _, key := range []string{"node_id", "cycle_types_id"} {
+		id, err := strconv.Atoi(params[key])
+		if err != nil {
+			fmt.Println(err)
+		}
+		db.Model(&plan).Update(key, id)
+	}
 
 	b, err := json.Marshal(plan)
 	if err != nil {

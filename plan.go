@@ -14,8 +14,8 @@ type Plan struct {
 	Name           string
 	Description    string
 	File           string
-	Node_id        string
-	Cycle_types_id string
+	Node_id        int
+	Cycle_types_id int
 }
 
 func (plan *Plan) MarshalJSON() ([]byte, error) {
@@ -24,8 +24,8 @@ func (plan *Plan) MarshalJSON() ([]byte, error) {
 		Name           string `json:"name"`
 		Description    string `json:"description"`
 		File           string `json:"file"`
-		Node_id        string `json:"node_id"`
-		Cycle_types_id string `json:"cycle_types_id"`
+		Node_id        int    `json:"node_id"`
+		Cycle_types_id int    `json:"cycle_types_id"`
 	}{
 		ID:             plan.ID,
 		Name:           plan.Name,
