@@ -3,14 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"log"
-	"mime"
-	"mime/multipart"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -60,44 +54,24 @@ func planIDHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func file2path(r *http.Request) map[string]string {
-	params := make(map[string]string)
+func planMapFileDownloadHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	if r.Method == http.MethodOptions {
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
+		return
+	}
 
-	mediaType, mimeParams, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	vars := mux.Vars(r)
+	w.Header().Set("Content-Type", "application/json")
+
+	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		log.Fatal(err)
-	}
-	if strings.HasPrefix(mediaType, "multipart/") {
-		mr := multipart.NewReader(r.Body, mimeParams["boundary"])
-		for {
-			p, err := mr.NextPart()
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				log.Fatal(err)
-			}
-			slurp, err := ioutil.ReadAll(p)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			if p.FileName() != "" {
-				fmt.Println(p.FileName())
-				filepath := "data/storage/" + p.FileName()
-				err := ioutil.WriteFile(filepath, slurp, 0644)
-				if err != nil {
-					log.Fatal(err)
-				}
-				params[p.FormName()] = filepath
-			} else {
-				params[p.FormName()] = string(slurp)
-			}
-
-		}
+		fmt.Println(err)
 	}
 
-	return params
+	plan := &Plan{}
+	plan.Find(id)
+	handleDownload("233", plan.File, w)
 }
 
 func planCreateHandler(w http.ResponseWriter, r *http.Request) {

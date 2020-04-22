@@ -26,6 +26,9 @@ func main() {
 	r.HandleFunc(profix+"/plans/{id}", planIDHandler).Methods(http.MethodGet, http.MethodOptions)
 	r.HandleFunc(profix+"/plans/{id}", planUpdateHandler).Methods(http.MethodPut, http.MethodPatch, http.MethodOptions)
 	r.HandleFunc(profix+"/plans/{id}", planDestroyHandler).Methods(http.MethodDelete, http.MethodOptions)
+	r.HandleFunc(profix+"/plans/{id}/get_map", planMapFileDownloadHandler).Methods(http.MethodGet, http.MethodOptions)
+
+	//r.Handle("/storage/{name}", http.StripPrefix("/storage/", http.FileServer(http.Dir("data/storage"))))
 
 	r.HandleFunc(profix+"/{action}/", actionHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
 	r.Use(mux.CORSMethodMiddleware(r))

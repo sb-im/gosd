@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -23,14 +24,14 @@ func (plan *Plan) MarshalJSON() ([]byte, error) {
 		ID             uint   `json:"id"`
 		Name           string `json:"name"`
 		Description    string `json:"description"`
-		File           string `json:"file"`
+		File           string `json:"map_path"`
 		Node_id        int    `json:"node_id"`
 		Cycle_types_id int    `json:"cycle_types_id"`
 	}{
 		ID:             plan.ID,
 		Name:           plan.Name,
 		Description:    plan.Description,
-		File:           plan.File,
+		File:           profix + "/plans/" + strconv.FormatUint(uint64(plan.ID), 10) + "/get_map",
 		Node_id:        plan.Node_id,
 		Cycle_types_id: plan.Cycle_types_id,
 	})
@@ -45,6 +46,7 @@ func DBlink() {
 	//defer db.Close()
 
 	db.AutoMigrate(&Plan{})
+	db.AutoMigrate(&StorageBlob{})
 }
 
 func (this *Plan) Find(id int) {
