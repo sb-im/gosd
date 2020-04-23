@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	namespace = "/gosd"
+	namespace   = "/gosd"
 	api_version = "/api/v1"
-	profix = namespace + api_version
+	profix      = namespace + api_version
 )
 
 var accessGrant *AccessGrant
@@ -22,7 +22,7 @@ func main() {
 	DBlink()
 	accessGrant = NewAccessGrant()
 	r := mux.NewRouter()
-	r.HandleFunc(namespace + "/oauth/token", oauthHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
+	r.HandleFunc(namespace+"/oauth/token", oauthHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
 	r.HandleFunc(profix+"/plans/", planIndexHandler).Methods(http.MethodGet, http.MethodOptions)
 	r.HandleFunc(profix+"/plans/", planCreateHandler).Methods(http.MethodPost, http.MethodOptions)
 	r.HandleFunc(profix+"/plans/{id}", planIDHandler).Methods(http.MethodGet, http.MethodOptions)

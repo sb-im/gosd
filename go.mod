@@ -1,4 +1,4 @@
-module sb.im/sdgo
+module sb.im/gosd
 
 go 1.14
 
