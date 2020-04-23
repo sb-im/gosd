@@ -31,7 +31,7 @@ func (plan *Plan) MarshalJSON() ([]byte, error) {
 		ID:             plan.ID,
 		Name:           plan.Name,
 		Description:    plan.Description,
-		File:           profix + "/plans/" + strconv.FormatUint(uint64(plan.ID), 10) + "/get_map",
+		File:           api_version + "/plans/" + strconv.FormatUint(uint64(plan.ID), 10) + "/get_map",
 		Node_id:        plan.Node_id,
 		Cycle_types_id: plan.Cycle_types_id,
 	})
