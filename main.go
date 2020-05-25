@@ -8,6 +8,9 @@ import (
 	"time"
 	"os"
 	"fmt"
+	"net/url"
+
+	"sb.im/gosd/state"
 
 	"github.com/gorilla/mux"
 )
@@ -33,7 +36,18 @@ func main() {
 	}
 
 	fmt.Println("=========")
-	fmt.Println(config)
+
+	uri, err := url.Parse(config.Mqtt)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	state := &state.State{
+		Node: make(map[int]state.NodeState),
+	}
+
+	mq := state.Connect("cloud.0", uri)
+	fmt.Println(mq)
 
 	DBlink(config.Database)
 	accessGrant = NewAccessGrant()
