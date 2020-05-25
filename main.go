@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"os"
+	"fmt"
 
 	"github.com/gorilla/mux"
 )
@@ -19,7 +21,21 @@ var (
 var accessGrant *AccessGrant
 
 func main() {
-	DBlink()
+	config_path := "./config.yaml"
+	if os.Getenv("GOSD_CONF") != "" {
+		config_path = os.Getenv("GOSD_CONF")
+	}
+	fmt.Println("load config: " + config_path)
+
+	config, err := getConfig(config_path)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+
+	fmt.Println("=========")
+	fmt.Println(config)
+
+	DBlink(config.Database)
 	accessGrant = NewAccessGrant()
 	r := mux.NewRouter()
 	r.HandleFunc(namespace+"/oauth/token", oauthHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
@@ -35,7 +51,7 @@ func main() {
 	r.HandleFunc(profix+"/{action}/", actionHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
 	r.Use(mux.CORSMethodMiddleware(r))
 
-	http.ListenAndServe(":8000", r)
+	http.ListenAndServe(config.Server, r)
 }
 
 func oauthHandler(w http.ResponseWriter, r *http.Request) {
