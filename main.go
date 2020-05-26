@@ -11,6 +11,7 @@ import (
 	"net/url"
 
 	"sb.im/gosd/state"
+	"sb.im/gosd/luavm"
 
 	"github.com/gorilla/mux"
 )
@@ -48,6 +49,9 @@ func main() {
 
 	mq := state.Connect("cloud.0", uri)
 	fmt.Println(mq)
+
+	path := "test.lua"
+	luavm.Run(state, path)
 
 	DBlink(config.Database)
 	accessGrant = NewAccessGrant()
