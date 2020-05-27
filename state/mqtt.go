@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"sb.im/gosd/jsonrpc2mqtt"
+
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -19,6 +21,10 @@ func setUri(uri *url.URL) *mqtt.ClientOptions {
 	password, _ := uri.User.Password()
 	opts.SetPassword(password)
 	return opts
+}
+
+func (s *State) RpcCall(id string, msg []byte) ([]byte, error) {
+	return jsonrpc2mqtt.SyncMqttRpc(s.Mqtt, 10, msg)
 }
 
 func (s *State) Connect(clientId string, uri *url.URL) mqtt.Client {
@@ -34,6 +40,10 @@ func (s *State) Connect(clientId string, uri *url.URL) mqtt.Client {
 	// Lost callback
 	opts.SetConnectionLostHandler(func(client mqtt.Client, err error) {
 		logger.Println("Lost Connect")
+	})
+
+	opts.SetOnConnectHandler(func(client mqtt.Client) {
+		logger.Println("New Connect")
 	})
 
 	client := mqtt.NewClient(opts)
@@ -57,6 +67,8 @@ func (s *State) Connect(clientId string, uri *url.URL) mqtt.Client {
 
 		s.Node[id].Msg[str] = msg.Payload()
 	})
+
+	s.Mqtt = client
 
 	return client
 }

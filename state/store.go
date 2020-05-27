@@ -1,8 +1,11 @@
 package state
 
+import mqtt "github.com/eclipse/paho.mqtt.golang"
+
 type State struct {
 	Plan map[int]PlanState
 	Node map[int]NodeState
+	Mqtt mqtt.Client
 }
 
 type PlanState struct {

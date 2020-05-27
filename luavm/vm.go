@@ -1,11 +1,13 @@
 package luavm
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
 	"sb.im/gosd/state"
 
+	jsonrpc2 "github.com/sb-im/jsonrpc2"
 	"github.com/yuin/gopher-lua"
 )
 
@@ -13,7 +15,7 @@ func Run(s *state.State, path string) {
 	l := lua.NewState()
 	defer l.Close()
 
-	regService(l)
+	regService(s, l)
 
 	//err := l.DoString(script)
 	err := l.DoFile(path)
@@ -38,18 +40,35 @@ func Run(s *state.State, path string) {
 	fmt.Println(ret)
 }
 
-func regService(l *lua.LState) {
-	aaa := &aa{}
+func regService(s *state.State, l *lua.LState) {
+	service := LService{
+		Client: s,
+	}
 
-	l.SetGlobal("call_service", l.NewFunction(aaa.callService))
+	l.SetGlobal("rpc_call", l.NewFunction(service.rpc))
+	l.SetGlobal("call_service", l.NewFunction(callService))
 	l.SetGlobal("filePoolService", lua.LString("FilePoolService"))
+
+	l.SetGlobal("plan_id", lua.LString("1"))
+	l.SetGlobal("plan_log_id", lua.LString("2"))
+	l.SetGlobal("node_id", lua.LString("3"))
 }
 
-type aa struct {
+type LService struct {
+	Client *state.State
 }
 
-// lua脚本中调用的函数
-func (a *aa) callService(L *lua.LState) int {
+func (m *LService) rpc(L *lua.LState) int {
+	jsonrpc_req := jsonrpc2.WireRequest{
+		Method: L.ToString(2),
+	}
+
+	r, _ := json.Marshal(jsonrpc_req)
+	m.Client.RpcCall(L.ToString(1), r)
+	return 1
+}
+
+func callService(L *lua.LState) int {
 	// 根据编号获取传入参数(从1开始)
 	service := L.ToString(1)
 	param := L.ToTable(3)
