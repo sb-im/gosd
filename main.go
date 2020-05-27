@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"sb.im/gosd/jsonrpc2mqtt"
 	"sb.im/gosd/state"
 	"sb.im/gosd/luavm"
 
@@ -48,7 +49,14 @@ func main() {
 	}
 
 	mq := state.Connect("cloud.0", uri)
-	fmt.Println(mq)
+
+	time.Sleep(1 * time.Second)
+	req := []byte(`{"jsonrpc":"2.0","id":"gosd.0","method":"check_ready"}`)
+	res, err := jsonrpc2mqtt.SyncMqttRpc(mq, 10, req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(res))
 
 	path := "test.lua"
 	luavm.Run(state, path)
