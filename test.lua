@@ -8,8 +8,10 @@ function info(n)
   print(plan_id)
   print(plan_log_id)
   print(node_id)
-  print("33333333333333333333333")
 
-  rpc_call("10", "23333333333")
+  print(rpc_call("10", "23333333333"))
+  print(rpc_call("10", "23333333333"))
+
+  print("33333333333333333333333")
   return ret['data']
 end

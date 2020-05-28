@@ -4,12 +4,26 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
+	"sync"
+	"time"
 
 	"sb.im/gosd/state"
 
 	jsonrpc2 "github.com/sb-im/jsonrpc2"
 	"github.com/yuin/gopher-lua"
 )
+
+var sequence uint64
+var mu sync.Mutex
+
+func getSequence() string {
+	mu.Lock()
+	id := strconv.FormatUint(sequence, 10)
+	sequence++
+	mu.Unlock()
+	return id
+}
 
 func Run(s *state.State, path string) {
 	l := lua.NewState()
@@ -59,12 +73,24 @@ type LService struct {
 }
 
 func (m *LService) rpc(L *lua.LState) int {
+	bit13_timestamp := string([]byte(strconv.FormatInt(time.Now().UnixNano(), 10))[:13])
+	rpc_id := "gosd.0-" + bit13_timestamp + "-" + getSequence()
+	fmt.Println(rpc_id)
+
 	jsonrpc_req := jsonrpc2.WireRequest{
 		Method: L.ToString(2),
+		ID: &jsonrpc2.ID{
+			Name: rpc_id,
+		},
 	}
 
 	r, _ := json.Marshal(jsonrpc_req)
-	m.Client.RpcCall(L.ToString(1), r)
+	r, err := m.Client.RpcCall(L.ToString(1), r)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//fmt.Println(string(r))
+	L.Push(lua.LString(string(r)))
 	return 1
 }
 
