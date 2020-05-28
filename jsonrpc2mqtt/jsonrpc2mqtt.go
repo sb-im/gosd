@@ -22,6 +22,10 @@ func SyncMqttRpcWait(client mqtt.Client, id int, timeout time.Duration, req []by
 		return []byte(""), err
 	}
 
+	if jsonrpc_req.ID == nil {
+		return []byte(""), errors.New("jsonrpc Not find ID")
+	}
+
 	ch_recv := make(chan []byte)
 	token := client.Subscribe(topic+"recv", 1, func(client mqtt.Client, mqtt_msg mqtt.Message) {
 		jsonrpc_res := jsonrpc2.WireResponse{}
