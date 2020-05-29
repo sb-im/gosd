@@ -9,6 +9,16 @@ function info(n)
   print(plan_log_id)
   print(node_id)
 
+  ch = channel.make()
+  async_rpc_call("10", "async", ch)
+  print("5555555555555555555555")
+
+  channel.select(
+  {"|<-", ch, function(ok, data)
+    print(ok, data)
+  end}
+  )
+
   print(rpc_call("10", "23333333333"))
   print(rpc_call("10", "23333333333"))
 

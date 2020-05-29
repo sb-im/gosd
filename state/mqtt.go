@@ -23,6 +23,10 @@ func setUri(uri *url.URL) *mqtt.ClientOptions {
 	return opts
 }
 
+func (s *State) AsyncRpcCall(id string, msg []byte, ch chan []byte) error {
+	return jsonrpc2mqtt.AsyncMqttRpc(s.Mqtt, 10, msg, ch)
+}
+
 func (s *State) RpcCall(id string, msg []byte) ([]byte, error) {
 	return jsonrpc2mqtt.SyncMqttRpc(s.Mqtt, 10, msg)
 }

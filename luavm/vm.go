@@ -59,6 +59,7 @@ func regService(s *state.State, l *lua.LState) {
 		Client: s,
 	}
 
+	l.SetGlobal("async_rpc_call", l.NewFunction(service.async_rpc))
 	l.SetGlobal("rpc_call", l.NewFunction(service.rpc))
 	l.SetGlobal("call_service", l.NewFunction(callService))
 	l.SetGlobal("filePoolService", lua.LString("FilePoolService"))
@@ -70,6 +71,31 @@ func regService(s *state.State, l *lua.LState) {
 
 type LService struct {
 	Client *state.State
+}
+
+func (m *LService) async_rpc(L *lua.LState) int {
+	bit13_timestamp := string([]byte(strconv.FormatInt(time.Now().UnixNano(), 10))[:13])
+	rpc_id := "gosd.0-" + bit13_timestamp + "-" + getSequence()
+	fmt.Println(rpc_id)
+
+	jsonrpc_req := jsonrpc2.WireRequest{
+		Method: L.ToString(2),
+		ID: &jsonrpc2.ID{
+			Name: rpc_id,
+		},
+	}
+
+	ch_L := L.ToChannel(3)
+	ch := make(chan []byte)
+	r, _ := json.Marshal(jsonrpc_req)
+	err := m.Client.AsyncRpcCall(L.ToString(1), r, ch)
+	if err != nil {
+		fmt.Println(err)
+	}
+	go func() {
+		ch_L <- lua.LString(<-ch)
+	}()
+	return 1
 }
 
 func (m *LService) rpc(L *lua.LState) int {
