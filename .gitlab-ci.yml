@@ -1,0 +1,28 @@
+image: golang:1.13.1-buster
+
+.gobuild:
+  before_script:
+    - go version
+  script:
+    - go build
+  only:
+    refs:
+      - master
+      - dev
+
+go1.11:
+  image: golang:1.11-buster
+  extends: .gobuild
+
+go1.12:
+  image: golang:1.12-buster
+  extends: .gobuild
+
+go1.13:
+  image: golang:1.13-buster
+  extends: .gobuild
+
+go1.14:
+  image: golang:1.14-buster
+  extends: .gobuild
+
