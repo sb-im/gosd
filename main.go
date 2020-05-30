@@ -2,17 +2,17 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"time"
-	"os"
-	"fmt"
 	"net/url"
+	"os"
+	"time"
 
-	//"sb.im/gosd/jsonrpc2mqtt"
-	"sb.im/gosd/state"
+	"sb.im/gosd/jsonrpc2mqtt"
 	"sb.im/gosd/luavm"
+	"sb.im/gosd/state"
 
 	"github.com/gorilla/mux"
 )
@@ -48,11 +48,27 @@ func main() {
 		Node: make(map[int]state.NodeState),
 	}
 
-	mq := state.Connect("cloud.0", uri)
-	fmt.Println(mq)
+	mqttClient := state.Connect("cloud.0", uri)
+	fmt.Println(mqttClient)
 
 	time.Sleep(1 * time.Second)
-	//req := []byte(`{"jsonrpc":"2.0","id":"gosd.0","method":"check_ready"}`)
+	mqttProxy, err := jsonrpc2mqtt.OpenMqttProxy(mqttClient)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	req := []byte(`{"jsonrpc":"2.0","id":"gosd.0","method":"check_ready"}`)
+	ch_recv := make(chan []byte)
+	mqttProxy.AsyncRpc("10", req, ch_recv)
+	fmt.Println("000000000000000")
+	aa := <-ch_recv
+	fmt.Println(string(aa))
+	res, err := mqttProxy.SyncRpc("10", req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(res)
+
 	//res, err := jsonrpc2mqtt.SyncMqttRpc(mq, 10, req)
 	//if err != nil {
 	//	fmt.Println(err)
