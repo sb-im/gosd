@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"sb.im/gosd/jsonrpc2mqtt"
-
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -21,14 +19,6 @@ func setUri(uri *url.URL) *mqtt.ClientOptions {
 	password, _ := uri.User.Password()
 	opts.SetPassword(password)
 	return opts
-}
-
-func (s *State) AsyncRpcCall(id string, msg []byte, ch chan []byte) error {
-	return jsonrpc2mqtt.AsyncMqttRpc(s.Mqtt, 10, msg, ch)
-}
-
-func (s *State) RpcCall(id string, msg []byte) ([]byte, error) {
-	return jsonrpc2mqtt.SyncMqttRpc(s.Mqtt, 10, msg)
 }
 
 func (s *State) Connect(clientId string, uri *url.URL) mqtt.Client {

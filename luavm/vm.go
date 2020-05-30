@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"sb.im/gosd/jsonrpc2mqtt"
 	"sb.im/gosd/state"
 
 	jsonrpc2 "github.com/sb-im/jsonrpc2"
@@ -55,8 +56,10 @@ func Run(s *state.State, path string) {
 }
 
 func regService(s *state.State, l *lua.LState) {
+	mqttProxy, _ := jsonrpc2mqtt.OpenMqttProxy(s.Mqtt)
 	service := LService{
-		Client: s,
+		Client:    s,
+		MqttProxy: mqttProxy,
 	}
 
 	l.SetGlobal("async_rpc_call", l.NewFunction(service.async_rpc))
@@ -70,7 +73,8 @@ func regService(s *state.State, l *lua.LState) {
 }
 
 type LService struct {
-	Client *state.State
+	Client    *state.State
+	MqttProxy *jsonrpc2mqtt.MqttProxy
 }
 
 func (m *LService) async_rpc(L *lua.LState) int {
@@ -88,7 +92,7 @@ func (m *LService) async_rpc(L *lua.LState) int {
 	ch_L := L.ToChannel(3)
 	ch := make(chan []byte)
 	r, _ := json.Marshal(jsonrpc_req)
-	err := m.Client.AsyncRpcCall(L.ToString(1), r, ch)
+	err := m.MqttProxy.AsyncRpc(L.ToString(1), r, ch)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -111,7 +115,7 @@ func (m *LService) rpc(L *lua.LState) int {
 	}
 
 	r, _ := json.Marshal(jsonrpc_req)
-	r, err := m.Client.RpcCall(L.ToString(1), r)
+	r, err := m.MqttProxy.SyncRpc(L.ToString(1), r)
 	if err != nil {
 		fmt.Println(err)
 	}
