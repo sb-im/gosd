@@ -56,18 +56,19 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println(mqttProxy)
 
-	req := []byte(`{"jsonrpc":"2.0","id":"gosd.0","method":"check_ready"}`)
-	ch_recv := make(chan []byte)
-	mqttProxy.AsyncRpc("10", req, ch_recv)
-	fmt.Println("000000000000000")
-	aa := <-ch_recv
-	fmt.Println(string(aa))
-	res, err := mqttProxy.SyncRpc("10", req)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(res)
+	//req := []byte(`{"jsonrpc":"2.0","id":"gosd.0","method":"check_ready"}`)
+	//ch_recv := make(chan []byte)
+	//mqttProxy.AsyncRpc("10", req, ch_recv)
+	//fmt.Println("000000000000000")
+	//aa := <-ch_recv
+	//fmt.Println(string(aa))
+	//res, err := mqttProxy.SyncRpc("10", req)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//fmt.Println(res)
 
 	//res, err := jsonrpc2mqtt.SyncMqttRpc(mq, 10, req)
 	//if err != nil {

@@ -13,6 +13,7 @@ import (
 
 	jsonrpc2 "github.com/sb-im/jsonrpc2"
 	"github.com/yuin/gopher-lua"
+	luajson "layeh.com/gopher-json"
 )
 
 var sequence uint64
@@ -29,6 +30,7 @@ func getSequence() string {
 func Run(s *state.State, path string) {
 	l := lua.NewState()
 	defer l.Close()
+	luajson.Preload(l)
 
 	regService(s, l)
 
@@ -77,50 +79,61 @@ type LService struct {
 	MqttProxy *jsonrpc2mqtt.MqttProxy
 }
 
-func (m *LService) async_rpc(L *lua.LState) int {
+func req_jsonrpc(raw []byte) ([]byte, error) {
 	bit13_timestamp := string([]byte(strconv.FormatInt(time.Now().UnixNano(), 10))[:13])
 	rpc_id := "gosd.0-" + bit13_timestamp + "-" + getSequence()
 	fmt.Println(rpc_id)
 
-	jsonrpc_req := jsonrpc2.WireRequest{
-		Method: L.ToString(2),
-		ID: &jsonrpc2.ID{
-			Name: rpc_id,
-		},
-	}
-
-	ch_L := L.ToChannel(3)
-	ch := make(chan []byte)
-	r, _ := json.Marshal(jsonrpc_req)
-	err := m.MqttProxy.AsyncRpc(L.ToString(1), r, ch)
+	jsonrpc_req := jsonrpc2.WireRequest{}
+	err := json.Unmarshal(raw, &jsonrpc_req)
 	if err != nil {
 		fmt.Println(err)
 	}
+	jsonrpc_req.ID = &jsonrpc2.ID{
+		Name: rpc_id,
+	}
+
+	return json.Marshal(jsonrpc_req)
+}
+
+func res_jsonrpc(raw []byte) ([]byte, error) {
+	type rpc struct {
+		Result *json.RawMessage `json:"result,omitempty"`
+		Error  *jsonrpc2.Error  `json:"error,omitempty"`
+	}
+	r := rpc{}
+	json.Unmarshal(raw, &r)
+	return json.Marshal(r)
+}
+
+func (m *LService) async_rpc(L *lua.LState) int {
+	req, _ := req_jsonrpc([]byte(L.ToString(2)))
+	ch_L := L.ToChannel(3)
+	ch := make(chan []byte)
+
+	err := m.MqttProxy.AsyncRpc(L.ToString(1), req, ch)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	go func() {
-		ch_L <- lua.LString(<-ch)
+		r, _ := res_jsonrpc(<-ch)
+		ch_L <- lua.LString(r)
 	}()
+
 	return 1
 }
 
 func (m *LService) rpc(L *lua.LState) int {
-	bit13_timestamp := string([]byte(strconv.FormatInt(time.Now().UnixNano(), 10))[:13])
-	rpc_id := "gosd.0-" + bit13_timestamp + "-" + getSequence()
-	fmt.Println(rpc_id)
+	req, _ := req_jsonrpc([]byte(L.ToString(2)))
 
-	jsonrpc_req := jsonrpc2.WireRequest{
-		Method: L.ToString(2),
-		ID: &jsonrpc2.ID{
-			Name: rpc_id,
-		},
-	}
-
-	r, _ := json.Marshal(jsonrpc_req)
-	r, err := m.MqttProxy.SyncRpc(L.ToString(1), r)
+	res, err := m.MqttProxy.SyncRpc(L.ToString(1), req)
 	if err != nil {
 		fmt.Println(err)
 	}
-	//fmt.Println(string(r))
-	L.Push(lua.LString(string(r)))
+
+	r, _ := res_jsonrpc(res)
+	L.Push(lua.LString(r))
 	return 1
 }
 
