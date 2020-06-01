@@ -64,6 +64,7 @@ func regService(s *state.State, l *lua.LState) {
 		MqttProxy: mqttProxy,
 	}
 
+	l.SetGlobal("notify", l.NewFunction(service.notify))
 	l.SetGlobal("async_rpc_call", l.NewFunction(service.async_rpc))
 	l.SetGlobal("rpc_call", l.NewFunction(service.rpc))
 	l.SetGlobal("call_service", l.NewFunction(callService))
@@ -104,6 +105,22 @@ func res_jsonrpc(raw []byte) ([]byte, error) {
 	r := rpc{}
 	json.Unmarshal(raw, &r)
 	return json.Marshal(r)
+}
+
+func (m *LService) notify(L *lua.LState) int {
+	jsonrpc_req := jsonrpc2.WireRequest{}
+	err := json.Unmarshal([]byte(L.ToString(2)), &jsonrpc_req)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	req, _ := json.Marshal(jsonrpc_req)
+	err = m.MqttProxy.Notify(L.ToString(1), req)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return 1
 }
 
 func (m *LService) async_rpc(L *lua.LState) int {

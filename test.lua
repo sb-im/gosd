@@ -11,6 +11,14 @@ function info(n)
   print(plan_log_id)
   print(node_id)
 
+  notify("10", json.encode({
+    ["method"] = "test",
+    ["params"] = {
+      ["a"] = "233",
+      ["b"] = "456"
+    }
+  }), ch)
+
   ch = channel.make()
   async_rpc_call("10", json.encode({
     ["method"] = "test",

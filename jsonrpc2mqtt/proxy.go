@@ -50,6 +50,14 @@ func OpenMqttProxy(client mqtt.Client) (*MqttProxy, error) {
 	return mqttProxy, nil
 }
 
+func (m *MqttProxy) Notify(id string, req []byte) error {
+	token := m.Client.Publish(fmt.Sprintf(rpc_topic, id), 1, false, req)
+	if err := token.Error(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (m *MqttProxy) AsyncRpc(id string, req []byte, ch_res chan []byte) error {
 	jsonrpc_req := jsonrpc2.WireRequest{}
 	err := json.Unmarshal(req, &jsonrpc_req)
