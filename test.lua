@@ -11,41 +11,41 @@ function info(n)
   print(plan_log_id)
   print(node_id)
 
-  notify("10", json.encode({
+  notify(node_id, {
     ["method"] = "test",
     ["params"] = {
       ["a"] = "233",
       ["b"] = "456"
     }
-  }), ch)
+  }, ch)
 
   ch = channel.make()
-  async_rpc_call("10", json.encode({
+  async_rpc_call(node_id, {
     ["method"] = "test",
     ["params"] = {
       ["a"] = "233",
       ["b"] = "456"
     }
-  }), ch)
+  }, ch)
   print("5555555555555555555555")
 
   local res = {}
   channel.select(
   {"|<-", ch, function(ok, data)
     print(ok, data)
-    if json.decode(data)["result"]
+    print(json.encode(data))
+    if data["result"]
       then
-        res = json.decode(data)
         print("SSSSSSSSSSSSSSssss")
       end
   end}
   )
   print(res["result"])
 
-  print(rpc_call("10", json.encode({
+  print(json.encode(rpc_call(node_id, {
     ["method"] = "sync1"
   })))
-  print(rpc_call("10", json.encode({
+  print(json.encode(rpc_call(node_id, {
     ["method"] = "sync2"
   })))
 

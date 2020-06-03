@@ -108,8 +108,9 @@ func res_jsonrpc(raw []byte) ([]byte, error) {
 }
 
 func (m *LService) notify(L *lua.LState) int {
+	raw, _ := luajson.Encode(L.ToTable(2))
 	jsonrpc_req := jsonrpc2.WireRequest{}
-	err := json.Unmarshal([]byte(L.ToString(2)), &jsonrpc_req)
+	err := json.Unmarshal(raw, &jsonrpc_req)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -124,7 +125,8 @@ func (m *LService) notify(L *lua.LState) int {
 }
 
 func (m *LService) async_rpc(L *lua.LState) int {
-	req, _ := req_jsonrpc([]byte(L.ToString(2)))
+	raw, _ := luajson.Encode(L.ToTable(2))
+	req, _ := req_jsonrpc(raw)
 	ch_L := L.ToChannel(3)
 	ch := make(chan []byte)
 
@@ -135,14 +137,16 @@ func (m *LService) async_rpc(L *lua.LState) int {
 
 	go func() {
 		r, _ := res_jsonrpc(<-ch)
-		ch_L <- lua.LString(r)
+		value, _ := luajson.Decode(L, r)
+		ch_L <- value
 	}()
 
 	return 1
 }
 
 func (m *LService) rpc(L *lua.LState) int {
-	req, _ := req_jsonrpc([]byte(L.ToString(2)))
+	raw, _ := luajson.Encode(L.ToTable(2))
+	req, _ := req_jsonrpc(raw)
 
 	res, err := m.MqttProxy.SyncRpc(L.ToString(1), req)
 	if err != nil {
@@ -150,7 +154,8 @@ func (m *LService) rpc(L *lua.LState) int {
 	}
 
 	r, _ := res_jsonrpc(res)
-	L.Push(lua.LString(r))
+	value, _ := luajson.Decode(L, r)
+	L.Push(value)
 	return 1
 }
 
