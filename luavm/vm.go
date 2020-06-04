@@ -72,7 +72,7 @@ func regService(s *state.State, l *lua.LState) {
 
 	l.SetGlobal("plan_id", lua.LString("1"))
 	l.SetGlobal("plan_log_id", lua.LString("2"))
-	l.SetGlobal("node_id", lua.LString("3"))
+	l.SetGlobal("node_id", lua.LString("10"))
 }
 
 type LService struct {
@@ -108,31 +108,49 @@ func res_jsonrpc(raw []byte) ([]byte, error) {
 }
 
 func (m *LService) notify(L *lua.LState) int {
-	raw, _ := luajson.Encode(L.ToTable(2))
-	jsonrpc_req := jsonrpc2.WireRequest{}
-	err := json.Unmarshal(raw, &jsonrpc_req)
+	raw, err := luajson.Encode(L.ToTable(2))
 	if err != nil {
-		fmt.Println(err)
+		L.Push(lua.LString(err.Error()))
+		return 1
+	}
+	jsonrpc_req := jsonrpc2.WireRequest{}
+	err = json.Unmarshal(raw, &jsonrpc_req)
+	if err != nil {
+		L.Push(lua.LString(err.Error()))
+		return 1
 	}
 
 	req, _ := json.Marshal(jsonrpc_req)
 	err = m.MqttProxy.Notify(L.ToString(1), req)
 	if err != nil {
-		fmt.Println(err)
+		L.Push(lua.LString(err.Error()))
+		return 1
 	}
 
+	L.Push(lua.LString(""))
 	return 1
 }
 
 func (m *LService) async_rpc(L *lua.LState) int {
-	raw, _ := luajson.Encode(L.ToTable(2))
-	req, _ := req_jsonrpc(raw)
+	raw, err := luajson.Encode(L.ToTable(2))
+	if err != nil {
+		L.Push(lua.LString(err.Error()))
+		return 1
+	}
+
+	req, err := req_jsonrpc(raw)
+	if err != nil {
+		L.Push(lua.LString(err.Error()))
+		return 1
+	}
+
 	ch_L := L.ToChannel(3)
 	ch := make(chan []byte)
 
-	err := m.MqttProxy.AsyncRpc(L.ToString(1), req, ch)
+	err = m.MqttProxy.AsyncRpc(L.ToString(1), req, ch)
 	if err != nil {
-		fmt.Println(err)
+		L.Push(lua.LString(err.Error()))
+		return 1
 	}
 
 	go func() {
@@ -141,22 +159,48 @@ func (m *LService) async_rpc(L *lua.LState) int {
 		ch_L <- value
 	}()
 
+	L.Push(lua.LString(""))
 	return 1
 }
 
 func (m *LService) rpc(L *lua.LState) int {
-	raw, _ := luajson.Encode(L.ToTable(2))
-	req, _ := req_jsonrpc(raw)
+	raw, err := luajson.Encode(L.ToTable(2))
+	if err != nil {
+		L.Push(&lua.LTable{})
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
+	req, err := req_jsonrpc(raw)
+	if err != nil {
+		L.Push(&lua.LTable{})
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
 
 	res, err := m.MqttProxy.SyncRpc(L.ToString(1), req)
 	if err != nil {
-		fmt.Println(err)
+		L.Push(&lua.LTable{})
+		L.Push(lua.LString(err.Error()))
+		return 2
 	}
 
-	r, _ := res_jsonrpc(res)
-	value, _ := luajson.Decode(L, r)
+	r, err := res_jsonrpc(res)
+	if err != nil {
+		L.Push(&lua.LTable{})
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
+
+	value, err := luajson.Decode(L, r)
+	if err != nil {
+		L.Push(&lua.LTable{})
+		L.Push(lua.LString(err.Error()))
+		return 2
+	}
+
 	L.Push(value)
-	return 1
+	L.Push(lua.LString(""))
+	return 2
 }
 
 func callService(L *lua.LState) int {
