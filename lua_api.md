@@ -10,10 +10,10 @@
 
 ## function
 
-### notify
+### `rpc_notify`
 
 ```sblua
-notify(id string, rpc table{ "method": string, "params": table})
+rpc_notify(id string, rpc table{ "method": string, "params": table})
 
 -> error.string
 ```
@@ -27,7 +27,7 @@ name | type | description
 About success
 
 ```lua
-local err = notify("233", {
+local err = rpc_notify("233", {
   ["method"] = "sbim"
 })
 
@@ -39,7 +39,7 @@ else
 end
 ```
 
-### rpcCall
+### `rpc_call`
 
 ```sblua
 rpc_call(id string, rpc table{ "method": string, "params": table})
@@ -75,10 +75,10 @@ else
 end
 ```
 
-### asyncRpc
+### `rpc_async`
 
 ```sblua
-async_rpc(id string, rpc table{ "method": string, "params": table}, LChannel)
+rpc_async(id string, rpc table{ "method": string, "params": table}, LChannel)
 
 -> error.string
 ```
@@ -97,7 +97,7 @@ local res, err = rpc_call("233", {
 
 
 ch = channel.make()
-local err = async_rpc_call(node_id, {
+local err = rpc_async(node_id, {
   ["method"] = "test",
   ["params"] = {
     ["a"] = "233",

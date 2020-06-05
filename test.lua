@@ -11,7 +11,7 @@ function info(n)
   print(plan_log_id)
   print(node_id)
 
-  local err = notify(node_id, {
+  local err = rpc_notify(node_id, {
     ["method"] = "test",
     ["params"] = {
       ["a"] = "233",
@@ -27,7 +27,7 @@ function info(n)
   print("=============")
 
   ch = channel.make()
-  async_rpc_call(node_id, {
+  rpc_async(node_id, {
     ["method"] = "test",
     ["params"] = {
       ["a"] = "233",

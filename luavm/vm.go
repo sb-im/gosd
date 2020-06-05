@@ -1,31 +1,15 @@
 package luavm
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
-	"sync"
-	"time"
 
 	"sb.im/gosd/jsonrpc2mqtt"
 	"sb.im/gosd/state"
 
-	jsonrpc2 "github.com/sb-im/jsonrpc2"
-	"github.com/yuin/gopher-lua"
+	lua "github.com/yuin/gopher-lua"
 	luajson "layeh.com/gopher-json"
 )
-
-var sequence uint64
-var mu sync.Mutex
-
-func getSequence() string {
-	mu.Lock()
-	id := strconv.FormatUint(sequence, 10)
-	sequence++
-	mu.Unlock()
-	return id
-}
 
 func Run(s *state.State, path string) {
 	l := lua.NewState()
@@ -59,148 +43,20 @@ func Run(s *state.State, path string) {
 
 func regService(s *state.State, l *lua.LState) {
 	mqttProxy, _ := jsonrpc2mqtt.OpenMqttProxy(s.Mqtt)
-	service := LService{
-		Client:    s,
+	rpc := &LRpc{
 		MqttProxy: mqttProxy,
 	}
 
-	l.SetGlobal("notify", l.NewFunction(service.notify))
-	l.SetGlobal("async_rpc_call", l.NewFunction(service.async_rpc))
-	l.SetGlobal("rpc_call", l.NewFunction(service.rpc))
+	l.SetGlobal("rpc_notify", l.NewFunction(rpc.notify))
+	l.SetGlobal("rpc_async", l.NewFunction(rpc.asyncCall))
+	l.SetGlobal("rpc_call", l.NewFunction(rpc.call))
+
 	l.SetGlobal("call_service", l.NewFunction(callService))
 	l.SetGlobal("filePoolService", lua.LString("FilePoolService"))
 
 	l.SetGlobal("plan_id", lua.LString("1"))
 	l.SetGlobal("plan_log_id", lua.LString("2"))
 	l.SetGlobal("node_id", lua.LString("10"))
-}
-
-type LService struct {
-	Client    *state.State
-	MqttProxy *jsonrpc2mqtt.MqttProxy
-}
-
-func req_jsonrpc(raw []byte) ([]byte, error) {
-	bit13_timestamp := string([]byte(strconv.FormatInt(time.Now().UnixNano(), 10))[:13])
-	rpc_id := "gosd.0-" + bit13_timestamp + "-" + getSequence()
-	fmt.Println(rpc_id)
-
-	jsonrpc_req := jsonrpc2.WireRequest{}
-	err := json.Unmarshal(raw, &jsonrpc_req)
-	if err != nil {
-		fmt.Println(err)
-	}
-	jsonrpc_req.ID = &jsonrpc2.ID{
-		Name: rpc_id,
-	}
-
-	return json.Marshal(jsonrpc_req)
-}
-
-func res_jsonrpc(raw []byte) ([]byte, error) {
-	type rpc struct {
-		Result *json.RawMessage `json:"result,omitempty"`
-		Error  *jsonrpc2.Error  `json:"error,omitempty"`
-	}
-	r := rpc{}
-	json.Unmarshal(raw, &r)
-	return json.Marshal(r)
-}
-
-func (m *LService) notify(L *lua.LState) int {
-	raw, err := luajson.Encode(L.ToTable(2))
-	if err != nil {
-		L.Push(lua.LString(err.Error()))
-		return 1
-	}
-	jsonrpc_req := jsonrpc2.WireRequest{}
-	err = json.Unmarshal(raw, &jsonrpc_req)
-	if err != nil {
-		L.Push(lua.LString(err.Error()))
-		return 1
-	}
-
-	req, _ := json.Marshal(jsonrpc_req)
-	err = m.MqttProxy.Notify(L.ToString(1), req)
-	if err != nil {
-		L.Push(lua.LString(err.Error()))
-		return 1
-	}
-
-	L.Push(lua.LString(""))
-	return 1
-}
-
-func (m *LService) async_rpc(L *lua.LState) int {
-	raw, err := luajson.Encode(L.ToTable(2))
-	if err != nil {
-		L.Push(lua.LString(err.Error()))
-		return 1
-	}
-
-	req, err := req_jsonrpc(raw)
-	if err != nil {
-		L.Push(lua.LString(err.Error()))
-		return 1
-	}
-
-	ch_L := L.ToChannel(3)
-	ch := make(chan []byte)
-
-	err = m.MqttProxy.AsyncRpc(L.ToString(1), req, ch)
-	if err != nil {
-		L.Push(lua.LString(err.Error()))
-		return 1
-	}
-
-	go func() {
-		r, _ := res_jsonrpc(<-ch)
-		value, _ := luajson.Decode(L, r)
-		ch_L <- value
-	}()
-
-	L.Push(lua.LString(""))
-	return 1
-}
-
-func (m *LService) rpc(L *lua.LState) int {
-	raw, err := luajson.Encode(L.ToTable(2))
-	if err != nil {
-		L.Push(&lua.LTable{})
-		L.Push(lua.LString(err.Error()))
-		return 2
-	}
-	req, err := req_jsonrpc(raw)
-	if err != nil {
-		L.Push(&lua.LTable{})
-		L.Push(lua.LString(err.Error()))
-		return 2
-	}
-
-	res, err := m.MqttProxy.SyncRpc(L.ToString(1), req)
-	if err != nil {
-		L.Push(&lua.LTable{})
-		L.Push(lua.LString(err.Error()))
-		return 2
-	}
-
-	r, err := res_jsonrpc(res)
-	if err != nil {
-		L.Push(&lua.LTable{})
-		L.Push(lua.LString(err.Error()))
-		return 2
-	}
-
-	value, err := luajson.Decode(L, r)
-	if err != nil {
-		L.Push(&lua.LTable{})
-		L.Push(lua.LString(err.Error()))
-		return 2
-	}
-
-	L.Push(value)
-	L.Push(lua.LString(""))
-	return 2
 }
 
 func callService(L *lua.LState) int {
