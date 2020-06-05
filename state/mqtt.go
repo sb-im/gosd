@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -38,6 +37,10 @@ func (s *State) Connect(clientId string, uri *url.URL) mqtt.Client {
 
 	opts.SetOnConnectHandler(func(client mqtt.Client) {
 		logger.Println("New Connect")
+		err := s.Sync(client)
+		if err != nil {
+			logger.Panicln("Sub error", err)
+		}
 	})
 
 	client := mqtt.NewClient(opts)
@@ -46,11 +49,13 @@ func (s *State) Connect(clientId string, uri *url.URL) mqtt.Client {
 		logger.Fatal(err)
 	}
 
-	client.Subscribe("nodes/+/msg/+", 1, func(client mqtt.Client, msg mqtt.Message) {
-		m := string(msg.Payload())
-		logger.Println("Recv:", strings.Split(msg.Topic(), "/")[3], m)
+	s.Mqtt = client
+	return client
+}
 
-		id, _ := strconv.Atoi(strings.Split(msg.Topic(), "/")[2])
+func (s *State) Sync(client mqtt.Client) error {
+	token := client.Subscribe("nodes/+/msg/+", 1, func(client mqtt.Client, msg mqtt.Message) {
+		id := strings.Split(msg.Topic(), "/")[2]
 		str := strings.Split(msg.Topic(), "/")[3]
 
 		if len(s.Node[id].Msg) == 0 {
@@ -62,7 +67,8 @@ func (s *State) Connect(clientId string, uri *url.URL) mqtt.Client {
 		s.Node[id].Msg[str] = msg.Payload()
 	})
 
-	s.Mqtt = client
-
-	return client
+	if err := token.Error(); err != nil {
+		return err
+	}
+	return nil
 }

@@ -45,7 +45,7 @@ func main() {
 	}
 
 	state := &state.State{
-		Node: make(map[int]state.NodeState),
+		Node: make(map[string]state.NodeState),
 	}
 
 	mqttClient := state.Connect("cloud.0", uri)
