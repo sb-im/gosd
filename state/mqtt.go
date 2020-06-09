@@ -55,16 +55,10 @@ func (s *State) Connect(clientId string, uri *url.URL) mqtt.Client {
 
 func (s *State) Sync(client mqtt.Client) error {
 	token := client.Subscribe("nodes/+/msg/+", 1, func(client mqtt.Client, msg mqtt.Message) {
-		id := strings.Split(msg.Topic(), "/")[2]
+		id := strings.Split(msg.Topic(), "/")[1]
 		str := strings.Split(msg.Topic(), "/")[3]
 
-		if len(s.Node[id].Msg) == 0 {
-			s.Node[id] = NodeState{
-				Msg: map[string][]byte{},
-			}
-		}
-
-		s.Node[id].Msg[str] = msg.Payload()
+		s.NodePut(id, str, msg.Payload())
 	})
 
 	if err := token.Error(); err != nil {
