@@ -59,6 +59,6 @@ function info(n)
     ["method"] = "sync2"
   })))
 
-  print("33333333333333333333333")
+  print("=== END Lua END ===")
   return ret['data']
 end

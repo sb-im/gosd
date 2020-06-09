@@ -44,10 +44,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	state := &state.State{
-		Node: make(map[string]state.NodeState),
-	}
-
+	state := state.NewState()
 	mqttClient := state.Connect("cloud.0", uri)
 	fmt.Println(mqttClient)
 
@@ -76,6 +73,8 @@ func main() {
 	//}
 	//fmt.Println(string(res))
 
+	// Wait mqtt connected
+	time.Sleep(3 * time.Second)
 	path := "test.lua"
 	luavm.Run(state, path)
 
