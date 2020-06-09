@@ -47,6 +47,12 @@ func regService(s *state.State, l *lua.LState) {
 		MqttProxy: mqttProxy,
 	}
 
+	service := &LService{
+		State: s,
+	}
+
+	l.SetGlobal("get_msg", l.NewFunction(service.GetMsg))
+
 	l.SetGlobal("rpc_notify", l.NewFunction(rpc.notify))
 	l.SetGlobal("rpc_async", l.NewFunction(rpc.asyncCall))
 	l.SetGlobal("rpc_call", l.NewFunction(rpc.call))

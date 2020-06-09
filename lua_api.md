@@ -136,3 +136,32 @@ else
 end
 ```
 
+### `get_msg`
+
+function
+
+```golang
+get_msg(id, msg string) (data tables{}, error string)
+```
+
+name | type | description
+---- | ---- | ----------
+<- id   | string | callee id
+<- msg  | string | `weather`, `battery` ...
+-> data | table  | `table{}`
+-> error| string | `""` Or `"xxxxxxxx"`
+
+```lua
+local data, err = get_msg("8", "weather")
+
+if err == ""
+then
+  print("get success")
+else
+  print("get failure")
+end
+
+-- Print data
+print(json.encode(data))
+```
+

@@ -11,6 +11,9 @@ function info(n)
   print(plan_log_id)
   print(node_id)
 
+  local data, err = get_msg("8", "weather")
+  print(json.encode(data))
+
   local err = rpc_notify(node_id, {
     ["method"] = "test",
     ["params"] = {
