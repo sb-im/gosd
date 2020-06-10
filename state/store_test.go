@@ -47,3 +47,18 @@ func Test_NodeGetMsgNil(t *testing.T) {
 		t.Errorf("%s\n", payload)
 	}
 }
+
+func Test_SetNodeStatus(t *testing.T) {
+	id := "233"
+	msg := `{"code":0,"msg":"online","timestamp":"1591733101","status":{"link_id":5,"position_ok":true,"lat":"22.6876423001","lng":"114.2248673001","alt":"80.0001"}}`
+
+	state := NewState()
+	state.SetNodeStatus(id, []byte(msg))
+	if state.Node[id].Status.Code != 0 {
+		t.Error(state.Node[id].Status)
+	}
+
+	if !state.Node[id].Status.isConnect() {
+		t.Error(state.Node[id].Status)
+	}
+}

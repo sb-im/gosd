@@ -17,7 +17,8 @@ type PlanState struct {
 }
 
 type NodeState struct {
-	Msg map[string][]byte
+	Status NodeStatus
+	Msg    map[string][]byte
 }
 
 func NewState() *State {
@@ -26,11 +27,16 @@ func NewState() *State {
 	}
 }
 
+func (s *State) addNode(id string) error {
+	s.Node[id] = &NodeState{
+		Msg: map[string][]byte{},
+	}
+	return nil
+}
+
 func (s *State) NodePut(id, msg string, payload []byte) error {
 	if s.Node[id] == nil {
-		s.Node[id] = &NodeState{
-			Msg: map[string][]byte{},
-		}
+		s.addNode(id)
 	}
 	s.Node[id].Msg[msg] = payload
 
@@ -47,4 +53,11 @@ func (s *State) NodeGet(id, msg string) ([]byte, error) {
 	}
 
 	return s.Node[id].Msg[msg], nil
+}
+
+func (s *State) SetNodeStatus(id string, payload []byte) error {
+	if s.Node[id] == nil {
+		s.addNode(id)
+	}
+	return s.Node[id].Status.SetStatus(payload)
 }
