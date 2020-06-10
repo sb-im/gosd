@@ -13,6 +13,7 @@ const (
 type NodeStatus struct {
 	Code   int    `json:"code"`
 	Status Status `json:"status"`
+	Raw    []byte
 }
 
 // [Reference] https://gitlab.com/sbim/superdock/cloud/ncp/-/blob/master/config.go#L35
@@ -45,5 +46,6 @@ func (n *NodeStatus) SetStatus(raw []byte) error {
 	if err != nil {
 		return err
 	}
+	n.Raw = raw
 	return nil
 }

@@ -64,5 +64,15 @@ func (s *State) Sync(client mqtt.Client) error {
 	if err := token.Error(); err != nil {
 		return err
 	}
+
+	token = client.Subscribe("nodes/+/status", 1, func(client mqtt.Client, msg mqtt.Message) {
+		id := strings.Split(msg.Topic(), "/")[1]
+		s.SetNodeStatus(id, msg.Payload())
+	})
+
+	if err := token.Error(); err != nil {
+		return err
+	}
+
 	return nil
 }
