@@ -7,6 +7,10 @@ function info(n)
   }
   ret = call_service(filepoolservice,"getuserinfo",param)
   print("22222222222222222222222")
+
+  print(get_id("link_id"))
+  print(json.encode(get_status()))
+
   print(plan_id)
   print(plan_log_id)
   print(node_id)

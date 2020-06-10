@@ -11,6 +11,12 @@ import (
 	luajson "layeh.com/gopher-json"
 )
 
+type Plan struct {
+	Id      string
+	NodeId  string
+	PlanLog string
+}
+
 func Run(s *state.State, path string) {
 	l := lua.NewState()
 	defer l.Close()
@@ -49,9 +55,16 @@ func regService(s *state.State, l *lua.LState) {
 
 	service := &LService{
 		State: s,
+		Plan: &Plan{
+			Id:      "1",
+			PlanLog: "2",
+			NodeId:  "6",
+		},
 	}
 
+	l.SetGlobal("get_id", l.NewFunction(service.GetID))
 	l.SetGlobal("get_msg", l.NewFunction(service.GetMsg))
+	l.SetGlobal("get_status", l.NewFunction(service.GetStatus))
 
 	l.SetGlobal("rpc_notify", l.NewFunction(rpc.notify))
 	l.SetGlobal("rpc_async", l.NewFunction(rpc.asyncCall))

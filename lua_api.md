@@ -136,13 +136,52 @@ else
 end
 ```
 
-### `get_msg`
+### Service
 
-function
+#### `get_status`
+
+> Get Status
+
+function:
+
+```golang
+get_status() (data tables{}, error string)
+```
+
+params:
+
+name | type | description
+---- | ---- | ----------
+-> data | table  | `table{}`
+-> error| string | `""` Or `"xxxxxxxx"`
+
+example:
+
+```lua
+local data, err = get_status()
+
+if err == ""
+then
+  print("get success")
+else
+  print("get failure")
+end
+
+-- Print data
+print(json.encode(data))
+```
+
+#### `get_msg`
+
+> Get Message
+
+function:
 
 ```golang
 get_msg(id, msg string) (data tables{}, error string)
 ```
+
+params:
 
 name | type | description
 ---- | ---- | ----------
@@ -150,6 +189,8 @@ name | type | description
 <- msg  | string | `weather`, `battery` ...
 -> data | table  | `table{}`
 -> error| string | `""` Or `"xxxxxxxx"`
+
+example:
 
 ```lua
 local data, err = get_msg("8", "weather")
@@ -163,5 +204,35 @@ end
 
 -- Print data
 print(json.encode(data))
+```
+
+#### `get_id`
+
+> Get various types of ID
+
+function:
+
+```golang
+get_id(str string) (id string)
+```
+
+params:
+
+name | type | description
+---- | ---- | ----------
+<- str  | string | Only support `link_id`
+-> id   | string | id if `id == "0"` is No id
+
+example:
+
+```lua
+local id = get_id("link_id")
+
+if id ~= "0"
+then
+  print("get id" + id)
+else
+  print("No find id")
+end
 ```
 
