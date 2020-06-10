@@ -88,7 +88,7 @@ func (m *MqttProxy) SyncRpcWait(id string, timeout time.Duration, req []byte) ([
 	ch := make(chan []byte)
 	err := m.AsyncRpc(id, req, ch)
 	if err != nil {
-		return []byte(""), err
+		return []byte{}, err
 	}
 	return <-ch, nil
 }
