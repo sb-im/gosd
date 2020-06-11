@@ -4,18 +4,25 @@
 
 ### `node_id`
 
+> The id of this current plan need `node`
+
 ### `plan_id`
 
+> The id of this current plan
+
 ### `plan_log_id`
+
+> The id of this current planLog
 
 ## function
 
 ### `rpc_notify`
 
-```sblua
-rpc_notify(id string, rpc table{ "method": string, "params": table})
+> jsonrpc Notification
 
--> error.string
+```go
+rpc_notify(id string, rpc table{ "method": string, "params": table }) \
+(error string)
 ```
 
 name | type | description
@@ -41,10 +48,11 @@ end
 
 ### `rpc_call`
 
-```sblua
-rpc_call(id string, rpc table{ "method": string, "params": table})
+> Sync jsonrpc call
 
--> table{ "result": table{}, "error": "" }, error.string
+```go
+rpc_call(id string, rpc table{ "method": string, "params": table }) \
+(table{ "result": table{}, "error": "" }, error string)
 ```
 
 name | type | description
@@ -77,10 +85,11 @@ end
 
 ### `rpc_async`
 
-```sblua
-rpc_async(id string, rpc table{ "method": string, "params": table}, LChannel)
+> Async jsonrpc call
 
--> error.string
+```go
+rpc_async(id string, rpc table{ "method": string, "params": table{}}, LChannel) \
+(error string)
 ```
 
 name | type | description
@@ -136,15 +145,13 @@ else
 end
 ```
 
-### Service
-
-#### `get_status`
+### `get_status`
 
 > Get Status
 
 function:
 
-```golang
+```go
 get_status() (data tables{}, error string)
 ```
 
@@ -171,13 +178,13 @@ end
 print(json.encode(data))
 ```
 
-#### `get_msg`
+### `get_msg`
 
 > Get Message
 
 function:
 
-```golang
+```go
 get_msg(id, msg string) (data tables{}, error string)
 ```
 
@@ -206,13 +213,13 @@ end
 print(json.encode(data))
 ```
 
-#### `get_id`
+### `get_id`
 
 > Get various types of ID
 
 function:
 
-```golang
+```go
 get_id(str string) (id string)
 ```
 
