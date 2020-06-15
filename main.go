@@ -1,5 +1,7 @@
 package main
 
+//go:generate go run generate.go
+
 import (
 	"encoding/json"
 	"fmt"
@@ -14,6 +16,10 @@ import (
 	"sb.im/gosd/luavm"
 	"sb.im/gosd/state"
 
+	"sb.im/gosd/database"
+	"sb.im/gosd/storage"
+	"sb.im/gosd/model"
+
 	"github.com/gorilla/mux"
 )
 
@@ -26,6 +32,23 @@ var (
 var accessGrant *AccessGrant
 
 func main() {
+
+
+	db ,_ := database.NewConnectionPool("postgres://postgres:password@localhost/gosd?sslmode=disable", 1, 10)
+	database.Migrate(db)
+	s := storage.NewStorage(db)
+	p := model.NewPlan()
+
+	p.Name = "TTTTTTTTTTTTTTT"
+	p.Description = "DDDD"
+	p.Attachments["233"] = "789"
+	p.Attachments["23"] = "789"
+	s.CreatePlan(p)
+	fmt.Println(p)
+
+
+
+
 	config_path := "./config.yaml"
 	if os.Getenv("GOSD_CONF") != "" {
 		config_path = os.Getenv("GOSD_CONF")
