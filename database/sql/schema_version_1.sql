@@ -27,8 +27,10 @@ create table plan_logs (
 create table blobs (
   id bigserial not null,
   filename text,
-  context text,
+  content bytea,
   checksum text,
+  create_at timestamp with time zone,
+  update_at timestamp with time zone,
   primary key (id)
 );
 

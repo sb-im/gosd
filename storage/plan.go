@@ -27,7 +27,7 @@ func (s *Storage) CreatePlan(plan *model.Plan) (err error) {
 	id, name, description, node_id
 	`
 
-	err = s.db.QueryRow(query, plan.Name, plan.Description, 233, attachments).Scan(
+	err = s.db.QueryRow(query, plan.Name, plan.Description, plan.NodeID, attachments).Scan(
 		&plan.ID,
 		&plan.Name,
 		&plan.Description,

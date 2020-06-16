@@ -32,8 +32,10 @@ create table plan_logs (
 create table blobs (
   id bigserial not null,
   filename text,
-  context text,
+  content bytea,
   checksum text,
+  create_at timestamp with time zone,
+  update_at timestamp with time zone,
   primary key (id)
 );
 
@@ -41,5 +43,5 @@ create table blobs (
 }
 
 var SqlMapChecksums = map[string]string{
-	"schema_version_1": "c5830f4d2039d609fdde0133412504d4509d7901ea0cde43ad9bca00a4a2017b",
+	"schema_version_1": "099859b4017c1c53adecdeee9382bd838665e9ec5e39e990b9e7a00644e02b91",
 }

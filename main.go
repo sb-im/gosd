@@ -13,12 +13,14 @@ import (
 	"time"
 
 	"sb.im/gosd/jsonrpc2mqtt"
-	"sb.im/gosd/luavm"
+	//"sb.im/gosd/luavm"
 	"sb.im/gosd/state"
 
 	"sb.im/gosd/database"
 	"sb.im/gosd/storage"
 	"sb.im/gosd/model"
+
+	"sb.im/gosd/api"
 
 	"github.com/gorilla/mux"
 )
@@ -45,6 +47,12 @@ func main() {
 	p.Attachments["23"] = "789"
 	s.CreatePlan(p)
 	fmt.Println(p)
+
+	f, _ := os.Open("./test.lua")
+	err := s.CreateBlob(model.NewBlob("test_233.lua", f))
+	if err != nil {
+		fmt.Println(err)
+	}
 
 
 
@@ -98,12 +106,16 @@ func main() {
 
 	// Wait mqtt connected
 	time.Sleep(3 * time.Second)
-	path := "test.lua"
-	luavm.Run(state, path)
+	//path := "test.lua"
+	//luavm.Run(state, path)
 
 	DBlink(config.Database)
 	accessGrant = NewAccessGrant()
 	r := mux.NewRouter()
+
+	fmt.Println("Start http")
+	api.Serve(r, s)
+
 	r.HandleFunc(namespace+"/oauth/token", oauthHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
 	r.HandleFunc(profix+"/plans/", planIndexHandler).Methods(http.MethodGet, http.MethodOptions)
 	r.HandleFunc(profix+"/plans/", planCreateHandler).Methods(http.MethodPost, http.MethodOptions)
