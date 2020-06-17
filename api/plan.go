@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"mime"
 	"net/http"
 	"strconv"
@@ -8,6 +9,7 @@ import (
 
 	"sb.im/gosd/model"
 
+	"miniflux.app/http/request"
 	"miniflux.app/http/response/json"
 )
 
@@ -61,4 +63,21 @@ func (h *handler) plans(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.OK(w, r, plans)
+}
+
+func (h *handler) planByID(w http.ResponseWriter, r *http.Request) {
+	planID := request.RouteInt64Param(r, "planID")
+	plan, err := h.store.PlanByID(planID)
+	if err != nil {
+		json.BadRequest(w, r, errors.New("Unable to fetch this plan from the database"))
+		return
+	}
+
+	if plan == nil {
+		json.NotFound(w, r)
+		return
+	}
+
+	//user.UseTimezone(request.UserTimezone(r))
+	json.OK(w, r, plan)
 }

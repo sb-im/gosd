@@ -25,4 +25,5 @@ func Serve(router *mux.Router, store *storage.Storage) {
 
 	sr.HandleFunc("/plans/", handler.plans).Methods(http.MethodGet)
 	sr.HandleFunc("/plans/", handler.createPlan).Methods(http.MethodPost)
+	sr.HandleFunc("/plans/{planID:[0-9]+}", handler.planByID).Methods(http.MethodGet)
 }

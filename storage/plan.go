@@ -89,3 +89,48 @@ func (s *Storage) Plans() (model.Plans, error) {
 
 	return plans, nil
 }
+
+// PlanByID finds a plan by the ID.
+func (s *Storage) PlanByID(planID int64) (*model.Plan, error) {
+	query := `
+		SELECT
+			id,
+			name,
+			description,
+			node_id,
+			attachments
+		FROM
+			plans
+		WHERE
+			id = $1
+	`
+
+	return s.fetchPlan(query, planID)
+}
+
+func (s *Storage) fetchPlan(query string, args ...interface{}) (*model.Plan, error) {
+	var attachments hstore.Hstore
+	plan := model.NewPlan()
+
+	err := s.db.QueryRow(query, args...).Scan(
+		&plan.ID,
+		&plan.Name,
+		&plan.Description,
+		&plan.NodeID,
+		&attachments,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf(`store: unable to fetch user: %v`, err)
+	}
+
+	for key, value := range attachments.Map {
+		if value.Valid {
+			plan.Attachments[key] = value.String
+		}
+	}
+
+	return plan, nil
+}
