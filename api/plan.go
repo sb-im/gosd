@@ -51,3 +51,14 @@ func (h *handler) createPlan(w http.ResponseWriter, r *http.Request) {
 
 	json.Created(w, r, plan)
 }
+
+func (h *handler) plans(w http.ResponseWriter, r *http.Request) {
+	plans, err := h.store.Plans()
+
+	if err != nil {
+		json.ServerError(w, r, err)
+		return
+	}
+
+	json.OK(w, r, plans)
+}

@@ -18,7 +18,6 @@ import (
 
 	"sb.im/gosd/database"
 	"sb.im/gosd/storage"
-	"sb.im/gosd/model"
 
 	"sb.im/gosd/api"
 
@@ -38,24 +37,7 @@ func main() {
 
 	db ,_ := database.NewConnectionPool("postgres://postgres:password@localhost/gosd?sslmode=disable", 1, 10)
 	database.Migrate(db)
-	s := storage.NewStorage(db)
-	p := model.NewPlan()
-
-	p.Name = "TTTTTTTTTTTTTTT"
-	p.Description = "DDDD"
-	p.Attachments["233"] = "789"
-	p.Attachments["23"] = "789"
-	s.CreatePlan(p)
-	fmt.Println(p)
-
-	f, _ := os.Open("./test.lua")
-	err := s.CreateBlob(model.NewBlob("test_233.lua", f))
-	if err != nil {
-		fmt.Println(err)
-	}
-
-
-
+	store := storage.NewStorage(db)
 
 	config_path := "./config.yaml"
 	if os.Getenv("GOSD_CONF") != "" {
@@ -114,11 +96,11 @@ func main() {
 	r := mux.NewRouter()
 
 	fmt.Println("Start http")
-	api.Serve(r, s)
+	api.Serve(r, store)
 
 	r.HandleFunc(namespace+"/oauth/token", oauthHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
-	r.HandleFunc(profix+"/plans/", planIndexHandler).Methods(http.MethodGet, http.MethodOptions)
-	r.HandleFunc(profix+"/plans/", planCreateHandler).Methods(http.MethodPost, http.MethodOptions)
+	//r.HandleFunc(profix+"/plans/", planIndexHandler).Methods(http.MethodGet, http.MethodOptions)
+	//r.HandleFunc(profix+"/plans/", planCreateHandler).Methods(http.MethodPost, http.MethodOptions)
 	r.HandleFunc(profix+"/plans/{id}", planIDHandler).Methods(http.MethodGet, http.MethodOptions)
 	r.HandleFunc(profix+"/plans/{id}", planUpdateHandler).Methods(http.MethodPut, http.MethodPatch, http.MethodOptions)
 	r.HandleFunc(profix+"/plans/{id}", planDestroyHandler).Methods(http.MethodDelete, http.MethodOptions)

@@ -40,3 +40,52 @@ func (s *Storage) CreatePlan(plan *model.Plan) (err error) {
 
 	return nil
 }
+
+// Plans returns all plans.
+func (s *Storage) Plans() (model.Plans, error) {
+	query := `
+		SELECT
+			id,
+			name,
+			description,
+			node_id,
+			attachments
+		FROM
+			plans
+		ORDER BY id ASC
+	`
+
+	rows, err := s.db.Query(query)
+	defer rows.Close()
+	if err != nil {
+		return nil, fmt.Errorf(`store: unable to fetch plans: %v`, err)
+	}
+
+	var plans model.Plans
+
+	for rows.Next() {
+		var attachments hstore.Hstore
+		plan := model.NewPlan()
+		err := rows.Scan(
+			&plan.ID,
+			&plan.Name,
+			&plan.Description,
+			&plan.NodeID,
+			&attachments,
+		)
+
+		if err != nil {
+			return nil, fmt.Errorf(`store: unable to fetch plans row: %v`, err)
+		}
+
+		for key, value := range attachments.Map {
+			if value.Valid {
+				plan.Attachments[key] = value.String
+			}
+		}
+
+		plans = append(plans, plan)
+	}
+
+	return plans, nil
+}
