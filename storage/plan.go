@@ -18,16 +18,24 @@ func (s *Storage) CreatePlan(plan *model.Plan) (err error) {
 		}
 	}
 
+	extra := hstore.Hstore{Map: make(map[string]sql.NullString)}
+
+	if len(plan.Extra) > 0 {
+		for key, value := range plan.Extra {
+			extra.Map[key] = sql.NullString{String: value, Valid: true}
+		}
+	}
+
 	query := `
 	INSERT INTO plans
-	(name, description, node_id, attachments, create_at, update_at)
+	(name, description, node_id, attachments, extra, create_at, update_at)
 	VALUES
-	($1, $2, $3, $4, now(), now())
+	($1, $2, $3, $4, $5, now(), now())
 	RETURNING
 	id, name, description, node_id
 	`
 
-	err = s.db.QueryRow(query, plan.Name, plan.Description, plan.NodeID, attachments).Scan(
+	err = s.db.QueryRow(query, plan.Name, plan.Description, plan.NodeID, attachments, extra).Scan(
 		&plan.ID,
 		&plan.Name,
 		&plan.Description,
@@ -49,7 +57,8 @@ func (s *Storage) Plans() (model.Plans, error) {
 			name,
 			description,
 			node_id,
-			attachments
+			attachments,
+			extra
 		FROM
 			plans
 		ORDER BY id ASC
@@ -65,6 +74,7 @@ func (s *Storage) Plans() (model.Plans, error) {
 
 	for rows.Next() {
 		var attachments hstore.Hstore
+		var extra hstore.Hstore
 		plan := model.NewPlan()
 		err := rows.Scan(
 			&plan.ID,
@@ -72,6 +82,7 @@ func (s *Storage) Plans() (model.Plans, error) {
 			&plan.Description,
 			&plan.NodeID,
 			&attachments,
+			&extra,
 		)
 
 		if err != nil {
@@ -81,6 +92,12 @@ func (s *Storage) Plans() (model.Plans, error) {
 		for key, value := range attachments.Map {
 			if value.Valid {
 				plan.Attachments[key] = value.String
+			}
+		}
+
+		for key, value := range extra.Map {
+			if value.Valid {
+				plan.Extra[key] = value.String
 			}
 		}
 
@@ -98,7 +115,8 @@ func (s *Storage) PlanByID(planID int64) (*model.Plan, error) {
 			name,
 			description,
 			node_id,
-			attachments
+			attachments,
+			extra
 		FROM
 			plans
 		WHERE
@@ -110,6 +128,7 @@ func (s *Storage) PlanByID(planID int64) (*model.Plan, error) {
 
 func (s *Storage) fetchPlan(query string, args ...interface{}) (*model.Plan, error) {
 	var attachments hstore.Hstore
+	var extra hstore.Hstore
 	plan := model.NewPlan()
 
 	err := s.db.QueryRow(query, args...).Scan(
@@ -118,6 +137,7 @@ func (s *Storage) fetchPlan(query string, args ...interface{}) (*model.Plan, err
 		&plan.Description,
 		&plan.NodeID,
 		&attachments,
+		&extra,
 	)
 
 	if err == sql.ErrNoRows {
@@ -129,6 +149,12 @@ func (s *Storage) fetchPlan(query string, args ...interface{}) (*model.Plan, err
 	for key, value := range attachments.Map {
 		if value.Valid {
 			plan.Attachments[key] = value.String
+		}
+	}
+
+	for key, value := range extra.Map {
+		if value.Valid {
+			plan.Extra[key] = value.String
 		}
 	}
 

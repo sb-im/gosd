@@ -15,6 +15,7 @@ create table plans (
   description text,
   node_id int not null,
   attachments hstore,
+  extra hstore,
   create_at timestamp with time zone,
   update_at timestamp with time zone,
   primary key (id)
@@ -43,5 +44,5 @@ create table blobs (
 }
 
 var SqlMapChecksums = map[string]string{
-	"schema_version_1": "099859b4017c1c53adecdeee9382bd838665e9ec5e39e990b9e7a00644e02b91",
+	"schema_version_1": "7a75eec74af2888634c74e170dbb3e15961aebd12c8c810da75d3819bfcb62cf",
 }

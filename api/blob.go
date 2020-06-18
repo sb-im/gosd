@@ -30,12 +30,14 @@ func (h *handler) createBlob(w http.ResponseWriter, r *http.Request) {
 	json.Created(w, r, plan)
 }
 
-func (h *handler) formData2Blob(r *http.Request) (map[string]string, error) {
+// -> params, blobFileID, error
+func (h *handler) formData2Blob(r *http.Request) (map[string]string, map[string]string, error) {
 	params := make(map[string]string)
+	file := make(map[string]string)
 
 	mediaType, mimeParams, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil {
-		return params, err
+		return params, file, err
 	}
 
 	if strings.HasPrefix(mediaType, "multipart/") {
@@ -51,13 +53,13 @@ func (h *handler) formData2Blob(r *http.Request) (map[string]string, error) {
 
 				err = h.store.CreateBlob(blob)
 				if err != nil {
-					return params, err
+					return params, file, err
 				}
-				params[p.FormName()] = strconv.FormatInt(blob.ID, 10)
+				file[p.FormName()] = strconv.FormatInt(blob.ID, 10)
 			} else {
 				slurp, err := ioutil.ReadAll(p)
 				if err != nil {
-					return params, err
+					return params, file, err
 				}
 				params[p.FormName()] = string(slurp)
 			}
@@ -65,5 +67,5 @@ func (h *handler) formData2Blob(r *http.Request) (map[string]string, error) {
 		}
 	}
 
-	return params, nil
+	return params, file, nil
 }

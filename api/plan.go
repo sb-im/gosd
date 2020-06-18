@@ -23,7 +23,7 @@ func (h *handler) createPlan(w http.ResponseWriter, r *http.Request) {
 	plan := model.NewPlan()
 	if strings.HasPrefix(mediaType, "multipart/") {
 
-		params, err := h.formData2Blob(r)
+		params, file, err := h.formData2Blob(r)
 		if err != nil {
 			json.ServerError(w, r, err)
 			return
@@ -36,7 +36,8 @@ func (h *handler) createPlan(w http.ResponseWriter, r *http.Request) {
 		delete(params, "description")
 		delete(params, "node_id")
 
-		plan.Attachments = params
+		plan.Attachments = file
+		plan.Extra = params
 
 	} else {
 		plan, err = decodePlanCreationPayload(r.Body)

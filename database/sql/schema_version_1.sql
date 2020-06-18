@@ -10,6 +10,7 @@ create table plans (
   description text,
   node_id int not null,
   attachments hstore,
+  extra hstore,
   create_at timestamp with time zone,
   update_at timestamp with time zone,
   primary key (id)

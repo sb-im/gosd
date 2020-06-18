@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"strconv"
 	"time"
 )
 
@@ -13,13 +14,22 @@ type Plan struct {
 	CreateAt    *time.Time        `json:"create_at,omitempty"`
 	UpdateAt    *time.Time        `json:"update_at,omitempty"`
 	Attachments map[string]string `json:"attachments"`
+	Extra       map[string]string `json:"extra"`
 }
 
 func NewPlan() *Plan {
-	return &Plan{Attachments: make(map[string]string)}
+	return &Plan{
+		Attachments: make(map[string]string),
+		Extra:       make(map[string]string),
+	}
 }
 
 func (plan *Plan) MarshalJSON() ([]byte, error) {
+	cycle_types_id, err := strconv.Atoi(plan.Extra["cycle_types_id"])
+	if err != nil {
+		cycle_types_id = 0
+	}
+
 	return json.Marshal(&struct {
 		ID             int64             `json:"id"`
 		Name           string            `json:"name"`
@@ -28,6 +38,7 @@ func (plan *Plan) MarshalJSON() ([]byte, error) {
 		Node_id        int64             `json:"node_id"`
 		Cycle_types_id int               `json:"cycle_types_id"`
 		Attachments    map[string]string `json:"attachments"`
+		Extra          map[string]string `json:"extra"`
 	}{
 		ID:             plan.ID,
 		Name:           plan.Name,
@@ -35,7 +46,8 @@ func (plan *Plan) MarshalJSON() ([]byte, error) {
 		File:           plan.Attachments["file"],
 		Node_id:        plan.NodeID,
 		Attachments:    plan.Attachments,
-		Cycle_types_id: 0,
+		Extra:          plan.Extra,
+		Cycle_types_id: cycle_types_id,
 	})
 }
 
