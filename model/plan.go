@@ -43,12 +43,16 @@ func (plan *Plan) MarshalJSON() ([]byte, error) {
 		ID:             plan.ID,
 		Name:           plan.Name,
 		Description:    plan.Description,
-		File:           plan.Attachments["file"],
+		File:           blobPath(plan.Attachments["file"]),
 		Node_id:        plan.NodeID,
 		Attachments:    plan.Attachments,
 		Extra:          plan.Extra,
 		Cycle_types_id: cycle_types_id,
 	})
+}
+
+func blobPath(id string) string {
+	return `/api/v1/blobs/` + id
 }
 
 type Plans []*Plan

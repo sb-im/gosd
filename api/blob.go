@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -11,23 +12,36 @@ import (
 
 	"sb.im/gosd/model"
 
+	"miniflux.app/http/request"
 	"miniflux.app/http/response/json"
 )
 
-func (h *handler) createBlob(w http.ResponseWriter, r *http.Request) {
-	plan, err := decodePlanCreationPayload(r.Body)
+func handleDownload(filename string, reader io.Reader, w http.ResponseWriter) {
+	w.Header().Add("Content-type", "application/octet-stream")
+	w.Header().Add("content-disposition", "attachment; filename=\""+filename+"\"")
+	_, err := io.Copy(w, reader)
 	if err != nil {
-		json.BadRequest(w, r, err)
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = io.WriteString(w, "Bad request")
+		return
+	}
+}
+
+func (h *handler) blobByID(w http.ResponseWriter, r *http.Request) {
+	id := request.RouteInt64Param(r, "blobID")
+	item, err := h.store.BlobByID(id)
+	if err != nil {
+		json.BadRequest(w, r, errors.New("Unable to fetch this plan from the database"))
 		return
 	}
 
-	err = h.store.CreatePlan(plan)
-	if err != nil {
-		json.ServerError(w, r, err)
+	if item == nil {
+		json.NotFound(w, r)
 		return
 	}
 
-	json.Created(w, r, plan)
+	//json.OK(w, r, item)
+	handleDownload(item.FileName, item.Reader, w)
 }
 
 // -> params, blobFileID, error

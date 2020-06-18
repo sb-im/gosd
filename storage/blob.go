@@ -1,7 +1,9 @@
 package storage
 
 import (
+	"bytes"
 	"crypto/sha1"
+	"database/sql"
 	"fmt"
 	"io/ioutil"
 
@@ -33,4 +35,41 @@ func (s *Storage) CreateBlob(blob *model.Blob) (err error) {
 	}
 
 	return nil
+}
+
+func (s *Storage) BlobByID(id int64) (*model.Blob, error) {
+	query := `
+		SELECT
+			id,
+			filename,
+			content
+		FROM
+			blobs
+		WHERE
+			id = $1
+	`
+
+	return s.fetchBlob(query, id)
+}
+
+func (s *Storage) fetchBlob(query string, args ...interface{}) (*model.Blob, error) {
+	blob := &model.Blob{}
+
+	var content []byte
+
+	err := s.db.QueryRow(query, args...).Scan(
+		&blob.ID,
+		&blob.FileName,
+		&content,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf(`store: unable to fetch blob: %v`, err)
+	}
+
+	blob.Reader = bytes.NewReader(content)
+
+	return blob, nil
 }

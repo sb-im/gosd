@@ -19,11 +19,14 @@ func Serve(router *mux.Router, store *storage.Storage) {
 
 	sr.Use(CORSOriginMiddleware("*"))
 
-	sr.HandleFunc("/plans/", func(w http.ResponseWriter, r *http.Request) {
+	router.PathPrefix("/gosd/api/v1").Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
-	}).Methods(http.MethodOptions)
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+	})
 
 	sr.HandleFunc("/plans/", handler.plans).Methods(http.MethodGet)
 	sr.HandleFunc("/plans/", handler.createPlan).Methods(http.MethodPost)
 	sr.HandleFunc("/plans/{planID:[0-9]+}", handler.planByID).Methods(http.MethodGet)
+
+	sr.HandleFunc("/blobs/{blobID:[0-9]+}", handler.blobByID).Methods(http.MethodGet)
 }
