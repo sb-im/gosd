@@ -137,3 +137,19 @@ func (h *handler) planUpdate(w http.ResponseWriter, r *http.Request) {
 
 	json.Created(w, r, plan)
 }
+
+func (h *handler) planDestroy(w http.ResponseWriter, r *http.Request) {
+	planID := request.RouteInt64Param(r, "planID")
+	plan, err := h.store.PlanDestroy(planID)
+	if err != nil {
+		json.BadRequest(w, r, errors.New("Unable to fetch this plan from the database"))
+		return
+	}
+
+	if plan == nil {
+		json.NotFound(w, r)
+		return
+	}
+
+	json.OK(w, r, plan)
+}

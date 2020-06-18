@@ -28,6 +28,7 @@ func Serve(router *mux.Router, store *storage.Storage) {
 
 		allMethods := []string{
 			http.MethodPatch,
+			http.MethodDelete,
 		}
 
 		w.Header().Set("Access-Control-Allow-Methods", strings.Join(allMethods, ","))
@@ -37,6 +38,7 @@ func Serve(router *mux.Router, store *storage.Storage) {
 	sr.HandleFunc("/plans/", handler.createPlan).Methods(http.MethodPost)
 	sr.HandleFunc("/plans/{planID:[0-9]+}", handler.planByID).Methods(http.MethodGet)
 	sr.HandleFunc("/plans/{planID:[0-9]+}", handler.planUpdate).Methods(http.MethodPatch, http.MethodPut)
+	sr.HandleFunc("/plans/{planID:[0-9]+}", handler.planDestroy).Methods(http.MethodDelete)
 
 	sr.HandleFunc("/blobs/{blobID:[0-9]+}", handler.blobByID).Methods(http.MethodGet)
 }

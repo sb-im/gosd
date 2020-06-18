@@ -204,3 +204,40 @@ func (s *Storage) UpdatePlan(plan *model.Plan) error {
 
 	return nil
 }
+
+func (s *Storage) PlanDestroy(planID int64) (plan *model.Plan, err error) {
+	query := `
+		SELECT
+			id,
+			name,
+			description,
+			node_id,
+			attachments,
+			extra
+		FROM
+			plans
+		WHERE
+			id = $1
+	`
+
+	plan, err = s.fetchPlan(query, planID)
+	if err != nil {
+		return plan, err
+	}
+
+	ts, err := s.db.Begin()
+	if err != nil {
+		return plan, err
+	}
+
+	if _, err := ts.Exec(`DELETE FROM plans WHERE id=$1`, planID); err != nil {
+		ts.Rollback()
+		return plan, fmt.Errorf(`store: unable to remove user #%d: %v`, planID, err)
+	}
+
+	if err := ts.Commit(); err != nil {
+		return plan, fmt.Errorf(`store: unable to commit transaction: %v`, err)
+	}
+
+	return plan, nil
+}
