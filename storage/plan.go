@@ -160,3 +160,47 @@ func (s *Storage) fetchPlan(query string, args ...interface{}) (*model.Plan, err
 
 	return plan, nil
 }
+
+func (s *Storage) UpdatePlan(plan *model.Plan) error {
+	attachments := hstore.Hstore{Map: make(map[string]sql.NullString)}
+
+	if len(plan.Attachments) > 0 {
+		for key, value := range plan.Attachments {
+			attachments.Map[key] = sql.NullString{String: value, Valid: true}
+		}
+	}
+
+	extra := hstore.Hstore{Map: make(map[string]sql.NullString)}
+
+	if len(plan.Extra) > 0 {
+		for key, value := range plan.Extra {
+			extra.Map[key] = sql.NullString{String: value, Valid: true}
+		}
+	}
+
+	query := `
+		UPDATE
+			plans
+		SET
+			name=$2, description=$3, node_id=$4, attachments=$5, extra=$6, update_at=now()
+		WHERE
+			id=$1
+		RETURNING
+			id, name, description, node_id
+	`
+	_, err := s.db.Exec(
+		query,
+		plan.ID,
+		plan.Name,
+		plan.Description,
+		plan.NodeID,
+		attachments,
+		extra,
+	)
+
+	if err != nil {
+		return fmt.Errorf(`store: unable to update plan: %v`, err)
+	}
+
+	return nil
+}
