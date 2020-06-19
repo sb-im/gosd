@@ -23,11 +23,14 @@ create table plans (
 
 create table plan_logs (
   id bigserial not null,
+  log_id bigint not null,
+  plan_id bigint not null,
   attachments hstore,
+  extra hstore,
   create_at timestamp with time zone,
   update_at timestamp with time zone,
 
-  primary key (id)
+  primary key (plan_id, log_id)
 );
 
 create table blobs (
@@ -44,5 +47,5 @@ create table blobs (
 }
 
 var SqlMapChecksums = map[string]string{
-	"schema_version_1": "7a75eec74af2888634c74e170dbb3e15961aebd12c8c810da75d3819bfcb62cf",
+	"schema_version_1": "da52180dd7d09e31fa615e06b9a79698e8ba7f175fd7b4edebbb4c718e431fd4",
 }

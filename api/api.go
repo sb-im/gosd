@@ -40,5 +40,10 @@ func Serve(router *mux.Router, store *storage.Storage) {
 	sr.HandleFunc("/plans/{planID:[0-9]+}", handler.planUpdate).Methods(http.MethodPatch, http.MethodPut)
 	sr.HandleFunc("/plans/{planID:[0-9]+}", handler.planDestroy).Methods(http.MethodDelete)
 
+	sr.HandleFunc("/plans/{planID:[0-9]+}/mission_queues/", handler.missionQueue).Methods(http.MethodGet)
+
+	sr.HandleFunc("/plans/{planID:[0-9]+}/plan_logs/", handler.createPlanLog).Methods(http.MethodPost)
+	//sr.HandleFunc("/plans/{planID:[0-9]+}/plan_logs/{logID:[0-9]+}/", handler.createPlanLog).Methods(http.MethodPost)
+
 	sr.HandleFunc("/blobs/{blobID:[0-9]+}", handler.blobByID).Methods(http.MethodGet)
 }
