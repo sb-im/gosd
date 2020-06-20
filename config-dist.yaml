@@ -1,4 +1,0 @@
-mqtt: "mqtt://admin:public@mqtt.sblab.xyz:1883"
-server: "localhost:8000"
-database: "gosd.db"
-

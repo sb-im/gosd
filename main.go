@@ -9,9 +9,9 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"time"
 
+	"sb.im/gosd/config"
 	"sb.im/gosd/jsonrpc2mqtt"
 	//"sb.im/gosd/luavm"
 	"sb.im/gosd/state"
@@ -33,26 +33,28 @@ var (
 var accessGrant *AccessGrant
 
 func main() {
+	parse := config.NewParser()
+	opts, err := parse.ParseEnvironmentVariables()
+	if err != nil {
+		fmt.Println(err)
+	}
 
+	db, err := database.NewConnectionPool(
+		opts.DatabaseURL(),
+		opts.DatabaseMinConns(),
+		opts.DatabaseMaxConns(),
+	)
 
-	db ,_ := database.NewConnectionPool("postgres://postgres:password@localhost/gosd?sslmode=disable", 1, 10)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	database.Migrate(db)
 	store := storage.NewStorage(db)
 
-	config_path := "./config.yaml"
-	if os.Getenv("GOSD_CONF") != "" {
-		config_path = os.Getenv("GOSD_CONF")
-	}
-	fmt.Println("load config: " + config_path)
-
-	config, err := getConfig(config_path)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-
 	fmt.Println("=========")
 
-	uri, err := url.Parse(config.Mqtt)
+	uri, err := url.Parse(opts.MqttURL())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -102,7 +104,7 @@ func main() {
 	r.HandleFunc(profix+"/{action}/", actionHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
 	r.Use(mux.CORSMethodMiddleware(r))
 
-	http.ListenAndServe(config.Server, r)
+	http.ListenAndServe(opts.ListenAddr(), r)
 }
 
 func oauthHandler(w http.ResponseWriter, r *http.Request) {
