@@ -7,12 +7,15 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"net/http"
 	"net/url"
 	"time"
 
 	"sb.im/gosd/config"
 	"sb.im/gosd/jsonrpc2mqtt"
+	"sb.im/gosd/luavm"
+
 	//"sb.im/gosd/luavm"
 	"sb.im/gosd/state"
 
@@ -92,6 +95,30 @@ func main() {
 	time.Sleep(3 * time.Second)
 	//path := "test.lua"
 	//luavm.Run(state, path)
+
+	file, err := os.Open("luavm/test_min.lua")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	script, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+
+	worker := luavm.NewWorker(state)
+	go worker.Run()
+
+	p := &luavm.Plan{
+		Id: "1",
+		PlanLog: "2",
+		NodeId: "3",
+		Url: "1/12/3/4/4",
+		Pscript: script,
+	}
+
+	worker.Queue <- p
 
 	accessGrant = NewAccessGrant()
 	r := mux.NewRouter()

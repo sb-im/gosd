@@ -15,6 +15,28 @@ type Plan struct {
 	Id      string
 	NodeId  string
 	PlanLog string
+	Url     string
+	Pscript []byte
+}
+
+func (p *Plan) ID() string {
+	return p.Id
+}
+
+func (p *Plan) LogID() string {
+	return p.PlanLog
+}
+
+func (p *Plan) NodeID() string {
+	return p.NodeId
+}
+
+func (p *Plan) URL() string {
+	return p.Url
+}
+
+func (p *Plan) Script() []byte {
+	return p.Pscript
 }
 
 func Run(s *state.State, path string) {
