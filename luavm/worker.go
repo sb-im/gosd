@@ -36,7 +36,13 @@ func (w Worker) doRun(plan task.Task) {
 
 	w.LoadMod(l, plan)
 
-	err := l.DoString(string(plan.Script()))
+	var err error
+	if len(plan.Script()) == 0 {
+		err = l.DoString(LuaMap["default"])
+	} else {
+		err = l.DoString(string(plan.Script()))
+	}
+
 	if err != nil {
 		fmt.Println(err)
 		panic(err)

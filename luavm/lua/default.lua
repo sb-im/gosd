@@ -1,18 +1,11 @@
 local json = require("json")
 
-function info(n)
-  local param = {
-    ['id'] = n,
-    ['name'] = 'jyjiiiiii'
-  }
-  ret = call_service(filepoolservice,"getuserinfo",param)
-  print("22222222222222222222222")
+function run(node_id)
+  print("=== START Lua ===")
 
   print(get_id("link_id"))
   print(json.encode(get_status()))
 
-  print(plan_id)
-  print(plan_log_id)
   print(node_id)
 
   local data, err = get_msg("8", "weather")
@@ -41,7 +34,7 @@ function info(n)
       ["b"] = "456"
     }
   }, ch)
-  print("5555555555555555555555")
+  print("asyncCall send")
 
   local res = {}
   channel.select(
@@ -50,7 +43,7 @@ function info(n)
     print(json.encode(data))
     if data["result"]
       then
-        print("SSSSSSSSSSSSSSssss")
+        print("asyncCall success")
       end
   end}
   )

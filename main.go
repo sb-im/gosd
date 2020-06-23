@@ -96,7 +96,7 @@ func main() {
 	//path := "test.lua"
 	//luavm.Run(state, path)
 
-	file, err := os.Open("luavm/test_min.lua")
+	file, err := os.Open("luavm/lua/test_min.lua")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -105,6 +105,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Printf("%s\n", script)
 
 
 	worker := luavm.NewWorker(state)
