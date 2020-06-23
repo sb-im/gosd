@@ -16,7 +16,6 @@ import (
 	"sb.im/gosd/jsonrpc2mqtt"
 	"sb.im/gosd/luavm"
 
-	//"sb.im/gosd/luavm"
 	"sb.im/gosd/state"
 
 	"sb.im/gosd/database"
@@ -73,30 +72,11 @@ func main() {
 	}
 	fmt.Println(mqttProxy)
 
-	//req := []byte(`{"jsonrpc":"2.0","id":"gosd.0","method":"check_ready"}`)
-	//ch_recv := make(chan []byte)
-	//mqttProxy.AsyncRpc("10", req, ch_recv)
-	//fmt.Println("000000000000000")
-	//aa := <-ch_recv
-	//fmt.Println(string(aa))
-	//res, err := mqttProxy.SyncRpc("10", req)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//fmt.Println(res)
-
-	//res, err := jsonrpc2mqtt.SyncMqttRpc(mq, 10, req)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//fmt.Println(string(res))
-
 	// Wait mqtt connected
 	time.Sleep(3 * time.Second)
-	//path := "test.lua"
-	//luavm.Run(state, path)
 
-	file, err := os.Open("luavm/lua/test_min.lua")
+	//file, err := os.Open("luavm/lua/test_min.lua")
+	file, err := os.Open("luavm/lua/default.lua")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -111,15 +91,12 @@ func main() {
 	worker := luavm.NewWorker(state)
 	go worker.Run()
 
-	p := &luavm.Plan{
-		Id: "1",
-		PlanLog: "2",
-		NodeId: "3",
-		Url: "1/12/3/4/4",
-		Pscript: script,
+	worker.Queue <- &luavm.Task{
+		NodeID: "3",
+		URL: "1/12/3/4/4",
+		Script: script,
 	}
 
-	worker.Queue <- p
 
 	accessGrant = NewAccessGrant()
 	r := mux.NewRouter()

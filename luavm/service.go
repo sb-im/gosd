@@ -10,8 +10,8 @@ import (
 )
 
 type LService struct {
-	State *state.State
-	Plan  *Plan
+	State  *state.State
+	NodeID string
 }
 
 // GetMsg(id, msg string) (data tables{}, error string)
@@ -40,7 +40,7 @@ func (s *LService) GetID(L *lua.LState) int {
 	str := L.ToString(1)
 
 	if str == "link_id" {
-		L.Push(lua.LString(strconv.Itoa(s.State.Node[s.Plan.NodeId].Status.GetID(""))))
+		L.Push(lua.LString(strconv.Itoa(s.State.Node[s.NodeID].Status.GetID(""))))
 		return 1
 	}
 
@@ -50,7 +50,7 @@ func (s *LService) GetID(L *lua.LState) int {
 
 // GetStatus() (data tables{}, error string)
 func (s *LService) GetStatus(L *lua.LState) int {
-	raw := s.State.Node[s.Plan.NodeId].Status.Raw
+	raw := s.State.Node[s.NodeID].Status.Raw
 
 	value, err := luajson.Decode(L, raw)
 	if err != nil {
