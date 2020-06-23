@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"net/http"
 	"net/url"
 	"time"
@@ -75,34 +74,14 @@ func main() {
 	// Wait mqtt connected
 	time.Sleep(3 * time.Second)
 
-	//file, err := os.Open("luavm/lua/test_min.lua")
-	file, err := os.Open("luavm/lua/default.lua")
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	script, err := ioutil.ReadAll(file)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Printf("%s\n", script)
-
-
 	worker := luavm.NewWorker(state)
 	go worker.Run()
-
-	worker.Queue <- &luavm.Task{
-		NodeID: "3",
-		URL: "1/12/3/4/4",
-		Script: script,
-	}
-
 
 	accessGrant = NewAccessGrant()
 	r := mux.NewRouter()
 
 	fmt.Println("Start http")
-	api.Serve(r, store)
+	api.Serve(r, store, worker)
 
 	r.HandleFunc(namespace+"/oauth/token", oauthHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
 

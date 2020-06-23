@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"mime"
 	"net/http"
+	"strconv"
 	"strings"
 
+	"sb.im/gosd/luavm"
 	"sb.im/gosd/model"
 
 	"miniflux.app/http/request"
@@ -45,6 +47,18 @@ func (h *handler) createPlanLog(w http.ResponseWriter, r *http.Request) {
 	if err := h.store.CreatePlanLog(log); err != nil {
 		json.ServerError(w, r, err)
 		return
+	}
+
+	plan, err := h.store.PlanByID(log.PlanID)
+	if err != nil {
+		json.ServerError(w, r, err)
+		return
+	}
+
+	h.worker.Queue <- &luavm.Task{
+		NodeID: strconv.FormatInt(plan.NodeID, 10),
+		URL:    "1/12/3/4/4",
+		Script: []byte{},
 	}
 
 	json.Created(w, r, log)
