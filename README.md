@@ -4,8 +4,19 @@ replace RSD-backend
 
 ## Build
 
+* golang >= 1.11.x
+* make
+
 ```sh
-go build
+make
+```
+
+## Run
+
+```sh
+MQTT_URL=mqtt://admin:public@localhost:1883 \
+DATABASE_URL=postgres://postgres:password@localhost/gosd?sslmode=disable \
+./gosd -migrate
 ```
 
 ## Environment Variables

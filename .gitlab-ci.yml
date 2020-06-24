@@ -4,8 +4,8 @@ image: golang:1.13.1-buster
   before_script:
     - go version
   script:
-    - go generate
-    - go build
+    - make test
+    - make build
   only:
     refs:
       - master
