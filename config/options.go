@@ -3,9 +3,9 @@ package config
 const (
 	defaultDebug            = false
 	defaultMqttURL          = "mqtt://admin:public@localhost:1883"
-	defaultBaseURL          = "http://localhost"
+	defaultBaseURL          = "http://localhost/gosd"
 	defaultRootURL          = "http://localhost"
-	defaultBasePath         = "/gosd"
+	defaultBasePath         = ""
 	defaultDatabaseURL      = "postgres://postgres:password@localhost/gosd?sslmode=disable"
 	defaultDatabaseMaxConns = 20
 	defaultDatabaseMinConns = 1

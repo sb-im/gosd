@@ -81,7 +81,7 @@ func main() {
 	r := mux.NewRouter()
 
 	fmt.Println("Start http")
-	api.Serve(r, store, worker)
+	api.Serve(r, store, worker, opts.BaseURL())
 
 	r.HandleFunc(namespace+"/oauth/token", oauthHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
 

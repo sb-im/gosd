@@ -6,6 +6,7 @@ import (
 )
 
 type handler struct {
-	store  *storage.Storage
-	worker *luavm.Worker
+	store   *storage.Storage
+	worker  *luavm.Worker
+	baseURL string
 }

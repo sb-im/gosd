@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"io/ioutil"
 	"mime"
 	"net/http"
 	"strconv"
@@ -49,17 +50,44 @@ func (h *handler) createPlanLog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	plan, err := h.store.PlanByID(log.PlanID)
-	if err != nil {
+	// Run Task
+	if err := h.sendTask(log); err != nil {
 		json.ServerError(w, r, err)
 		return
 	}
 
-	h.worker.Queue <- &luavm.Task{
-		NodeID: strconv.FormatInt(plan.NodeID, 10),
-		URL:    "1/12/3/4/4",
-		Script: []byte{},
+	json.Created(w, r, log)
+}
+
+func (h *handler) sendTask(log *model.PlanLog) error {
+	plan, err := h.store.PlanByID(log.PlanID)
+	if err != nil {
+		return err
 	}
 
-	json.Created(w, r, log)
+	var script []byte
+	if blobID := plan.Attachments["lua"]; blobID != "" {
+		int64ID, err := strconv.ParseInt(blobID, 10, 64)
+		if err != nil {
+			return err
+		}
+
+		blob, err := h.store.BlobByID(int64ID)
+		if err != nil {
+			return err
+		}
+
+		script, err = ioutil.ReadAll(blob.Reader)
+		if err != nil {
+			return err
+		}
+	}
+
+	h.worker.Queue <- &luavm.Task{
+		NodeID: strconv.FormatInt(plan.NodeID, 10),
+		URL:    h.baseURL + "/api/v1/plans/" + strconv.FormatInt(log.PlanID, 10) + "/logs/" + strconv.FormatInt(log.LogID, 10),
+		Script: script,
+	}
+
+	return nil
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"net/url"
 	"strings"
 
 	"sb.im/gosd/luavm"
@@ -11,9 +12,11 @@ import (
 )
 
 // Serve declares API routes for the application.
-func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker) {
-	handler := &handler{store, worker}
-	sr := router.PathPrefix("/gosd/api/v1").Subrouter()
+func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker, baseURL string) {
+	u, _ := url.Parse(baseURL)
+
+	handler := &handler{store, worker, baseURL}
+	sr := router.PathPrefix(u.Path + "/api/v1").Subrouter()
 
 	//middleware := newMiddleware(store)
 
@@ -23,7 +26,7 @@ func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker) {
 
 	//router.Use(mux.CORSMethodMiddleware(sr))
 
-	router.PathPrefix("/gosd/api/v1").Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	router.PathPrefix(u.Path + "/api/v1").Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 
@@ -44,6 +47,7 @@ func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker) {
 	sr.HandleFunc("/plans/{planID:[0-9]+}/mission_queues/", handler.missionQueue).Methods(http.MethodGet)
 
 	sr.HandleFunc("/plans/{planID:[0-9]+}/plan_logs/", handler.createPlanLog).Methods(http.MethodPost)
+	sr.HandleFunc("/plans/{planID:[0-9]+}/logs/", handler.createPlanLog).Methods(http.MethodPost)
 	//sr.HandleFunc("/plans/{planID:[0-9]+}/plan_logs/{logID:[0-9]+}/", handler.createPlanLog).Methods(http.MethodPost)
 
 	sr.HandleFunc("/blobs/{blobID:[0-9]+}", handler.blobByID).Methods(http.MethodGet)
