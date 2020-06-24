@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"time"
 
-	"sb.im/gosd/config"
+	"sb.im/gosd/cli"
 	"sb.im/gosd/jsonrpc2mqtt"
 	"sb.im/gosd/luavm"
 
@@ -34,10 +34,10 @@ var (
 var accessGrant *AccessGrant
 
 func main() {
-	parse := config.NewParser()
-	opts, err := parse.ParseEnvironmentVariables()
+	opts, err := cli.Parse()
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	db, err := database.NewConnectionPool(
@@ -47,10 +47,9 @@ func main() {
 	)
 
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 
-	database.Migrate(db)
 	store := storage.NewStorage(db)
 
 	fmt.Println("=========")
