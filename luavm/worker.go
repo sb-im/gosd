@@ -1,8 +1,6 @@
 package luavm
 
 import (
-	"fmt"
-
 	"sb.im/gosd/jsonrpc2mqtt"
 	"sb.im/gosd/state"
 
@@ -28,7 +26,7 @@ func (w Worker) Run() {
 	}
 }
 
-func (w Worker) doRun(task *Task) {
+func (w Worker) doRun(task *Task) error {
 	l := lua.NewState()
 	defer l.Close()
 	luajson.Preload(l)
@@ -43,21 +41,18 @@ func (w Worker) doRun(task *Task) {
 	}
 
 	if err != nil {
-		fmt.Println(err)
-		panic(err)
+		return err
 	}
 
-	err = l.CallByParam(lua.P{
+	if err := l.CallByParam(lua.P{
 		Fn:      l.GetGlobal("run"),
 		NRet:    1,
 		Protect: false,
-	}, lua.LString(task.NodeID))
-
-	// 传递输入参数n=1
-	if err != nil {
-		panic(err)
+	}, lua.LString(task.NodeID)); err != nil {
+		return err
 	}
 
+	return nil
 }
 
 func (w Worker) LoadMod(l *lua.LState, task *Task) {
