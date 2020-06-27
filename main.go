@@ -11,16 +11,12 @@ import (
 	"net/url"
 	"time"
 
-	"sb.im/gosd/cli"
-	"sb.im/gosd/jsonrpc2mqtt"
-	"sb.im/gosd/luavm"
-
-	"sb.im/gosd/state"
-
-	"sb.im/gosd/database"
-	"sb.im/gosd/storage"
-
 	"sb.im/gosd/api"
+	"sb.im/gosd/cli"
+	"sb.im/gosd/database"
+	"sb.im/gosd/luavm"
+	"sb.im/gosd/state"
+	"sb.im/gosd/storage"
 
 	"github.com/gorilla/mux"
 )
@@ -36,8 +32,7 @@ var accessGrant *AccessGrant
 func main() {
 	opts, err := cli.Parse()
 	if err != nil {
-		fmt.Println(err)
-		return
+		panic(err)
 	}
 
 	db, err := database.NewConnectionPool(
@@ -52,23 +47,13 @@ func main() {
 
 	store := storage.NewStorage(db)
 
-	fmt.Println("=========")
-
 	uri, err := url.Parse(opts.MqttURL())
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	state := state.NewState()
-	mqttClient := state.Connect("cloud.0", uri)
-	fmt.Println(mqttClient)
-
-	time.Sleep(1 * time.Second)
-	mqttProxy, err := jsonrpc2mqtt.OpenMqttProxy(mqttClient)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(mqttProxy)
+	state.Connect("cloud.0", uri)
 
 	// Wait mqtt connected
 	time.Sleep(3 * time.Second)
@@ -79,7 +64,7 @@ func main() {
 	accessGrant = NewAccessGrant()
 	r := mux.NewRouter()
 
-	fmt.Println("Start http")
+	fmt.Println("=========")
 	api.Serve(r, store, worker, opts.BaseURL())
 
 	r.HandleFunc(namespace+"/oauth/token", oauthHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)

@@ -15,10 +15,10 @@ build: generate
 	$(GOBUILD)
 
 run: generate
-	go run `ls *.go | grep -v _test.go`
+	@ go run `ls *.go | grep -v _test.go | grep -v generate.go`
 
 test:
-	go test ./jsonrpc2mqtt ./state -cover
+	go test ./jsonrpc2mqtt ./state ./luavm -cover
 
 clean:
 	go clean
