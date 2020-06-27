@@ -17,7 +17,7 @@ build: generate
 run: generate
 	@ go run `ls *.go | grep -v _test.go | grep -v generate.go`
 
-test:
+test: generate
 	go test ./jsonrpc2mqtt ./state ./luavm -cover
 
 clean:
