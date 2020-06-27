@@ -37,10 +37,8 @@ func (s *LService) GetMsg(L *lua.LState) int {
 
 // GetID(str string) (id string)
 func (s *LService) GetID(L *lua.LState) int {
-	str := L.ToString(1)
-
-	if str == "link_id" {
-		L.Push(lua.LString(strconv.Itoa(s.State.Node[s.NodeID].Status.GetID(""))))
+	if n := s.State.Node[s.NodeID]; n != nil && L.ToString(1) == "link_id" {
+		L.Push(lua.LString(strconv.Itoa(n.Status.GetID(""))))
 		return 1
 	}
 
@@ -50,7 +48,10 @@ func (s *LService) GetID(L *lua.LState) int {
 
 // GetStatus() (data tables{}, error string)
 func (s *LService) GetStatus(L *lua.LState) int {
-	raw := s.State.Node[s.NodeID].Status.Raw
+	raw := []byte{}
+	if data := s.State.Node[s.NodeID]; data != nil {
+		raw = data.Status.Raw
+	}
 
 	value, err := luajson.Decode(L, raw)
 	if err != nil {

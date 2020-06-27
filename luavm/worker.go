@@ -9,14 +9,17 @@ import (
 )
 
 type Worker struct {
-	Queue chan *Task
-	State *state.State
+	Queue     chan *Task
+	State     *state.State
+	MqttProxy *jsonrpc2mqtt.MqttProxy
 }
 
 func NewWorker(s *state.State) *Worker {
+	mqttProxy, _ := jsonrpc2mqtt.OpenMqttProxy(s.Mqtt)
 	return &Worker{
-		Queue: make(chan *Task, 1024),
-		State: s,
+		Queue:     make(chan *Task, 1024),
+		State:     s,
+		MqttProxy: mqttProxy,
 	}
 }
 
@@ -56,9 +59,8 @@ func (w Worker) doRun(task *Task) error {
 }
 
 func (w Worker) LoadMod(l *lua.LState, task *Task) {
-	mqttProxy, _ := jsonrpc2mqtt.OpenMqttProxy(w.State.Mqtt)
 	rpc := &LRpc{
-		MqttProxy: mqttProxy,
+		MqttProxy: w.MqttProxy,
 	}
 
 	service := &LService{
