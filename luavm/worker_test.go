@@ -5,14 +5,16 @@ import (
 	"os"
 	"testing"
 
+	"sb.im/gosd/jsonrpc2mqtt"
 	"sb.im/gosd/state"
 )
 
 func TestNewWorker(t *testing.T) {
 	s := state.NewState()
+	s.Mqtt = &jsonrpc2mqtt.MockClient{}
 	worker := NewWorker(s)
 
-	file, err := os.Open("test_min.lua")
+	file, err := os.Open("lua/test_min.lua")
 	if err != nil {
 		t.Error(err)
 	}
@@ -22,11 +24,9 @@ func TestNewWorker(t *testing.T) {
 		t.Error(err)
 	}
 
-	p := &plan{
-		Id:     "1",
-		LogID:  "2",
-		NodeID: "3",
-		Url:    "1/12/3/4/4",
+	p := &Task{
+		NodeID: "1",
+		URL:    "1/12/3/4/4",
 		Script: script,
 	}
 
