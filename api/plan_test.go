@@ -10,15 +10,26 @@ import (
 	"testing"
 
 	"sb.im/gosd/database"
+	"sb.im/gosd/luavm"
+	"sb.im/gosd/state"
 	"sb.im/gosd/storage"
 )
 
-func Test_CreatePlanjson(t *testing.T) {
+func helpNewHandler() *handler {
 	db, _ := database.NewConnectionPool("postgres://postgres:password@localhost/gosd?sslmode=disable", 1, 10)
 	database.Migrate(db)
 	store := storage.NewStorage(db)
 
-	handler := &handler{store}
+	worker := luavm.NewWorker(state.NewState())
+	go worker.Run()
+
+	return &handler{store, worker, "http://localhost/test"}
+
+}
+
+func Test_CreatePlanjson(t *testing.T) {
+	handler := helpNewHandler()
+
 	ts := httptest.NewServer(http.HandlerFunc(handler.createPlan))
 	defer ts.Close()
 
@@ -36,11 +47,8 @@ func Test_CreatePlanjson(t *testing.T) {
 }
 
 func Test_CreatePlanFormData(t *testing.T) {
-	db, _ := database.NewConnectionPool("postgres://postgres:password@localhost/gosd?sslmode=disable", 1, 10)
-	database.Migrate(db)
-	store := storage.NewStorage(db)
+	handler := helpNewHandler()
 
-	handler := &handler{store}
 	ts := httptest.NewServer(http.HandlerFunc(handler.createPlan))
 	defer ts.Close()
 
