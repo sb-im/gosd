@@ -4,6 +4,17 @@ create table schema_version (
 
 create extension if not exists hstore;
 
+create table users (
+    id serial not null,
+    username text not null unique,
+    password text,
+    language text default 'en_US',
+    timezone text default 'UTC',
+    last_login_at timestamp with time zone,
+    extra hstore,
+    primary key (id)
+);
+
 create table plans (
   id serial not null,
   name text not null,

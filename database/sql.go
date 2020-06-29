@@ -9,6 +9,17 @@ var SqlMap = map[string]string{
 
 create extension if not exists hstore;
 
+create table users (
+    id serial not null,
+    username text not null unique,
+    password text,
+    language text default 'en_US',
+    timezone text default 'UTC',
+    last_login_at timestamp with time zone,
+    extra hstore,
+    primary key (id)
+);
+
 create table plans (
   id serial not null,
   name text not null,
@@ -47,5 +58,5 @@ create table blobs (
 }
 
 var SqlMapChecksums = map[string]string{
-	"schema_version_1": "da52180dd7d09e31fa615e06b9a79698e8ba7f175fd7b4edebbb4c718e431fd4",
+	"schema_version_1": "bc8d31e9a2d5eeb7375cb6ed16fe9281cd2252a375a9860505eb9e2705548e04",
 }
