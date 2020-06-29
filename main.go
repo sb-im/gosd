@@ -3,7 +3,6 @@ package main
 //go:generate go run generate.go
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -26,8 +25,6 @@ var (
 	api_version = "/api/v1"
 	profix      = namespace + api_version
 )
-
-var accessGrant *AccessGrant
 
 func main() {
 	opts, err := cli.Parse()
@@ -61,55 +58,15 @@ func main() {
 	worker := luavm.NewWorker(state)
 	go worker.Run()
 
-	accessGrant = NewAccessGrant()
 	r := mux.NewRouter()
 
 	fmt.Println("=========")
 	api.Serve(r, store, worker, opts.BaseURL())
 
-	r.HandleFunc(namespace+"/oauth/token", oauthHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
-
 	r.HandleFunc(profix+"/{action}/", actionHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
 	r.Use(mux.CORSMethodMiddleware(r))
 
 	http.ListenAndServe(opts.ListenAddr(), r)
-}
-
-func oauthHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	if r.Method == http.MethodOptions {
-		w.Header().Set("Access-Control-Allow-Headers", "content-type,Authorization")
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-
-	type Token struct {
-		AccessToken string `json:"access_token"`
-		TokenType   string `json:"token_type"`
-		ExpiresIn   int    `json:"expires_in"`
-		CreatedAt   int64  `json:"created_at"`
-	}
-
-	key, _ := accessGrant.Grant(nil)
-	log.Println(key)
-
-	token := &Token{
-		AccessToken: key,
-		TokenType:   "bearer",
-		ExpiresIn:   7200,
-		CreatedAt:   time.Now().Unix(),
-	}
-	b, err := json.Marshal(token)
-	if err != nil {
-		log.Println("error:", err)
-	}
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	w.Write(b)
 }
 
 func actionHandler(w http.ResponseWriter, r *http.Request) {
