@@ -57,5 +57,5 @@ function run(node_id)
   })))
 
   print("=== END Lua END ===")
-  return ret['data']
+  return res['data']
 end

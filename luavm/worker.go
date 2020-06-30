@@ -1,6 +1,8 @@
 package luavm
 
 import (
+	"fmt"
+
 	"sb.im/gosd/jsonrpc2mqtt"
 	"sb.im/gosd/state"
 
@@ -25,7 +27,9 @@ func NewWorker(s *state.State) *Worker {
 
 func (w Worker) Run() {
 	for task := range w.Queue {
-		w.doRun(task)
+		if err := w.doRun(task); err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
@@ -50,7 +54,7 @@ func (w Worker) doRun(task *Task) error {
 	if err := l.CallByParam(lua.P{
 		Fn:      l.GetGlobal("run"),
 		NRet:    1,
-		Protect: false,
+		Protect: true,
 	}, lua.LString(task.NodeID)); err != nil {
 		return err
 	}
