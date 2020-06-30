@@ -4,8 +4,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -18,12 +16,6 @@ import (
 	"sb.im/gosd/storage"
 
 	"github.com/gorilla/mux"
-)
-
-var (
-	namespace   = "/gosd"
-	api_version = "/api/v1"
-	profix      = namespace + api_version
 )
 
 func main() {
@@ -62,26 +54,5 @@ func main() {
 
 	fmt.Println("=========")
 	api.Serve(r, store, worker, opts.BaseURL())
-
-	r.HandleFunc(profix+"/{action}/", actionHandler).Methods(http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodOptions)
-	r.Use(mux.CORSMethodMiddleware(r))
-
 	http.ListenAndServe(opts.ListenAddr(), r)
-}
-
-func actionHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	if r.Method == http.MethodOptions {
-		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
-		return
-	}
-
-	vars := mux.Vars(r)
-	w.Header().Set("Content-Type", "application/json")
-	content, err := ioutil.ReadFile("data/" + vars["action"] + ".json")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	w.Write(content)
 }
