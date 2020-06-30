@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"runtime"
@@ -20,7 +19,7 @@ const (
 	flagDebugModeHelp   = "Show debug logs"
 )
 
-func Parse() (*config.Options, error) {
+func Parse() {
 	var (
 		err             error
 		flagVersion     bool
@@ -39,46 +38,36 @@ func Parse() (*config.Options, error) {
 
 	if flagVersion {
 		fmt.Printf("gosd %s %s %s %s\n", version.Version, runtime.GOOS, runtime.GOARCH, version.BuildDate)
-		return nil, errors.New("=== show version ===")
+		return
 	}
 
 	parse := config.NewParser()
 	opts, err := parse.ParseEnvironmentVariables()
 	if err != nil {
-		return opts, err
+		panic(err)
+	}
+
+	db, err := database.NewConnectionPool(
+		opts.DatabaseURL(),
+		opts.DatabaseMinConns(),
+		opts.DatabaseMaxConns(),
+	)
+
+	if err != nil {
+		panic(err)
 	}
 
 	if flagMigrate {
-		db, err := database.NewConnectionPool(
-			opts.DatabaseURL(),
-			opts.DatabaseMinConns(),
-			opts.DatabaseMaxConns(),
-		)
-
-		if err != nil {
-			return opts, err
-		}
-
 		database.Migrate(db)
-		return opts, errors.New("=== end migrate ===")
+		return
 	}
+
+	store := storage.NewStorage(db)
 
 	if flagCreateAdmin {
-		db, err := database.NewConnectionPool(
-			opts.DatabaseURL(),
-			opts.DatabaseMinConns(),
-			opts.DatabaseMaxConns(),
-		)
-
-		if err != nil {
-			return opts, err
-		}
-
-		store := storage.NewStorage(db)
-
 		createAdmin(store)
-		return opts, errors.New("=== end createAdmin ===")
+		return
 	}
 
-	return opts, err
+	startDaemon(store, opts)
 }
