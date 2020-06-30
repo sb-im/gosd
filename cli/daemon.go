@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"runtime"
@@ -13,11 +12,13 @@ import (
 	"sb.im/gosd/state"
 	"sb.im/gosd/storage"
 
+	"miniflux.app/logger"
+
 	"github.com/gorilla/mux"
 )
 
 func startDaemon(store *storage.Storage, opts *config.Options) {
-	fmt.Println("Starting gosd...")
+	logger.Info("Starting gosd...")
 
 	go showProcessStatistics()
 
@@ -37,21 +38,20 @@ func startDaemon(store *storage.Storage, opts *config.Options) {
 
 	r := mux.NewRouter()
 
-	fmt.Println("=========")
+	logger.Info("=========")
 	api.Serve(r, store, worker, opts.BaseURL())
 	http.ListenAndServe(opts.ListenAddr(), r)
 
-	fmt.Println("Process gracefully stopped")
+	logger.Info("Process gracefully stopped")
 }
 
 func showProcessStatistics() {
 	for {
 		var m runtime.MemStats
 		runtime.ReadMemStats(&m)
-		fmt.Printf("Sys=%vK, InUse=%vK, HeapInUse=%vK, StackSys=%vK, StackInUse=%vK, GoRoutines=%d, NumCPU=%d",
+		logger.Debug("Sys=%vK, InUse=%vK, HeapInUse=%vK, StackSys=%vK, StackInUse=%vK, GoRoutines=%d, NumCPU=%d",
 			m.Sys/1024, (m.Sys-m.HeapReleased)/1024, m.HeapInuse/1024, m.StackSys/1024, m.StackInuse/1024,
 			runtime.NumGoroutine(), runtime.NumCPU())
-
 		time.Sleep(30 * time.Second)
 	}
 }

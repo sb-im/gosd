@@ -15,7 +15,7 @@ build: generate
 	$(GOBUILD)
 
 run: generate
-	@ go run `ls *.go | grep -v _test.go | grep -v generate.go`
+	@ go run main.go -debug
 
 test: generate
 	go test ./jsonrpc2mqtt ./state ./luavm -cover

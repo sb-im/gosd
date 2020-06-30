@@ -9,6 +9,7 @@ import (
 	"sb.im/gosd/database"
 	"sb.im/gosd/storage"
 
+	"miniflux.app/logger"
 	"miniflux.app/version"
 )
 
@@ -45,6 +46,10 @@ func Parse() {
 	opts, err := parse.ParseEnvironmentVariables()
 	if err != nil {
 		panic(err)
+	}
+
+	if flagDebugMode || opts.HasDebugMode() {
+		logger.EnableDebug()
 	}
 
 	db, err := database.NewConnectionPool(
