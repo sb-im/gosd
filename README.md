@@ -31,6 +31,7 @@ Variable Name        | Description                                              
 `PORT`               | Override `LISTEN_ADDR` to `0.0.0.0:$PORT` (PaaS)          | None
 `BASE_URL`           | Base URL to generate HTML links and base path for cookies | `http://localhost/`
 `MQTT_URL`           | MQTT broker Server address                                | `mqtt://admin:public@localhost:1883`
+`MQTT_CLIENT_ID`     | MQTT Client ID                                            | `cloud.0`
 
 ### New Plan
 

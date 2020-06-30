@@ -36,6 +36,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 		switch key {
 		case "DEBUG":
 			p.opts.debug = parseBool(value, defaultDebug)
+		case "MQTT_CLIENT_ID":
+			p.opts.mqttClientID = parseString(value, defaultMqttClientID)
 		case "MQTT_URL":
 			p.opts.mqttURL = parseString(value, defaultMqttURL)
 		case "BASE_URL":

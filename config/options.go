@@ -2,6 +2,7 @@ package config
 
 const (
 	defaultDebug            = false
+	defaultMqttClientID     = "cloud.0"
 	defaultMqttURL          = "mqtt://admin:public@localhost:1883"
 	defaultBaseURL          = "http://localhost/gosd"
 	defaultRootURL          = "http://localhost"
@@ -15,6 +16,7 @@ const (
 // Options contains configuration options.
 type Options struct {
 	debug            bool
+	mqttClientID     string
 	mqttURL          string
 	baseURL          string
 	rootURL          string
@@ -29,6 +31,7 @@ type Options struct {
 func NewOptions() *Options {
 	return &Options{
 		debug:            defaultDebug,
+		mqttClientID:     defaultMqttClientID,
 		mqttURL:          defaultMqttURL,
 		baseURL:          defaultBaseURL,
 		rootURL:          defaultRootURL,
@@ -42,6 +45,10 @@ func NewOptions() *Options {
 
 func (o *Options) HasDebugMode() bool {
 	return o.debug
+}
+
+func (o *Options) MqttClientID() string {
+	return o.mqttClientID
 }
 
 func (o *Options) MqttURL() string {

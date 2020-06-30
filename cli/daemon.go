@@ -27,7 +27,7 @@ func startDaemon(store *storage.Storage, opts *config.Options) {
 	}
 
 	state := state.NewState()
-	state.Connect("cloud.0", uri)
+	state.Connect(opts.MqttClientID(), uri)
 
 	// Wait mqtt connected
 	time.Sleep(3 * time.Second)
