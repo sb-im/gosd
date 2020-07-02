@@ -11,3 +11,7 @@ func (s *Storage) CreateToken(token string, user *model.User) (err error) {
 
 	return nil
 }
+
+func (s *Storage) GetCurrentUser(token string) *model.User {
+	return s.cache.token[token]
+}

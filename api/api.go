@@ -53,6 +53,7 @@ func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker, bas
 
 	sr.HandleFunc("/blobs/{blobID:[0-9]+}", handler.blobByID).Methods(http.MethodGet)
 
+	sr.HandleFunc("/user/", handler.currentUser).Methods(http.MethodGet)
 	sr.HandleFunc("/{action}/", handler.actionHandler).Methods(http.MethodGet)
 
 }
