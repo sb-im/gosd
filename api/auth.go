@@ -3,8 +3,12 @@ package api
 import (
 	"crypto/rand"
 	"fmt"
+	"mime"
 	"net/http"
+	"strings"
 	"time"
+
+	"sb.im/gosd/model"
 
 	"miniflux.app/http/response/json"
 )
@@ -13,6 +17,46 @@ func (h *handler) authHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method == http.MethodOptions {
 		w.Header().Set("Access-Control-Allow-Headers", "content-type,Authorization")
+		return
+	}
+
+	mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	if err != nil {
+		json.ServerError(w, r, err)
+		return
+	}
+
+	item := &model.Login{}
+	if strings.HasPrefix(mediaType, "multipart/") {
+
+		params, _, err := h.formData2Blob(r)
+		if err != nil {
+			json.ServerError(w, r, err)
+			return
+		}
+
+		item.GrantType = params["grant_type"]
+		item.Username = params["username"]
+		item.Password = params["password"]
+		item.ClientID = params["client_id"]
+		item.ClientSecret = params["client_secret"]
+
+	} else {
+		item, err = decodeLoginPayload(r.Body)
+		if err != nil {
+			json.BadRequest(w, r, err)
+			return
+		}
+	}
+
+	if err := h.store.CheckPassword(item.Username, item.Password); err != nil {
+		json.ServerError(w, r, err)
+		return
+	}
+
+	user, err := h.store.UserByUsername(item.Username)
+	if err != nil {
+		json.ServerError(w, r, err)
 		return
 	}
 
@@ -36,7 +80,7 @@ func (h *handler) authHandler(w http.ResponseWriter, r *http.Request) {
 		CreatedAt:   time.Now().Unix(),
 	}
 
-	h.store.CreateToken(key, nil)
+	h.store.CreateToken(key, user)
 
 	json.OK(w, r, token)
 }
