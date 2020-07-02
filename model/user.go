@@ -15,12 +15,16 @@ type User struct {
 	Language    string            `json:"language"`
 	Timezone    string            `json:"timezone"`
 	LastLoginAt *time.Time        `json:"last_login_at,omitempty"`
+	Group       *Group            `json:"group"`
 	Extra       map[string]string `json:"extra"`
 }
 
 // NewUser returns a new User.
 func NewUser() *User {
-	return &User{Extra: make(map[string]string)}
+	return &User{
+		Group: NewGroup(),
+		Extra: make(map[string]string),
+	}
 }
 
 // ValidateUserCreation validates new user.

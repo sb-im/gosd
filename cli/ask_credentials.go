@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-func askCredentials() (string, string) {
+func askCredentials() (string, string, string) {
 	fd := int(os.Stdin.Fd())
 
 	if !terminal.IsTerminal(fd) {
@@ -28,5 +28,10 @@ func askCredentials() (string, string) {
 	bytePassword, _ := terminal.ReadPassword(fd)
 
 	fmt.Printf("\n")
-	return strings.TrimSpace(username), strings.TrimSpace(string(bytePassword))
+
+	fmt.Print("Enter Group: ")
+	readerG := bufio.NewReader(os.Stdin)
+	group, _ := readerG.ReadString('\n')
+
+	return strings.TrimSpace(username), strings.TrimSpace(string(bytePassword)), strings.TrimSpace(group)
 }

@@ -16,6 +16,14 @@ create table users (
     language text default 'en_US',
     timezone text default 'UTC',
     last_login_at timestamp with time zone,
+    group_id int not null,
+    extra hstore,
+    primary key (id)
+);
+
+create table groups (
+    id serial not null,
+    name text,
     extra hstore,
     primary key (id)
 );
@@ -58,5 +66,5 @@ create table blobs (
 }
 
 var SqlMapChecksums = map[string]string{
-	"schema_version_1": "bc8d31e9a2d5eeb7375cb6ed16fe9281cd2252a375a9860505eb9e2705548e04",
+	"schema_version_1": "06c8af64dcff47898166b7a49a24d73aa9a9f0f4d54a83b9674e3329b12e80b2",
 }

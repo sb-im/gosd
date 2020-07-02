@@ -20,7 +20,7 @@ import (
 func startDaemon(store *storage.Storage, opts *config.Options) {
 	logger.Info("Starting gosd...")
 
-	go showProcessStatistics()
+	//go showProcessStatistics()
 
 	uri, err := url.Parse(opts.MqttURL())
 	if err != nil {

@@ -56,14 +56,14 @@ func (s *Storage) CreateUser(user *model.User) (err error) {
 
 	query := `
 		INSERT INTO users
-			(username, password, extra)
+			(username, password, group_id, extra)
 		VALUES
-			(LOWER($1), $2, $3)
+			(LOWER($1), $2, $3, $4)
 		RETURNING
 			id, username, language, timezone
 	`
 
-	err = s.db.QueryRow(query, user.Username, password, extra).Scan(
+	err = s.db.QueryRow(query, user.Username, password, user.Group.ID, extra).Scan(
 		&user.ID,
 		&user.Username,
 		&user.Language,
@@ -163,16 +163,23 @@ func (s *Storage) UserLanguage(userID int64) (language string) {
 func (s *Storage) UserByID(userID int64) (*model.User, error) {
 	query := `
 		SELECT
-			id,
-			username,
-			language,
-			timezone,
-			last_login_at,
-			extra
+			u.id,
+			u.username,
+			u.language,
+			u.timezone,
+			u.last_login_at,
+			u.extra,
+			g.id,
+			g.name,
+			g.extra
 		FROM
-			users
+			users u
+		JOIN
+			groups g
+		ON
+			u.group_id = g.id
 		WHERE
-			id = $1
+			u.id = $1
 	`
 
 	return s.fetchUser(query, userID)
@@ -182,16 +189,23 @@ func (s *Storage) UserByID(userID int64) (*model.User, error) {
 func (s *Storage) UserByUsername(username string) (*model.User, error) {
 	query := `
 		SELECT
-			id,
-			username,
-			language,
-			timezone,
-			last_login_at,
-			extra
+			u.id,
+			u.username,
+			u.language,
+			u.timezone,
+			u.last_login_at,
+			u.extra,
+			g.id,
+			g.name,
+			g.extra
 		FROM
-			users
+			users u
+		JOIN
+			groups g
+		ON
+			u.group_id = g.id
 		WHERE
-			username=LOWER($1)
+			u.username=LOWER($1)
 	`
 
 	return s.fetchUser(query, username)
@@ -200,17 +214,24 @@ func (s *Storage) UserByUsername(username string) (*model.User, error) {
 // UserByExtraField finds a user by an extra field value.
 func (s *Storage) UserByExtraField(field, value string) (*model.User, error) {
 	query := `
-		SELECT
-			id,
-			username,
-			language,
-			timezone,
-			last_login_at,
-			extra
+	  SELECT
+			u.id,
+			u.username,
+			u.language,
+			u.timezone,
+			u.last_login_at,
+			u.extra,
+			g.id,
+			g.name,
+			g.extra
 		FROM
-			users
+			users u
+		JOIN
+			groups g
+		ON
+			u.group_id = g.id
 		WHERE
-			extra->$1=$2
+			u.extra->$1=$2
 	`
 
 	return s.fetchUser(query, field, value)
@@ -218,6 +239,7 @@ func (s *Storage) UserByExtraField(field, value string) (*model.User, error) {
 
 func (s *Storage) fetchUser(query string, args ...interface{}) (*model.User, error) {
 	var extra hstore.Hstore
+	var gextra hstore.Hstore
 	user := model.NewUser()
 	err := s.db.QueryRow(query, args...).Scan(
 		&user.ID,
@@ -226,6 +248,9 @@ func (s *Storage) fetchUser(query string, args ...interface{}) (*model.User, err
 		&user.Timezone,
 		&user.LastLoginAt,
 		&extra,
+		&user.Group.ID,
+		&user.Group.Name,
+		&gextra,
 	)
 
 	if err == sql.ErrNoRows {
@@ -237,6 +262,12 @@ func (s *Storage) fetchUser(query string, args ...interface{}) (*model.User, err
 	for key, value := range extra.Map {
 		if value.Valid {
 			user.Extra[key] = value.String
+		}
+	}
+
+	for key, value := range gextra.Map {
+		if value.Valid {
+			user.Group.Extra[key] = value.String
 		}
 	}
 

@@ -11,6 +11,14 @@ create table users (
     language text default 'en_US',
     timezone text default 'UTC',
     last_login_at timestamp with time zone,
+    group_id int not null,
+    extra hstore,
+    primary key (id)
+);
+
+create table groups (
+    id serial not null,
+    name text,
     extra hstore,
     primary key (id)
 );
