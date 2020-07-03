@@ -28,6 +28,7 @@ create table plans (
   name text not null,
   description text,
   node_id int not null,
+  group_id int not null,
   attachments hstore,
   extra hstore,
   create_at timestamp with time zone,

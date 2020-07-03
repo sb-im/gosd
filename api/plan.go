@@ -14,6 +14,12 @@ import (
 )
 
 func (h *handler) createPlan(w http.ResponseWriter, r *http.Request) {
+	user := h.helpCurrentUser(w, r)
+	if user == nil {
+		json.ServerError(w, r, errors.New("NotFound user"))
+		return
+	}
+
 	mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil {
 		json.ServerError(w, r, err)
@@ -47,6 +53,9 @@ func (h *handler) createPlan(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Add plan belong group
+	plan.GroupID = user.ID
+
 	if err := h.store.CreatePlan(plan); err != nil {
 		json.ServerError(w, r, err)
 		return
@@ -56,7 +65,13 @@ func (h *handler) createPlan(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) plans(w http.ResponseWriter, r *http.Request) {
-	plans, err := h.store.Plans()
+	user := h.helpCurrentUser(w, r)
+	if user == nil {
+		json.ServerError(w, r, errors.New("NotFound user"))
+		return
+	}
+
+	plans, err := h.store.FindPlansByGroup(user.Group.ID)
 
 	if err != nil {
 		json.ServerError(w, r, err)

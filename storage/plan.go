@@ -27,19 +27,20 @@ func (s *Storage) CreatePlan(plan *model.Plan) (err error) {
 	}
 
 	query := `
-	INSERT INTO plans
-	(name, description, node_id, attachments, extra, create_at, update_at)
-	VALUES
-	($1, $2, $3, $4, $5, now(), now())
-	RETURNING
-	id, name, description, node_id
+		INSERT INTO plans
+			(name, description, node_id, group_id, attachments, extra, create_at, update_at)
+		VALUES
+			($1, $2, $3, $4, $5, $6, now(), now())
+		RETURNING
+			id, name, description, node_id, group_id
 	`
 
-	err = s.db.QueryRow(query, plan.Name, plan.Description, plan.NodeID, attachments, extra).Scan(
+	err = s.db.QueryRow(query, plan.Name, plan.Description, plan.NodeID, plan.GroupID, attachments, extra).Scan(
 		&plan.ID,
 		&plan.Name,
 		&plan.Description,
 		&plan.NodeID,
+		&plan.GroupID,
 	)
 
 	if err != nil {
@@ -64,7 +65,31 @@ func (s *Storage) Plans() (model.Plans, error) {
 		ORDER BY id ASC
 	`
 
-	rows, err := s.db.Query(query)
+	return s.fetchPlans(query)
+}
+
+// Plans returns group all plans.
+func (s *Storage) FindPlansByGroup(groupID int64) (model.Plans, error) {
+	query := `
+		SELECT
+			id,
+			name,
+			description,
+			node_id,
+			attachments,
+			extra
+		FROM
+			plans
+		WHERE
+			group_id = $1
+		ORDER BY id ASC
+	`
+
+	return s.fetchPlans(query, groupID)
+}
+
+func (s *Storage) fetchPlans(query string, args ...interface{}) (model.Plans, error) {
+	rows, err := s.db.Query(query, args...)
 	defer rows.Close()
 	if err != nil {
 		return nil, fmt.Errorf(`store: unable to fetch plans: %v`, err)
