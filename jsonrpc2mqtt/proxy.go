@@ -13,6 +13,8 @@ import (
 
 const (
 	rpc_topic   = "nodes/%s/jsonrpc"
+	rpc_topic_send   = "nodes/%s/rpc/send"
+	rpc_topic_recv   = "nodes/%s/rpc/recv"
 	rpc_timeont = 1 * time.Hour
 )
 
@@ -28,7 +30,7 @@ func OpenMqttProxy(client mqtt.Client) (*MqttProxy, error) {
 		pending: make(map[jsonrpc2.ID]chan []byte),
 	}
 
-	token := mqttProxy.Client.Subscribe(fmt.Sprintf(rpc_topic, "+"), 1, func(client mqtt.Client, msg mqtt.Message) {
+	token := mqttProxy.Client.Subscribe(fmt.Sprintf(rpc_topic_recv, "+"), 1, func(client mqtt.Client, msg mqtt.Message) {
 		jsonrpc_res := jsonrpc2.Jsonrpc{}
 		err := json.Unmarshal(msg.Payload(), &jsonrpc_res)
 		if err != nil || jsonrpc_res.ID == nil {
@@ -51,7 +53,7 @@ func OpenMqttProxy(client mqtt.Client) (*MqttProxy, error) {
 }
 
 func (m *MqttProxy) Notify(id string, req []byte) error {
-	token := m.Client.Publish(fmt.Sprintf(rpc_topic, id), 1, false, req)
+	token := m.Client.Publish(fmt.Sprintf(rpc_topic_send, id), 1, false, req)
 	if err := token.Error(); err != nil {
 		return err
 	}
@@ -73,7 +75,7 @@ func (m *MqttProxy) AsyncRpc(id string, req []byte, ch_res chan []byte) error {
 	m.pending[*jsonrpc_req.ID] = ch_res
 	m.mutex.Unlock()
 
-	token := m.Client.Publish(fmt.Sprintf(rpc_topic, id), 1, false, req)
+	token := m.Client.Publish(fmt.Sprintf(rpc_topic_send, id), 1, false, req)
 	if err := token.Error(); err != nil {
 		return err
 	}
