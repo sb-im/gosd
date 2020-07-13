@@ -54,3 +54,63 @@ func (s *Storage) CreatePlanLog(item *model.PlanLog) (err error) {
 
 	return nil
 }
+
+// PlanLogs returns all logs.
+func (s *Storage) PlanLogs(planID int64) (model.PlanLogs, error) {
+	query := `
+		SELECT
+			id,
+			log_id,
+			attachments,
+			extra
+		FROM
+			plan_logs
+		WHERE
+			plan_id = $1
+		ORDER BY log_id ASC
+	`
+
+	return s.fetchPlanLogs(query, planID)
+}
+
+func (s *Storage) fetchPlanLogs(query string, args ...interface{}) (model.PlanLogs, error) {
+	rows, err := s.db.Query(query, args...)
+	defer rows.Close()
+	if err != nil {
+		return nil, fmt.Errorf(`store: unable to fetch plan_logs: %v`, err)
+	}
+
+	var logs model.PlanLogs
+
+	for rows.Next() {
+		var attachments hstore.Hstore
+		var extra hstore.Hstore
+		log := model.NewPlanLog()
+		err := rows.Scan(
+			&log.ID,
+			&log.LogID,
+			&attachments,
+			&extra,
+		)
+
+		if err != nil {
+			return nil, fmt.Errorf(`store: unable to fetch plan_logs row: %v`, err)
+		}
+
+		for key, value := range attachments.Map {
+			if value.Valid {
+				log.Attachments[key] = value.String
+			}
+		}
+
+		for key, value := range extra.Map {
+			if value.Valid {
+				log.Extra[key] = value.String
+			}
+		}
+
+		logs = append(logs, log)
+	}
+
+	return logs, nil
+}

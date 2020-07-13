@@ -81,3 +81,13 @@ func (h *handler) sendTask(log *model.PlanLog) error {
 
 	return nil
 }
+
+func (h *handler) planLogs(w http.ResponseWriter, r *http.Request) {
+	logs, err := h.store.PlanLogs(request.RouteInt64Param(r, "planID"))
+	if err != nil {
+		json.ServerError(w, r, err)
+		return
+	}
+
+	json.Created(w, r, logs)
+}
