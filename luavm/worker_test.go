@@ -30,6 +30,8 @@ func TestNewWorker(t *testing.T) {
 		Script: script,
 	}
 
-	worker.doRun(p)
-
+	err = worker.doRun(p)
+	if err != nil {
+		t.Error(err)
+	}
 }

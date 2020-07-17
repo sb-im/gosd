@@ -10,6 +10,7 @@ import (
 )
 
 type LService struct {
+	Task   *Task
 	State  *state.State
 	NodeID string
 }

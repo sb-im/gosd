@@ -8,6 +8,7 @@ import (
 
 	lua "github.com/yuin/gopher-lua"
 	luajson "layeh.com/gopher-json"
+	luar "layeh.com/gopher-luar"
 )
 
 type Worker struct {
@@ -68,9 +69,12 @@ func (w Worker) LoadMod(l *lua.LState, task *Task) {
 	}
 
 	service := &LService{
+		Task:   task,
 		State:  w.State,
 		NodeID: task.NodeID,
 	}
+
+	l.SetGlobal("SD", luar.New(l, service))
 
 	l.SetGlobal("get_id", l.NewFunction(service.GetID))
 	l.SetGlobal("get_msg", l.NewFunction(service.GetMsg))
