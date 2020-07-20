@@ -1,0 +1,13 @@
+[Unit]
+Description=SuperDock v2 application server
+Requires=network-online.target postgresql.service
+After=network-online.target postgresql.service
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/gosd.conf
+ExecStart=/usr/bin/gosd
+Restart=always
+
+[Install]
+WantedBy=default.target
