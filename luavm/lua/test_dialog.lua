@@ -1,6 +1,13 @@
 local json = require("json")
 
 function run(node_id)
+  SD:CleanDialog()
+
+  err = SD:IOPuts("checking")
+  if err ~= nil then
+    print(json.encode(err))
+  end
+
   dialog = {
     name = "Checker ~",
     message = "Wow Wow Wow ~",
@@ -17,7 +24,8 @@ function run(node_id)
     }
   }
 
-  if SD:ToggleDialog(dialog) ~= nil then
+  err = SD:ToggleDialog(dialog)
+  if err ~= nil then
     print(json.encode(err))
   end
 
@@ -33,13 +41,26 @@ function run(node_id)
 
 
   ask_status = {
-    name = "Input ~",
-    inputs = {
-      {name = "Height", message = '10', level = 'primary'},
-      {name = "Speed", message = '2', level = 'danger'},
+    name = "ARE YOU OK ?",
+    buttons = {
+      {name = "Fine, thank you.", message = 'fine', level = 'primary'},
+      {name = "I feel bad.", message = 'bad', level = 'danger'},
     }
   }
   SD:ToggleDialog(ask_status)
+
+  msg, err = SD:IOGets()
+  if err ~= nil then
+    print(msg)
+    print(json.encode(err))
+  end
+
+  SD:CleanDialog()
+
+  err = SD:IOPuts("checked")
+  if err ~= nil then
+    print(json.encode(err))
+  end
 
   return node_id
 end

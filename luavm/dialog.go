@@ -13,12 +13,11 @@ const (
 )
 
 type Dialog struct {
-	Name    string        `json:"name"`
+	Name    string        `json:"name,omitempty"`
 	Message string        `json:"message,omitempty"`
 	Level   string        `json:"level,omitempty"`
 	Items   []*DialogItem `json:"items,omitempty"`
 	Buttons []*DialogItem `json:"buttons,omitempty"`
-	Inputs  []*DialogItem `json:"inputs,omitempty"`
 }
 
 type DialogItem struct {
@@ -41,6 +40,10 @@ func (s *LService) IOGets() (string, error) {
 
 func (s *LService) IOPuts(str string) error {
 	return s.State.Mqtt.Publish(fmt.Sprintf(topic_terminal, s.Task.PlanID), 1, false, []byte(str)).Error()
+}
+
+func (s *LService) CleanDialog() error {
+	return s.ToggleDialog(&Dialog{})
 }
 
 func (s *LService) ToggleDialog(dialog *Dialog) error {
