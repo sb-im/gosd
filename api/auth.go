@@ -60,20 +60,13 @@ func (h *handler) authHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type Token struct {
-		AccessToken string `json:"access_token"`
-		TokenType   string `json:"token_type"`
-		ExpiresIn   int    `json:"expires_in"`
-		CreatedAt   int64  `json:"created_at"`
-	}
-
 	key, err := genToken(32)
 	if err != nil {
 		json.ServerError(w, r, err)
 		return
 	}
 
-	token := &Token{
+	token := &model.Token{
 		AccessToken: key,
 		TokenType:   "bearer",
 		ExpiresIn:   7200,
