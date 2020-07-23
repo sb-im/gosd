@@ -19,6 +19,10 @@ func CORSOriginMiddleware(origin string) func(http.Handler) http.Handler {
 func (h handler) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 
+		if strings.HasPrefix(req.URL.Path, "/gosd/api/v1/blobs/") {
+			next.ServeHTTP(w, req)
+		}
+
 		key := strings.Split(req.Header.Get("Authorization"), " ")[1]
 		user := h.store.GetCurrentUser(key)
 

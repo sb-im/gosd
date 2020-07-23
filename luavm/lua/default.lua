@@ -6,6 +6,9 @@ function run(node_id)
   local drone_id = node_id
   local depot_id =get_id("link_id")
 
+  print("Drone Id:", drone_id)
+  print("Depot Id:", depot_id)
+
   print(json.encode(get_status()))
 
   print(node_id)
@@ -105,6 +108,17 @@ function run(node_id)
   if step_1 >= 10 then
     return
   end
+
+  local data = rpc_call(drone_id, {
+    ["method"] = "loadmap",
+  })
+
+  if not data["result"] then
+    print("EEEEEEEEEEE")
+    print(json.encode(data))
+    return
+  end
+
 
   local data = rpc_call(drone_id, {
     ["method"] = "startmission_ready",
