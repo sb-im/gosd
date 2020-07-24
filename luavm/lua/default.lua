@@ -4,7 +4,7 @@ function run(node_id)
   print("=== START Lua ===")
 
   local drone_id = node_id
-  local depot_id =get_id("link_id")
+  local depot_id = get_id("link_id")
 
   print("Drone Id:", drone_id)
   print("Depot Id:", depot_id)
@@ -52,6 +52,19 @@ function run(node_id)
     {"|<-", ch_onDrone, function(ok, data)
       if data["result"] then
         print("Drone Battery started")
+
+
+        local data = rpc_call(drone_id, {
+          ["method"] = "ncp",
+          ["params"] = {"download", "map", SD:FileUrl("file")},
+        })
+
+        if not data["result"] then
+          print("EEEEEEEEEEE")
+          print(json.encode(data))
+          step_1 = err
+          return
+        end
 
         rpc_async(drone_id, {
           ["method"] = "loadmap",
@@ -108,17 +121,6 @@ function run(node_id)
   if step_1 >= 10 then
     return
   end
-
-  local data = rpc_call(drone_id, {
-    ["method"] = "loadmap",
-  })
-
-  if not data["result"] then
-    print("EEEEEEEEEEE")
-    print(json.encode(data))
-    return
-  end
-
 
   local data = rpc_call(drone_id, {
     ["method"] = "startmission_ready",
