@@ -21,6 +21,7 @@ func (h handler) AuthMiddleware(next http.Handler) http.Handler {
 
 		if strings.HasPrefix(req.URL.Path, "/gosd/api/v1/blobs/") {
 			next.ServeHTTP(w, req)
+			return
 		}
 
 		key := strings.Split(req.Header.Get("Authorization"), " ")[1]
