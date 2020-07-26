@@ -3,7 +3,6 @@ package model
 import (
 	"encoding/json"
 	"strconv"
-	"time"
 )
 
 type Plan struct {
@@ -12,10 +11,9 @@ type Plan struct {
 	Description string            `json:"description"`
 	NodeID      int64             `json:"node_id"`
 	GroupID     int64             `json:"group_id"`
-	CreateAt    *time.Time        `json:"create_at,omitempty"`
-	UpdateAt    *time.Time        `json:"update_at,omitempty"`
 	Attachments map[string]string `json:"attachments"`
 	Extra       map[string]string `json:"extra"`
+	RecordTime
 }
 
 func NewPlan() *Plan {
