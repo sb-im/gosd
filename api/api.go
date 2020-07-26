@@ -48,6 +48,9 @@ func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker, bas
 
 	sr.HandleFunc("/plans/{planID:[0-9]+}/mission_queues/", handler.missionQueue).Methods(http.MethodGet)
 
+	// How is this API designed WTF ???
+	sr.HandleFunc("/mission_queues/plan/{planID:[0-9]+}", handler.missionStop).Methods(http.MethodDelete)
+
 	sr.HandleFunc("/plans/{planID:[0-9]+}/plan_logs/", handler.planLogs).Methods(http.MethodGet)
 	sr.HandleFunc("/plans/{planID:[0-9]+}/plan_logs/", handler.createPlanLog).Methods(http.MethodPost)
 

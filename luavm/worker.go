@@ -14,7 +14,9 @@ import (
 type Worker struct {
 	Queue     chan *Task
 	State     *state.State
+	Runtime   map[string]*lua.LState
 	MqttProxy *jsonrpc2mqtt.MqttProxy
+	StatusManager *StatusManager
 }
 
 func NewWorker(s *state.State) *Worker {
@@ -22,7 +24,9 @@ func NewWorker(s *state.State) *Worker {
 	return &Worker{
 		Queue:     make(chan *Task, 1024),
 		State:     s,
+		Runtime:   make(map[string]*lua.LState),
 		MqttProxy: mqttProxy,
+		StatusManager: NewStatusManager(&s.Mqtt),
 	}
 }
 
@@ -36,7 +40,20 @@ func (w Worker) Run() {
 
 func (w Worker) doRun(task *Task) error {
 	l := lua.NewState()
-	defer l.Close()
+	planID := task.PlanID
+	w.StatusManager.SetStatus(planID, StatusRunning)
+	defer func() {
+		if w.StatusManager.GetStatus(planID) == StatusRunning {
+			l.Close()
+		}
+
+		if r := recover(); r != nil {
+			fmt.Printf("Emergency stop planID: %s\n", planID)
+			fmt.Printf("Error：%s\n", r)
+		}
+		w.StatusManager.SetStatus(planID, StatusReady)
+	}()
+
 	luajson.Preload(l)
 
 	w.LoadMod(l, task)
@@ -52,6 +69,9 @@ func (w Worker) doRun(task *Task) error {
 		return err
 	}
 
+	w.Runtime[task.PlanID] = l
+	defer delete(w.Runtime, task.PlanID)
+
 	if err := l.CallByParam(lua.P{
 		Fn:      l.GetGlobal("run"),
 		NRet:    1,
@@ -60,7 +80,17 @@ func (w Worker) doRun(task *Task) error {
 		return err
 	}
 
+	fmt.Println("==> luavm END")
 	return nil
+}
+
+func (w Worker) Kill(planID string) {
+	l, ok := w.Runtime[planID]
+	if ok {
+		fmt.Println("==> luavm Close")
+		l.Close()
+		w.StatusManager.SetStatus(planID, StatusProtect)
+	}
 }
 
 func (w Worker) LoadMod(l *lua.LState, task *Task) {
