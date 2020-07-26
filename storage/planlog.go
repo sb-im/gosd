@@ -39,13 +39,15 @@ func (s *Storage) CreatePlanLog(item *model.PlanLog) (err error) {
 				), $1, $2, $3, now(), now()
 			)
 		RETURNING
-			id, log_id, plan_id
+			id, log_id, plan_id, create_at, update_at
 	`
 
 	err = s.db.QueryRow(query, item.PlanID, attachments, extra).Scan(
 		&item.ID,
 		&item.LogID,
 		&item.PlanID,
+		&item.CreatedAt,
+		&item.UpdatedAt,
 	)
 
 	if err != nil {
@@ -62,7 +64,9 @@ func (s *Storage) PlanLogs(planID int64) (model.PlanLogs, error) {
 			id,
 			log_id,
 			attachments,
-			extra
+			extra,
+			create_at,
+			update_at
 		FROM
 			plan_logs
 		WHERE
@@ -91,6 +95,8 @@ func (s *Storage) fetchPlanLogs(query string, args ...interface{}) (model.PlanLo
 			&log.LogID,
 			&attachments,
 			&extra,
+			&log.CreatedAt,
+			&log.UpdatedAt,
 		)
 
 		if err != nil {
