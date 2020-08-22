@@ -2,6 +2,8 @@ local json = require("json")
 
 function run(node_id)
   SD:CleanDialog()
+  err = SD:Sleep("10s")
+  print(err)
 
   err = SD:IOPuts("checking")
   if err ~= nil then
