@@ -28,14 +28,20 @@ type DialogItem struct {
 
 func (s *LService) IOGets() (string, error) {
 	ch := make(chan []byte)
-	token := s.State.Mqtt.Subscribe(fmt.Sprintf(topic_terminal, s.Task.PlanID), 2, func(client mqtt.Client, msg mqtt.Message) {
+	topic := fmt.Sprintf(topic_terminal, s.Task.PlanID)
+	token := s.State.Mqtt.Subscribe(topic, 2, func(client mqtt.Client, msg mqtt.Message) {
 		ch <- msg.Payload()
 	})
 
 	if err := token.Error(); err != nil {
 		return "", err
 	}
-	return string(<-ch), nil
+	data := string(<-ch)
+	token = s.State.Mqtt.Unsubscribe(topic)
+	if err := token.Error(); err != nil {
+		return "", err
+	}
+	return data, nil
 }
 
 func (s *LService) IOPuts(str string) error {
