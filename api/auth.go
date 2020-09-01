@@ -13,6 +13,13 @@ import (
 	"miniflux.app/http/response/json"
 )
 
+const lockTimeOut = 1 * time.Hour
+const maxRetry = 5
+
+var lock struct {
+	fail map[time.Time]int64
+}
+
 func (h *handler) authHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if r.Method == http.MethodOptions {
@@ -49,14 +56,36 @@ func (h *handler) authHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := h.store.CheckPassword(item.Username, item.Password); err != nil {
+	user, err := h.store.UserByUsername(item.Username)
+	if err != nil {
 		json.ServerError(w, r, err)
 		return
 	}
 
-	user, err := h.store.UserByUsername(item.Username)
-	if err != nil {
+	if len(lock.fail) == 0 {
+		lock.fail = make(map[time.Time]int64, 1024)
+	}
+
+	count := 0
+	t := time.Now()
+	for k, v := range lock.fail {
+		if k2 := k.Add(lockTimeOut); t.Unix() > k2.Unix() {
+			delete(lock.fail, k)
+		}
+		if v == user.ID {
+			count = count + 1
+		}
+	}
+	fmt.Println("Lock User: ", user.ID)
+	if count > maxRetry {
+		return
+	}
+
+	if err := h.store.CheckPassword(item.Username, item.Password); err != nil {
 		json.ServerError(w, r, err)
+
+		lock.fail[time.Now()] = user.ID
+		fmt.Println("ERROR Login user: ", user.ID)
 		return
 	}
 
