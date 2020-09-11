@@ -9,6 +9,7 @@ import (
 
 	"sb.im/gosd/jsonrpc2mqtt"
 
+	jsonrpc "github.com/sb-im/jsonrpc-lite"
 	jsonrpc2 "github.com/sb-im/jsonrpc2"
 	lua "github.com/yuin/gopher-lua"
 	luajson "layeh.com/gopher-json"
@@ -26,8 +27,33 @@ func getSequence() string {
 }
 
 type LRpc struct {
+	pendings map[string]chan []byte
 	MqttProxy *jsonrpc2mqtt.MqttProxy
 }
+
+func NewLRpc(proxy *jsonrpc2mqtt.MqttProxy) *LRpc {
+	return &LRpc{
+		pendings: make(map[string]chan []byte),
+		MqttProxy: proxy,
+	}
+}
+
+func (m *LRpc) Kill() error {
+	fmt.Println(m)
+	fmt.Println(len(m.pendings))
+	for id, ch := range m.pendings {
+		rpc := jsonrpc.NewErrors(id)
+		rpc.Errors.InternalError("Be killed")
+		data, err := rpc.ToJSON()
+		if err != nil {
+			return err
+		}
+		ch <- data
+	}
+
+	return nil
+}
+
 
 func req_jsonrpc(raw []byte) ([]byte, error) {
 	bit13_timestamp := string([]byte(strconv.FormatInt(time.Now().UnixNano(), 10))[:13])
@@ -126,12 +152,20 @@ func (m *LRpc) call(L *lua.LState) int {
 		return 2
 	}
 
-	res, err := m.MqttProxy.SyncRpc(L.ToString(1), req)
+
+	//res, err := m.MqttProxy.SyncRpc(L.ToString(1), req)
+	ch := make(chan []byte)
+	m.pendings[jsonrpc.ParseObject(req).ID.String()] = ch
+
+	err = m.MqttProxy.AsyncRpc(L.ToString(1), req, ch)
 	if err != nil {
 		L.Push(&lua.LTable{})
 		L.Push(lua.LString(err.Error()))
 		return 2
 	}
+
+	res := <- ch
+	delete(m.pendings, jsonrpc.ParseObject(raw).ID.String())
 
 	r, err := res_jsonrpc(res)
 	if err != nil {

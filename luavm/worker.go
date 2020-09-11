@@ -12,6 +12,7 @@ import (
 )
 
 type Worker struct {
+	rpcs      map[string]*LRpc
 	Queue     chan *Task
 	State     *state.State
 	Runtime   map[string]*lua.LState
@@ -22,6 +23,7 @@ type Worker struct {
 func NewWorker(s *state.State) *Worker {
 	mqttProxy, _ := jsonrpc2mqtt.OpenMqttProxy(s.Mqtt)
 	return &Worker{
+		rpcs:      make(map[string]*LRpc),
 		Queue:     make(chan *Task, 1024),
 		State:     s,
 		Runtime:   make(map[string]*lua.LState),
@@ -56,6 +58,8 @@ func (w Worker) doRun(task *Task) error {
 
 	luajson.Preload(l)
 
+	w.rpcs[task.PlanID] = NewLRpc(w.MqttProxy)
+	fmt.Println(w.rpcs)
 	w.LoadMod(l, task)
 
 	var err error
@@ -85,18 +89,21 @@ func (w Worker) doRun(task *Task) error {
 }
 
 func (w Worker) Kill(planID string) {
-	l, ok := w.Runtime[planID]
+	//l, ok := w.Runtime[planID]
+	r, ok := w.rpcs[planID]
 	if ok {
 		fmt.Println("==> luavm Close")
-		l.Close()
+		//l.Close()
+		if err := r.Kill(); err != nil {
+			fmt.Println(err)
+		}
 		w.StatusManager.SetStatus(planID, StatusProtect)
 	}
 }
 
 func (w Worker) LoadMod(l *lua.LState, task *Task) {
-	rpc := &LRpc{
-		MqttProxy: w.MqttProxy,
-	}
+	rpc := w.rpcs[task.PlanID]
+	fmt.Println(rpc)
 
 	service := &LService{
 		Task:   task,
