@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"runtime"
 
+	"sb.im/gosd/auth"
 	"sb.im/gosd/config"
 	"sb.im/gosd/database"
 	"sb.im/gosd/storage"
@@ -18,6 +19,7 @@ const (
 	flagMigrateHelp     = "Run SQL migrations"
 	flagCreateAdminHelp = "Create admin user"
 	flagDebugModeHelp   = "Show debug logs"
+	flagNoAuthHelp      = "use the noauth auther when using quick setup"
 )
 
 func Parse() {
@@ -27,6 +29,7 @@ func Parse() {
 		flagMigrate     bool
 		flagCreateAdmin bool
 		flagDebugMode   bool
+		flagNoAuth      bool
 	)
 
 	flag.BoolVar(&flagVersion, "version", false, flagVersionHelp)
@@ -34,12 +37,18 @@ func Parse() {
 	flag.BoolVar(&flagMigrate, "migrate", false, flagMigrateHelp)
 	flag.BoolVar(&flagCreateAdmin, "create-admin", false, flagCreateAdminHelp)
 	flag.BoolVar(&flagDebugMode, "debug", false, flagDebugModeHelp)
+	flag.BoolVar(&flagNoAuth, "noauth", false, flagNoAuthHelp)
 
 	flag.Parse()
 
 	if flagVersion {
 		fmt.Printf("gosd %s %s %s %s\n", version.Version, runtime.GOOS, runtime.GOARCH, version.BuildDate)
 		return
+	}
+
+	if flagNoAuth {
+		fmt.Println("=== Enable noauth ===")
+		auth.SetAuthMethod(auth.NoAuth)
 	}
 
 	parse := config.NewParser()

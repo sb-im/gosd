@@ -15,7 +15,7 @@ build: generate
 	$(GOBUILD)
 
 run: generate
-	@ go run main.go -debug
+	@ go run main.go --debug --noauth
 
 test: generate
 	go test ./jsonrpc2mqtt ./state ./luavm -cover
