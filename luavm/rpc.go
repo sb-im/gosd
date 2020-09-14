@@ -121,6 +121,7 @@ func (m *LRpc) asyncCall(L *lua.LState) int {
 
 	ch_L := L.ToChannel(3)
 	ch := make(chan []byte)
+	m.pendings[jsonrpc.ParseObject(req).ID.String()] = ch
 
 	err = m.MqttProxy.AsyncRpc(L.ToString(1), req, ch)
 	if err != nil {
@@ -129,7 +130,9 @@ func (m *LRpc) asyncCall(L *lua.LState) int {
 	}
 
 	go func() {
-		r, _ := res_jsonrpc(<-ch)
+		raw := <- ch
+		r, _ := res_jsonrpc(raw)
+		delete(m.pendings, jsonrpc.ParseObject(raw).ID.String())
 		value, _ := luajson.Decode(L, r)
 		ch_L <- value
 	}()
