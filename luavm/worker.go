@@ -28,7 +28,7 @@ func NewWorker(s *state.State) *Worker {
 		State:     s,
 		Runtime:   make(map[string]*lua.LState),
 		MqttProxy: mqttProxy,
-		StatusManager: NewStatusManager(&s.Mqtt),
+		StatusManager: NewStatusManager(s.Mqtt),
 	}
 }
 
@@ -64,7 +64,7 @@ func (w Worker) doRun(task *Task) error {
 
 	var err error
 	if len(task.Script) == 0 {
-		err = l.DoString(LuaMap["default"])
+		err = l.DoString(LuaMap["default2"])
 	} else {
 		err = l.DoString(string(task.Script))
 	}
