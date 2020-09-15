@@ -27,20 +27,22 @@ func getSequence() string {
 }
 
 type LRpc struct {
-	pendings map[string]chan []byte
+	task      *Task
+	pendings  map[string]chan []byte
 	MqttProxy *jsonrpc2mqtt.MqttProxy
+	Status    *StatusManager
 }
 
-func NewLRpc(proxy *jsonrpc2mqtt.MqttProxy) *LRpc {
+func NewLRpc(task *Task, proxy *jsonrpc2mqtt.MqttProxy, status *StatusManager) *LRpc {
 	return &LRpc{
-		pendings: make(map[string]chan []byte),
+		task:      task,
+		pendings:  make(map[string]chan []byte),
 		MqttProxy: proxy,
+		Status:    status,
 	}
 }
 
 func (m *LRpc) Kill() error {
-	fmt.Println(m)
-	fmt.Println(len(m.pendings))
 	for id, ch := range m.pendings {
 		rpc := jsonrpc.NewErrors(id)
 		rpc.Errors.InternalError("Be killed")
@@ -53,7 +55,6 @@ func (m *LRpc) Kill() error {
 
 	return nil
 }
-
 
 func req_jsonrpc(raw []byte) ([]byte, error) {
 	bit13_timestamp := string([]byte(strconv.FormatInt(time.Now().UnixNano(), 10))[:13])
@@ -130,7 +131,7 @@ func (m *LRpc) asyncCall(L *lua.LState) int {
 	}
 
 	go func() {
-		raw := <- ch
+		raw := <-ch
 		r, _ := res_jsonrpc(raw)
 		delete(m.pendings, jsonrpc.ParseObject(raw).ID.String())
 		value, _ := luajson.Decode(L, r)
@@ -155,22 +156,33 @@ func (m *LRpc) call(L *lua.LState) int {
 		return 2
 	}
 
+	var res []byte
+	fmt.Println(m.Status.GetStatus(m.task.PlanID))
+	if status := m.Status.GetStatus(m.task.PlanID); status != StatusRunning {
+		rpc := jsonrpc.NewErrors(jsonrpc.ParseObject(req).ID)
+		rpc.Errors.InternalError("Status is: " + status)
+		res, err = rpc.ToJSON()
+		if err != nil {
+			L.Push(&lua.LTable{})
+			L.Push(lua.LString(err.Error()))
+		}
+	} else {
+		ch := make(chan []byte)
+		m.pendings[jsonrpc.ParseObject(req).ID.String()] = ch
 
-	//res, err := m.MqttProxy.SyncRpc(L.ToString(1), req)
-	ch := make(chan []byte)
-	m.pendings[jsonrpc.ParseObject(req).ID.String()] = ch
+		err = m.MqttProxy.AsyncRpc(L.ToString(1), req, ch)
+		if err != nil {
+			L.Push(&lua.LTable{})
+			L.Push(lua.LString(err.Error()))
+			return 2
+		}
 
-	err = m.MqttProxy.AsyncRpc(L.ToString(1), req, ch)
-	if err != nil {
-		L.Push(&lua.LTable{})
-		L.Push(lua.LString(err.Error()))
-		return 2
+		res = <-ch
+		delete(m.pendings, jsonrpc.ParseObject(raw).ID.String())
 	}
 
-	res := <- ch
-	delete(m.pendings, jsonrpc.ParseObject(raw).ID.String())
-
 	r, err := res_jsonrpc(res)
+
 	if err != nil {
 		L.Push(&lua.LTable{})
 		L.Push(lua.LString(err.Error()))

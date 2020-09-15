@@ -12,22 +12,22 @@ import (
 )
 
 type Worker struct {
-	rpcs      map[string]*LRpc
-	Queue     chan *Task
-	State     *state.State
-	Runtime   map[string]*lua.LState
-	MqttProxy *jsonrpc2mqtt.MqttProxy
+	rpcs          map[string]*LRpc
+	Queue         chan *Task
+	State         *state.State
+	Runtime       map[string]*lua.LState
+	MqttProxy     *jsonrpc2mqtt.MqttProxy
 	StatusManager *StatusManager
 }
 
 func NewWorker(s *state.State) *Worker {
 	mqttProxy, _ := jsonrpc2mqtt.OpenMqttProxy(s.Mqtt)
 	return &Worker{
-		rpcs:      make(map[string]*LRpc),
-		Queue:     make(chan *Task, 1024),
-		State:     s,
-		Runtime:   make(map[string]*lua.LState),
-		MqttProxy: mqttProxy,
+		rpcs:          make(map[string]*LRpc),
+		Queue:         make(chan *Task, 1024),
+		State:         s,
+		Runtime:       make(map[string]*lua.LState),
+		MqttProxy:     mqttProxy,
 		StatusManager: NewStatusManager(s.Mqtt),
 	}
 }
@@ -58,7 +58,7 @@ func (w Worker) doRun(task *Task) error {
 
 	luajson.Preload(l)
 
-	w.rpcs[task.PlanID] = NewLRpc(w.MqttProxy)
+	w.rpcs[task.PlanID] = NewLRpc(task, w.MqttProxy, w.StatusManager)
 	fmt.Println(w.rpcs)
 	w.LoadMod(l, task)
 

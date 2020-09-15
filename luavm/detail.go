@@ -35,15 +35,14 @@ func NewStatusManager(client mqtt.Client) *StatusManager {
 }
 
 func (s *StatusManager) SetStatus(planID, status string) error {
-	detail := s.Plans[planID]
-	if detail == nil {
-		detail = &Detail{
+	if _, ok := s.Plans[planID]; ok {
+		s.Plans[planID].Status = status
+	} else {
+		s.Plans[planID] = &Detail{
 			Status: status,
 		}
-	} else {
-		detail.Status = status
 	}
-	data, err := json.Marshal(detail)
+	data, err := json.Marshal(s.Plans[planID])
 	if err != nil {
 		return err
 	}
@@ -52,9 +51,9 @@ func (s *StatusManager) SetStatus(planID, status string) error {
 }
 
 func (s *StatusManager) GetStatus(planID string) string {
-	if detail := s.Plans[planID]; detail == nil {
-		return StatusReady
-	} else {
+	if _, ok := s.Plans[planID]; ok {
 		return s.Plans[planID].Status
+	} else {
+		return StatusReady
 	}
 }
