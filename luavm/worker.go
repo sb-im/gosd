@@ -63,8 +63,9 @@ func (w Worker) doRun(task *Task) error {
 	w.LoadMod(l, task)
 
 	var err error
+	err = l.DoString(LuaMap["lib"])
 	if len(task.Script) == 0 {
-		err = l.DoString(LuaMap["default2"])
+		err = l.DoString(LuaMap["default"])
 	} else {
 		err = l.DoString(string(task.Script))
 	}
@@ -109,9 +110,14 @@ func (w Worker) LoadMod(l *lua.LState, task *Task) {
 		Task:   task,
 		State:  w.State,
 		NodeID: task.NodeID,
+		MqttProxy: w.MqttProxy,
 	}
 
+	sd := NewService()
+	sd.Rpc.MqttProxy = w.MqttProxy
+
 	l.SetGlobal("SD", luar.New(l, service))
+	l.SetGlobal("SD2", luar.New(l, sd))
 
 	l.SetGlobal("get_id", l.NewFunction(service.GetID))
 	l.SetGlobal("get_msg", l.NewFunction(service.GetMsg))
