@@ -2,6 +2,7 @@ package luavm
 
 import (
 	"fmt"
+	"strings"
 
 	"sb.im/gosd/jsonrpc2mqtt"
 	"sb.im/gosd/state"
@@ -63,7 +64,14 @@ func (w Worker) doRun(task *Task) error {
 	w.LoadMod(l, task)
 
 	var err error
-	err = l.DoString(LuaMap["lib"])
+	if fn, err := l.Load(strings.NewReader(LuaMap["lib"]), "lib.lua"); err != nil {
+		return err
+	} else {
+		l.Push(fn)
+		err = l.PCall(0, lua.MultRet, nil)
+	}
+
+
 	if len(task.Script) == 0 {
 		err = l.DoString(LuaMap["default"])
 	} else {
@@ -110,7 +118,6 @@ func (w Worker) LoadMod(l *lua.LState, task *Task) {
 		Task:   task,
 		State:  w.State,
 		NodeID: task.NodeID,
-		MqttProxy: w.MqttProxy,
 	}
 
 	sd := NewService()
