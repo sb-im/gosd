@@ -3,13 +3,32 @@ local json = require("json")
 function NewRPC(nodeID)
   return {
     id = nodeID,
-    SyncCall = function(self, method, params)
-      data, err = SD2:SyncCall(self.id, tostring(method), json.encode(params))
+    AsyncCall = function(self, method, params)
+      rpc = {
+        id = SD2:GenRpcID(),
+        method = tostring(method),
+        params = params,
+        jsonrpc = "2.0",
+      }
+
+      print(self.id, "SEND -->", json.encode(rpc))
+      local rpcID, err = SD2:RpcSend(self.id, json.encode(rpc))
       if err ~= nil then
         error(err)
       end
 
-      result = json.decode(data)
+      return function()
+        print(self.id, "await -->", rpcID)
+        data, err = SD2:RpcRecv(rpcID)
+        if err ~= nil then
+          error(err)
+        end
+        print(self.id, "RECV -->", data)
+        return json.decode(data)
+      end
+    end,
+    SyncCall = function(self, method, params)
+      local result = self.AsyncCall(self, method, params)()
       if result["result"] then
         return result["result"]
       end
