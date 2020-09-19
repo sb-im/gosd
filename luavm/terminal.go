@@ -2,6 +2,7 @@ package luavm
 
 import (
 	"fmt"
+	"errors"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
@@ -20,12 +21,19 @@ func (s *Service) IOGets() (string, error) {
 	if err := token.Error(); err != nil {
 		return "", err
 	}
-	data := string(<-ch)
+
+	var raw []byte
+	select {
+	case <-s.ctx.Done():
+		return "", errors.New("Be killed")
+	case raw = <-ch:
+	}
+
 	token = s.State.Mqtt.Unsubscribe(topic)
 	if err := token.Error(); err != nil {
-		return "", err
+		return string(raw), err
 	}
-	return data, nil
+	return string(raw), nil
 }
 
 func (s *Service) IOPuts(str string) error {

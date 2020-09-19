@@ -17,7 +17,7 @@ import (
 func (h *handler) missionQueue(w http.ResponseWriter, r *http.Request) {
 	PlanID := request.RouteStringParam(r, "planID")
 
-	_, ok := h.worker.Runtime[PlanID]
+	_, ok := h.worker.Running[PlanID]
 	if ok {
 		json.OK(w, r, []string{PlanID})
 	} else {

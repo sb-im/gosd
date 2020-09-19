@@ -16,7 +16,7 @@ type Worker struct {
 	rpcs          map[string]*LRpc
 	Queue         chan *Task
 	State         *state.State
-	Runtime       map[string]*lua.LState
+	Running       map[string]*Service
 	MqttProxy     *jsonrpc2mqtt.MqttProxy
 	StatusManager *StatusManager
 }
@@ -27,7 +27,7 @@ func NewWorker(s *state.State) *Worker {
 		rpcs:          make(map[string]*LRpc),
 		Queue:         make(chan *Task, 1024),
 		State:         s,
-		Runtime:       make(map[string]*lua.LState),
+		Running:       make(map[string]*Service),
 		MqttProxy:     mqttProxy,
 		StatusManager: NewStatusManager(s.Mqtt),
 	}
@@ -61,6 +61,13 @@ func (w Worker) doRun(task *Task) error {
 
 	w.rpcs[task.PlanID] = NewLRpc(task, w.MqttProxy, w.StatusManager)
 	fmt.Println(w.rpcs)
+
+	service := NewService(task)
+	service.Rpc.MqttProxy = w.MqttProxy
+	service.State = w.State
+	w.Running[task.PlanID] = service
+	defer delete(w.Running, task.PlanID)
+
 	w.LoadMod(l, task)
 
 	var err error
@@ -80,9 +87,6 @@ func (w Worker) doRun(task *Task) error {
 	if err != nil {
 		return err
 	}
-
-	w.Runtime[task.PlanID] = l
-	defer delete(w.Runtime, task.PlanID)
 
 	if err := l.CallByParam(lua.P{
 		Fn:      l.GetGlobal("main"),
@@ -107,14 +111,16 @@ func (w Worker) Kill(planID string) {
 		}
 		w.StatusManager.SetStatus(planID, StatusProtect)
 	}
+
+	if service, ok := w.Running[planID]; ok {
+		service.Close()
+	}
+
 }
 
 func (w Worker) LoadMod(l *lua.LState, task *Task) {
 	rpc := w.rpcs[task.PlanID]
-
-	service := NewService(task)
-	service.Rpc.MqttProxy = w.MqttProxy
-	service.State = w.State
+	service := w.Running[task.PlanID]
 
 	l.SetGlobal("SD", luar.New(l, service))
 
