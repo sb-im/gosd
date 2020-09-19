@@ -3,6 +3,7 @@ package luavm
 import (
 	"errors"
 	"strconv"
+	"sync"
 	"time"
 
 	"sb.im/gosd/jsonrpc2mqtt"
@@ -19,6 +20,17 @@ func NewRpc() *Rpc {
 	return &Rpc{
 		pendings: make(map[string]chan []byte),
 	}
+}
+
+var sequence uint64
+var sequenceMutex sync.Mutex
+
+func getSequence() string {
+	sequenceMutex.Lock()
+	id := strconv.FormatUint(sequence, 10)
+	sequence++
+	sequenceMutex.Unlock()
+	return id
 }
 
 func (s *Service) GenRpcID() string {
