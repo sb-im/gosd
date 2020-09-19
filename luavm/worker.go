@@ -111,23 +111,12 @@ func (w Worker) Kill(planID string) {
 
 func (w Worker) LoadMod(l *lua.LState, task *Task) {
 	rpc := w.rpcs[task.PlanID]
-	fmt.Println(rpc)
 
-	service := &LService{
-		Task:   task,
-		State:  w.State,
-		NodeID: task.NodeID,
-	}
+	service := NewService(task)
+	service.Rpc.MqttProxy = w.MqttProxy
+	service.State = w.State
 
-	sd := NewService(task)
-	sd.Rpc.MqttProxy = w.MqttProxy
-	sd.State = w.State
-
-	l.SetGlobal("SD", luar.New(l, sd))
-
-	l.SetGlobal("get_id", l.NewFunction(service.GetID))
-	l.SetGlobal("get_msg", l.NewFunction(service.GetMsg))
-	l.SetGlobal("get_status", l.NewFunction(service.GetStatus))
+	l.SetGlobal("SD", luar.New(l, service))
 
 	l.SetGlobal("rpc_notify", l.NewFunction(rpc.notify))
 	l.SetGlobal("rpc_async", l.NewFunction(rpc.asyncCall))

@@ -1,6 +1,6 @@
 local json = require("json")
 
-function NewRPC(nodeID)
+function NewNode(nodeID)
   return {
     id = nodeID,
     AsyncCall = function(self, method, params)
@@ -38,6 +38,30 @@ function NewRPC(nodeID)
       end
 
       error("Result Error")
+    end,
+    GetMsg = function(self, msg)
+      local raw, err = SD:GetMsg(self.id, msg)
+      if err ~= nil then
+        error(err)
+      end
+      return json.decode(raw)
+    end,
+    GetStatus = function(self)
+      local raw, err = SD:GetStatus(self.id)
+      if err ~= nil then
+        error(err)
+      end
+      return json.decode(raw)
+    end,
+    GetID = function(self, str)
+      if str == nil then
+        str = "link_id"
+      end
+      local raw, err = SD:GetID(self.id, tostring(str))
+      if err ~= nil then
+        error(err)
+      end
+      return raw
     end,
   }
 end

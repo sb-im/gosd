@@ -1,67 +1,42 @@
 package luavm
 
 import (
-	"strconv"
+	"context"
 
 	"sb.im/gosd/state"
 
-	lua "github.com/yuin/gopher-lua"
-	luajson "layeh.com/gopher-json"
+	jsonrpc "github.com/sb-im/jsonrpc-lite"
 )
 
-type LService struct {
+type Service struct {
+	ctx    context.Context
+	cancel context.CancelFunc
+	Rpc    *Rpc
 	Task   *Task
 	State  *state.State
-	NodeID string
 }
 
-// GetMsg(id, msg string) (data tables{}, error string)
-func (s *LService) GetMsg(L *lua.LState) int {
-	raw, err := s.State.NodeGet(L.ToString(1), L.ToString(2))
-	if err != nil {
-		L.Push(&lua.LTable{})
-		L.Push(lua.LString(err.Error()))
-		return 2
+func NewService(task *Task) *Service {
+	ctx, cancel := context.WithCancel(context.Background())
+	return &Service{
+		ctx:    ctx,
+		cancel: cancel,
+		Task:   task,
+		Rpc:    NewRpc(),
 	}
-
-	value, err := luajson.Decode(L, raw)
-	if err != nil {
-		L.Push(&lua.LTable{})
-		L.Push(lua.LString(err.Error()))
-		return 2
-	}
-
-	L.Push(value)
-	L.Push(lua.LString(""))
-	return 2
 }
 
-// GetID(str string) (id string)
-func (s *LService) GetID(L *lua.LState) int {
-	if n := s.State.Node[s.NodeID]; n != nil && L.ToString(1) == "link_id" {
-		L.Push(lua.LString(strconv.Itoa(n.Status.GetID(""))))
-		return 1
+func (s *Service) Close() error {
+	s.cancel()
+
+	for id, ch := range s.Rpc.pendings {
+		rpc := jsonrpc.NewErrors(id)
+		rpc.Errors.InternalError("Be killed")
+		data, err := rpc.ToJSON()
+		if err != nil {
+			return err
+		}
+		ch <- data
 	}
-
-	L.Push(lua.LString("0"))
-	return 1
-}
-
-// GetStatus() (data tables{}, error string)
-func (s *LService) GetStatus(L *lua.LState) int {
-	raw := []byte{}
-	if data := s.State.Node[s.NodeID]; data != nil {
-		raw = data.Status.Raw
-	}
-
-	value, err := luajson.Decode(L, raw)
-	if err != nil {
-		L.Push(&lua.LTable{})
-		L.Push(lua.LString(err.Error()))
-		return 2
-	}
-
-	L.Push(value)
-	L.Push(lua.LString(""))
-	return 2
+	return nil
 }
