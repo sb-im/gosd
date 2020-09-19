@@ -65,3 +65,30 @@ function NewNode(nodeID)
     end,
   }
 end
+
+function NewPlan()
+  return {
+    ToggleDialog = function(self, dialog)
+      local err = SD:ToggleDialog(dialog)
+      if err ~= nil then
+        error(err)
+      end
+    end,
+    CleanDialog = function(self)
+      SD:CleanDialog()
+    end,
+    Gets = function(self)
+      local data, err = SD:IOGets()
+      if err ~= nil then
+        error(err)
+      end
+      return data
+    end,
+    Puts = function(self, data)
+      local err = SD:IOPuts(data)
+      if err ~= nil then
+        error(err)
+      end
+    end,
+  }
+end
