@@ -68,6 +68,9 @@ func (w Worker) doRun(task *Task) error {
 	w.Running[task.PlanID] = service
 	defer delete(w.Running, task.PlanID)
 
+	// Clean up the "Dialog" when exiting
+	defer service.CleanDialog()
+
 	w.LoadMod(l, task)
 
 	var err error
