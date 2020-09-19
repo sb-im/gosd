@@ -1,22 +1,34 @@
-function run(node_id)
-  print("=== START Lua ===")
+local json = require("json")
 
-  local drone_id = node_id
+function main(node_id)
+  local drone = NewNode(node_id)
+  drone:SyncCall("ncp", {"download", "map", SD:FileUrl("file")})
 
-  local data = rpc_call(drone_id, {
-    ["method"] = "ncp",
-    ["params"] = {"download", "map", SD:FileUrl("file")}
-  })
+  local ok, result = pcall(drone.SyncCall, drone, "ncp", {"download", "map", SD:FileUrl("file")})
+  if not ok then
+    print("ERROE")
+  end
+  json.encode(result)
 
-  if data["result"] then
-    print("download success")
-  else
-    print("EEEEEEEEEEE")
-    print(json.encode(data))
-    return
+  local ok, GetResult = pcall(drone.AsyncCall, drone, "ncp", {"download", "map", SD:FileUrl("file")})
+  if not ok then
+    print("ERROE")
   end
 
-  print("=== END Lua END ===")
+  local ok, GetResult2 = pcall(depot.AsyncCall, depot, "ncp", {"download", "map", SD:FileUrl("file")})
+  if not ok then
+    print("ERROE")
+  end
+
+
+  local ok, data = pcall(GetResult)
+  if not ok then
+    print("ERROE")
+  end
+  json.encode(data)
+
+  local ok, data = pcall(GetResult2)
+  json.encode(data)
 
   return node_id
 end
