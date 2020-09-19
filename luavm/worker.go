@@ -71,7 +71,6 @@ func (w Worker) doRun(task *Task) error {
 		err = l.PCall(0, lua.MultRet, nil)
 	}
 
-
 	if len(task.Script) == 0 {
 		err = l.DoString(LuaMap["default"])
 	} else {
@@ -86,7 +85,7 @@ func (w Worker) doRun(task *Task) error {
 	defer delete(w.Runtime, task.PlanID)
 
 	if err := l.CallByParam(lua.P{
-		Fn:      l.GetGlobal("run"),
+		Fn:      l.GetGlobal("main"),
 		NRet:    1,
 		Protect: true,
 	}, lua.LString(task.NodeID)); err != nil {
@@ -120,11 +119,11 @@ func (w Worker) LoadMod(l *lua.LState, task *Task) {
 		NodeID: task.NodeID,
 	}
 
-	sd := NewService()
+	sd := NewService(task)
 	sd.Rpc.MqttProxy = w.MqttProxy
+	sd.State = w.State
 
-	l.SetGlobal("SD", luar.New(l, service))
-	l.SetGlobal("SD2", luar.New(l, sd))
+	l.SetGlobal("SD", luar.New(l, sd))
 
 	l.SetGlobal("get_id", l.NewFunction(service.GetID))
 	l.SetGlobal("get_msg", l.NewFunction(service.GetMsg))

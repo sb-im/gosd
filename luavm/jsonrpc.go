@@ -16,6 +16,7 @@ type Service struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 	Rpc    *Rpc
+	Task   *Task
 	State  *state.State
 }
 
@@ -30,11 +31,12 @@ func NewRpc() *Rpc {
 	}
 }
 
-func NewService() *Service {
+func NewService(task *Task) *Service {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &Service{
 		ctx:    ctx,
 		cancel: cancel,
+		Task:   task,
 		Rpc:    NewRpc(),
 	}
 }

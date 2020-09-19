@@ -26,7 +26,7 @@ type DialogItem struct {
 	Level   string `json:"level,omitempty"`
 }
 
-func (s *LService) IOGets() (string, error) {
+func (s *Service) IOGets() (string, error) {
 	ch := make(chan []byte)
 	topic := fmt.Sprintf(topic_terminal, s.Task.PlanID)
 	token := s.State.Mqtt.Subscribe(topic, 2, func(client mqtt.Client, msg mqtt.Message) {
@@ -44,15 +44,15 @@ func (s *LService) IOGets() (string, error) {
 	return data, nil
 }
 
-func (s *LService) IOPuts(str string) error {
+func (s *Service) IOPuts(str string) error {
 	return s.State.Mqtt.Publish(fmt.Sprintf(topic_terminal, s.Task.PlanID), 1, false, []byte(str)).Error()
 }
 
-func (s *LService) CleanDialog() error {
+func (s *Service) CleanDialog() error {
 	return s.ToggleDialog(&Dialog{})
 }
 
-func (s *LService) ToggleDialog(dialog *Dialog) error {
+func (s *Service) ToggleDialog(dialog *Dialog) error {
 	data, err := json.Marshal(dialog)
 	if err != nil {
 		return err

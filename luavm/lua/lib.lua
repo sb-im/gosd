@@ -5,21 +5,21 @@ function NewRPC(nodeID)
     id = nodeID,
     AsyncCall = function(self, method, params)
       rpc = {
-        id = SD2:GenRpcID(),
+        id = SD:GenRpcID(),
         method = tostring(method),
         params = params,
         jsonrpc = "2.0",
       }
 
       print(self.id, "SEND -->", json.encode(rpc))
-      local rpcID, err = SD2:RpcSend(self.id, json.encode(rpc))
+      local rpcID, err = SD:RpcSend(self.id, json.encode(rpc))
       if err ~= nil then
         error(err)
       end
 
       return function()
         print(self.id, "await -->", rpcID)
-        data, err = SD2:RpcRecv(rpcID)
+        data, err = SD:RpcRecv(rpcID)
         if err ~= nil then
           error(err)
         end

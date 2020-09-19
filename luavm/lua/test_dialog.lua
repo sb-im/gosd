@@ -1,6 +1,6 @@
 local json = require("json")
 
-function run(node_id)
+function main(node_id)
   SD:CleanDialog()
   err = SD:Sleep("10s")
   print(err)
