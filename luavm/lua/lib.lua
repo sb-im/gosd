@@ -1,4 +1,4 @@
-local json = require("json")
+json = require("json")
 
 function NewNode(nodeID)
   return {
@@ -57,17 +57,14 @@ function NewNode(nodeID)
       if str == nil then
         str = "link_id"
       end
-      local raw, err = SD:GetID(self.id, tostring(str))
-      if err ~= nil then
-        error(err)
-      end
-      return raw
+      return (self.GetStatus(self)).status[str]
     end,
   }
 end
 
-function NewPlan()
+function NewPlan(nodeID)
   return {
+    nodeID = nodeID,
     ToggleDialog = function(self, dialog)
       local err = SD:ToggleDialog(dialog)
       if err ~= nil then
