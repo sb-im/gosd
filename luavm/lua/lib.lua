@@ -90,5 +90,12 @@ function NewPlan()
         error(err)
       end
     end,
+    FileUrl = function(self, key)
+      local data = SD:FileUrl(key)
+      if data == "" then
+        error("key not found")
+      end
+      return data
+    end
   }
 end
