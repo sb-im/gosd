@@ -87,7 +87,7 @@ func (w Worker) doRun(task *Task) error {
 	}
 
 	if err := l.CallByParam(lua.P{
-		Fn:      l.GetGlobal("main"),
+		Fn:      l.GetGlobal("SD_main"),
 		NRet:    1,
 		Protect: true,
 	}, lua.LString(task.NodeID)); err != nil {

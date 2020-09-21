@@ -1,9 +1,8 @@
-local json = require("json")
-
-function main(node_id)
+function main(plan)
   print("=== START Lua ===")
+  sleep("1ms")
 
-  local drone_id = node_id
+  local drone_id = plan.nodeID
   local drone = NewNode(drone_id)
 
   local depot_id = drone:GetID()
@@ -95,7 +94,7 @@ function main(node_id)
     depot:SyncCall("freedrone")
 
     drone:SyncCall("check_drone_ready")
-    drone:SyncCall("ncp", {"download", "map", SD:FileUrl("file")})
+    drone:SyncCall("ncp", {"download", "map", plan:FileUrl("file")})
     drone:SyncCall("loadmap")
     drone:SyncCall("check_gps")
     drone:SyncCall("startmission_ready")
