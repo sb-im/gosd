@@ -4,7 +4,7 @@ type PlanLog struct {
 	ID          int64             `json:"id"`
 	LogID       int64             `json:"log_id"`
 	PlanID      int64             `json:"plan_id"`
-	Attachments map[string]string `json:"attachments"`
+	Attachments map[string]string `json:"files"`
 	Extra       map[string]string `json:"extra"`
 	RecordTime
 }
