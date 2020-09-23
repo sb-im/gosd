@@ -2,9 +2,11 @@ package luavm
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"sb.im/gosd/jsonrpc2mqtt"
+	"sb.im/gosd/model"
 	"sb.im/gosd/state"
 
 	lua "github.com/yuin/gopher-lua"
@@ -14,6 +16,7 @@ import (
 
 type Worker struct {
 	Queue         chan *Task
+	Log           chan *model.PlanLog
 	State         *state.State
 	Running       map[string]*Service
 	MqttProxy     *jsonrpc2mqtt.MqttProxy
@@ -24,6 +27,7 @@ func NewWorker(s *state.State) *Worker {
 	mqttProxy, _ := jsonrpc2mqtt.OpenMqttProxy(s.Mqtt)
 	return &Worker{
 		Queue:         make(chan *Task, 1024),
+		Log:           make(chan *model.PlanLog, 1024),
 		State:         s,
 		Running:       make(map[string]*Service),
 		MqttProxy:     mqttProxy,
@@ -32,6 +36,12 @@ func NewWorker(s *state.State) *Worker {
 }
 
 func (w Worker) Run() {
+	go func() {
+		for l := range w.Log {
+			w.StatusManager.SetRunning(strconv.FormatInt(l.PlanID, 10), l)
+		}
+	}()
+
 	for task := range w.Queue {
 		if err := w.doRun(task); err != nil {
 			fmt.Println(err)
@@ -42,17 +52,14 @@ func (w Worker) Run() {
 func (w Worker) doRun(task *Task) error {
 	l := lua.NewState()
 	planID := task.PlanID
-	w.StatusManager.SetStatus(planID, StatusRunning)
 	defer func() {
-		if w.StatusManager.GetStatus(planID) == StatusRunning {
-			l.Close()
-		}
+		l.Close()
 
 		if r := recover(); r != nil {
 			fmt.Printf("Emergency stop planID: %s\n", planID)
 			fmt.Printf("Error：%s\n", r)
 		}
-		w.StatusManager.SetStatus(planID, StatusReady)
+		w.StatusManager.SetRunning(planID, &struct{}{})
 	}()
 
 	luajson.Preload(l)
@@ -102,6 +109,5 @@ func (w Worker) Kill(planID string) {
 	if service, ok := w.Running[planID]; ok {
 		service.Close()
 		fmt.Println("==> luavm Kill")
-		w.StatusManager.SetStatus(planID, StatusProtect)
 	}
 }

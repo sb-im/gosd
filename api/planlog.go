@@ -86,6 +86,8 @@ func (h *handler) sendTask(log *model.PlanLog) error {
 		}
 	}
 
+	h.worker.Log <- log
+
 	h.worker.Queue <- &luavm.Task{
 		PlanID: strconv.FormatInt(plan.ID, 10),
 		Attach: plan.Attachments,

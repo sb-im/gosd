@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	topic_detail = "plans/%s/status"
+	topic_detail = "plans/%s/running"
 )
 
 const (
@@ -32,6 +32,14 @@ func NewStatusManager(client mqtt.Client) *StatusManager {
 		Plans:  map[string]*Detail{},
 		Client: client,
 	}
+}
+
+func (s *StatusManager) SetRunning(planID string, status interface{}) error {
+	data, err := json.Marshal(status)
+	if err != nil {
+		return err
+	}
+	return s.Client.Publish(fmt.Sprintf(topic_detail, planID), 1, true, data).Error()
 }
 
 func (s *StatusManager) SetStatus(planID, status string) error {
