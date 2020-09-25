@@ -17,6 +17,7 @@ func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker, bas
 
 	handler := &handler{store, worker, baseURL}
 	sr := router.PathPrefix(u.Path + "/api/v1").Subrouter()
+	sr2 := router.PathPrefix(u.Path + "/api/v2").Subrouter()
 
 	//middleware := newMiddleware(store)
 
@@ -56,6 +57,14 @@ func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker, bas
 
 	sr.HandleFunc("/plans/{planID:[0-9]+}/logs/", handler.planLogs).Methods(http.MethodGet)
 	sr.HandleFunc("/plans/{planID:[0-9]+}/logs/", handler.createPlanLog).Methods(http.MethodPost)
+
+	sr2.HandleFunc("/plans/{planID:[0-9]+}/jobs/", handler.planLogs).Methods(http.MethodGet)
+	sr2.HandleFunc("/plans/{planID:[0-9]+}/jobs/", handler.createPlanLog).Methods(http.MethodPost)
+	sr2.HandleFunc("/plans/{planID:[0-9]+}/jobs/{logID:[0-9]+}", handler.createPlanLog).Methods(http.MethodGet)
+	sr2.HandleFunc("/plans/{planID:[0-9]+}/jobs/{logID:[0-9]+}/cancel", handler.missionStop).Methods(http.MethodPost)
+
+	// Debug use
+	sr2.HandleFunc("/plans/{planID:[0-9]+}/jobs/running", handler.missionStop).Methods(http.MethodDelete)
 	//sr.HandleFunc("/plans/{planID:[0-9]+}/plan_logs/{logID:[0-9]+}/", handler.createPlanLog).Methods(http.MethodPost)
 
 	sr.HandleFunc("/blobs/{blobID:[0-9]+}", handler.blobByID).Methods(http.MethodGet)
