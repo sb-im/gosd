@@ -27,3 +27,32 @@ go1.14:
   image: golang:1.14-buster
   extends: .gobuild
 
+go1.15:
+  image: golang:1.15-buster
+  extends: .gobuild
+
+deploy_staging:
+  stage: deploy
+  needs:
+    - go1.11
+    - go1.12
+    - go1.13
+    - go1.14
+    - go1.15
+  only:
+    refs:
+      - dev
+  before_script:
+    - apt-get update -y && apt-get install xz-utils
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval "$(ssh-agent -s)"
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - cp "$SSH_KNOWN_HOSTS" ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - make
+    - tar -cJf file.tar.xz gosd data/
+    - cat file.tar.xz | ssh ${USER_CLOUD_STAGING}@${HOST_CLOUD_STAGING} 'cd gosd/ && tar -xJf -'
+
