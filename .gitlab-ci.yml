@@ -1,44 +1,79 @@
 image: golang:1.13.1-buster
 
 .gobuild:
+  stage: build
+  before_script:
+    - go version
+  script:
+    - make build
+
+go1.11:build:
+  image: golang:1.11-buster
+  extends: .gobuild
+
+go1.12:build:
+  image: golang:1.12-buster
+  extends: .gobuild
+
+go1.13:build:
+  image: golang:1.13-buster
+  extends: .gobuild
+
+go1.14:build:
+  image: golang:1.14-buster
+  extends: .gobuild
+
+go1.15:build:
+  image: golang:1.15-buster
+  extends: .gobuild
+
+
+.gotest:
+  stage: test
   before_script:
     - go version
   script:
     - make cover
-    - make build
-  only:
-    refs:
-      - master
-      - dev
 
-go1.11:
+go1.11:test:
+  needs:
+    - go1.11:build
   image: golang:1.11-buster
-  extends: .gobuild
+  extends: .gotest
 
-go1.12:
+go1.12:test:
+  needs:
+    - go1.12:build
   image: golang:1.12-buster
-  extends: .gobuild
+  extends: .gotest
 
-go1.13:
+go1.13:test:
+  needs:
+    - go1.13:build
   image: golang:1.13-buster
-  extends: .gobuild
+  extends: .gotest
 
-go1.14:
+go1.14:test:
+  needs:
+    - go1.14:build
   image: golang:1.14-buster
-  extends: .gobuild
+  extends: .gotest
 
-go1.15:
+go1.15:test:
+  needs:
+    - go1.15:build
   image: golang:1.15-buster
-  extends: .gobuild
+  extends: .gotest
+
 
 deploy_staging:
   stage: deploy
   needs:
-    - go1.11
-    - go1.12
-    - go1.13
-    - go1.14
-    - go1.15
+    - go1.11:test
+    - go1.12:test
+    - go1.13:test
+    - go1.14:test
+    - go1.15:test
   only:
     refs:
       - dev
