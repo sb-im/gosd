@@ -17,14 +17,16 @@ func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker, bas
 
 	handler := &handler{store, worker, baseURL}
 	sr := router.PathPrefix(u.Path + "/api/v1").Subrouter()
-	sr2 := router.PathPrefix(u.Path + "/api/v2").Subrouter()
-
 	//middleware := newMiddleware(store)
 
 	//sr.Use(middleware.apiKeyAuth)
 
 	sr.Use(CORSOriginMiddleware("*"))
 	sr.Use(handler.AuthMiddleware)
+
+	sr2 := router.PathPrefix(u.Path + "/api/v2").Subrouter()
+	sr2.Use(CORSOriginMiddleware("*"))
+	sr2.Use(handler.AuthMiddleware)
 
 	//router.Use(mux.CORSMethodMiddleware(sr))
 	router.HandleFunc(u.Path+"/oauth/token", handler.authHandler).Methods(http.MethodPost, http.MethodOptions)
