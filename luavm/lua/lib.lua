@@ -2,7 +2,7 @@ json = require("json")
 
 function NewNode(nodeID)
   return {
-    id = nodeID,
+    id = tostring(nodeID),
     AsyncCall = function(self, method, params)
       rpc = {
         id = SD:GenRpcID(),
