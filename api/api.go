@@ -31,7 +31,7 @@ func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker, bas
 	//router.Use(mux.CORSMethodMiddleware(sr))
 	router.HandleFunc(u.Path+"/oauth/token", handler.authHandler).Methods(http.MethodPost, http.MethodOptions)
 
-	router.PathPrefix(u.Path + "/api/v1").Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	router.PathPrefix(u.Path + "/api").Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 
