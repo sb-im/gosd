@@ -41,7 +41,7 @@ function main(plan)
   -- drone:SyncCall("test")
 
   -- Check UPS
-  local ups_status = drone:GetMsg("ups_status")
+  local ups_status = depot:GetMsg("ups_status")
   if ups_status.status ~= "online" then
     plan:ToggleDialog({
       name = "无法执行此任务",
@@ -64,8 +64,8 @@ function main(plan)
 
   xpcall(function()
     depot:SyncCall("dooropen")
-    depot:SyncCall("power_on_remote")
     depot:SyncCall("drone_switch")
+    depot:SyncCall("power_on_remote")
     drone:SyncCall("wait_to_boot_finish")
   end, function()
     print(debug.traceback())
@@ -97,15 +97,46 @@ function main(plan)
   end
   plan:CleanDialog()
 
+  if tonumber(battery.remain) < 90 then
+    depot:SyncCall("exchange_battery")
+  end
+
   -- 正片开始！！！ 开始执行任务
 
   xpcall(function()
 
+    drone:SyncCall("check_gps")
     drone:SyncCall("ncp", {"download", "map", plan:FileUrl("file")})
     drone:SyncCall("loadmap")
-    drone:SyncCall("check_rtk")
 
     depot:SyncCall("freedrone")
+
+  end,
+  function()
+    drone:SyncCall("emergency_stop")
+  end)
+
+
+  if debug then
+    plan:ToggleDialog({
+      name = "最后确认",
+      buttons = {
+        {name = "Cancel", message = 'cancel', level = 'primary'},
+        {name = "Confirm", message = 'confirm', level = 'danger'},
+      }
+    })
+  end
+
+  if plan:Gets() ~= 'confirm' then
+    print("cancel")
+    plan:CleanDialog()
+    drone:SyncCall("emergency_stop")
+
+    return
+  end
+  plan:CleanDialog()
+
+  xpcall(function()
 
     drone:SyncCall("startmission_ready")
     drone:SyncCall("startmission")
