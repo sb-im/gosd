@@ -42,6 +42,7 @@ function main(plan)
     depot:SyncCall("power_on_remote")
     drone:SyncCall("wait_to_boot_finish")
   end, function()
+    print(debug.traceback())
     drone:SyncCall("emergency_stop")
   end)
 
