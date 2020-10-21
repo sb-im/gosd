@@ -24,20 +24,20 @@ function NewNode(nodeID)
           error(err)
         end
         print(self.id, "RECV -->", data)
-        return json.decode(data)
+        local result = json.decode(data)
+        if result["result"] then
+          return result["result"]
+        end
+
+        if result["error"] then
+          error(result["error"])
+        end
+
+        error("Result Error")
       end
     end,
     SyncCall = function(self, method, params)
-      local result = self.AsyncCall(self, method, params)()
-      if result["result"] then
-        return result["result"]
-      end
-
-      if result["error"] then
-        error(result["error"])
-      end
-
-      error("Result Error")
+      return self.AsyncCall(self, method, params)()
     end,
     GetMsg = function(self, msg)
       local raw, err = SD:GetMsg(self.id, msg)
