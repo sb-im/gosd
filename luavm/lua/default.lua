@@ -108,28 +108,68 @@ function main(plan)
   local depotGPS = depot:GetStatus().status
   print("Depot GPS:", json.encode(depotGPS))
 
-  local droneGPS = drone:GetMsg("position")
-  print("Drone GPS:", json.encode(droneGPS))
-  print("Lat Distance :", (tonumber(droneGPS.lat) - tonumber(depotGPS.lat)))
-  print("Lat Distance :", (tonumber(droneGPS.lng) - tonumber(depotGPS.lng)))
+  local retrycount = 0
+  local distance
+  while true do
+    if retrycount > 3 then
 
-  local distance = 10000000000 * (
-    (tonumber(droneGPS.lat) - tonumber(depotGPS.lat)) *
-    (tonumber(droneGPS.lat) - tonumber(depotGPS.lat)) +
-    (tonumber(droneGPS.lng) - tonumber(depotGPS.lng)) *
-    (tonumber(droneGPS.lng) - tonumber(depotGPS.lng)) )
+      plan:ToggleDialog({
+        name = "是否继续检查 GPS",
+        message = "Wow Wow Wow ~",
+        level = "danger",
+        items = {
+          {name = "Distance ", message = string.format("%.2f",  distance) .. 'M', level = 'danger'},
+        },
+        buttons = {
+          {name = "Cancel" , message = 'cancel', level = 'primary'},
+          {name = "Confirm", message = 'confirm', level = 'danger'},
+        }
+      })
+
+      if plan:Gets() ~= 'confirm' then
+        print("cancel")
+        plan:CleanDialog()
+        drone:SyncCall("emergency_stop")
+        print("=== Distance:", distance, "END ===")
+
+        return
+      else
+        plan:CleanDialog()
+        retrycount = 0
+      end
+    end
+    retrycount = retrycount + 1
+
+    local droneGPS = drone:GetMsg("position")
+    print("Drone GPS:", json.encode(droneGPS))
+
+    distance = GetDistance(
+      tonumber(droneGPS.lng),
+      tonumber(droneGPS.lat),
+      tonumber(depotGPS.lng),
+      tonumber(depotGPS.lat)
+    )
+
+    if distance < 5 then
+      print("Distance:", distance, "continue")
+      break
+    end
+
+    sleep("5s")
+  end
+
+  local distanceLevel = 'warning'
+  if distance < 3 then
+    distanceLevel = 'success'
+  end
 
   if debug then
     plan:ToggleDialog({
       name = "最后确认",
       message = "Wow Wow Wow ~",
-      level = "success",
+      level = distanceLevel,
       items = {
-        {name = "Drone Lat", message = tostring(droneGPS.lat), level = 'success'},
-        {name = "Drone Lng", message = tostring(droneGPS.lng), level = 'success'},
-        {name = "Depot Lat", message = tostring(depotGPS.lat), level = 'success'},
-        {name = "Depot Lng", message = tostring(depotGPS.lng), level = 'success'},
-        {name = "Distance ", message = tostring(distance), level = 'warning'},
+        {name = "Distance ", message = string.format("%.2f",  distance) .. 'M', level = distanceLevel},
       },
       buttons = {
         {name = "Cancel" , message = 'cancel', level = 'primary'},
