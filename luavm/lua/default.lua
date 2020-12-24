@@ -1,6 +1,7 @@
 function main(plan)
   print("=== START Lua ===")
   sleep("1ms")
+  local debug = true
 
   local drone_id = plan.nodeID
   local drone = NewNode(drone_id)
@@ -98,6 +99,56 @@ function main(plan)
     drone:SyncCall("ncp", {"download", "map", plan:FileUrl("file")})
     drone:SyncCall("loadmap")
     drone:SyncCall("check_gps")
+
+  end,
+  function()
+    drone:SyncCall("emergency_stop")
+  end)
+
+  local depotGPS = depot:GetStatus().status
+  print("Depot GPS:", json.encode(depotGPS))
+
+  local droneGPS = drone:GetMsg("position")
+  print("Drone GPS:", json.encode(droneGPS))
+  print("Lat Distance :", (tonumber(droneGPS.lat) - tonumber(depotGPS.lat)))
+  print("Lat Distance :", (tonumber(droneGPS.lng) - tonumber(depotGPS.lng)))
+
+  local distance = 10000000000 * (
+    (tonumber(droneGPS.lat) - tonumber(depotGPS.lat)) *
+    (tonumber(droneGPS.lat) - tonumber(depotGPS.lat)) +
+    (tonumber(droneGPS.lng) - tonumber(depotGPS.lng)) *
+    (tonumber(droneGPS.lng) - tonumber(depotGPS.lng)) )
+
+  if debug then
+    plan:ToggleDialog({
+      name = "最后确认",
+      message = "Wow Wow Wow ~",
+      level = "success",
+      items = {
+        {name = "Drone Lat", message = tostring(droneGPS.lat), level = 'success'},
+        {name = "Drone Lng", message = tostring(droneGPS.lng), level = 'success'},
+        {name = "Depot Lat", message = tostring(depotGPS.lat), level = 'success'},
+        {name = "Depot Lng", message = tostring(depotGPS.lng), level = 'success'},
+        {name = "Distance ", message = tostring(distance), level = 'warning'},
+      },
+      buttons = {
+        {name = "Cancel" , message = 'cancel', level = 'primary'},
+        {name = "Confirm", message = 'confirm', level = 'danger'},
+      }
+    })
+  end
+
+  if plan:Gets() ~= 'confirm' then
+    print("cancel")
+    plan:CleanDialog()
+    drone:SyncCall("emergency_stop")
+
+    return
+  end
+  plan:CleanDialog()
+
+  xpcall(function()
+
     drone:SyncCall("startmission_ready")
     drone:SyncCall("startmission")
     drone:SyncCall("check_land")
