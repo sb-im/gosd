@@ -15,10 +15,10 @@ function main(plan)
   print("Depot Id:", depot.id)
 
   print("Drone Status:", json.encode(drone:GetStatus()))
-  local ok, data = pcall(drone.GetMsg, drone, "battery")
-  if ok then
-    print(json.encode(data))
-  end
+  -- local ok, data = pcall(drone.GetMsg, drone, "battery")
+  -- if ok then
+  --   print(json.encode(data))
+  -- end
 
   plan:CleanDialog()
   ask_status = {
@@ -38,27 +38,24 @@ function main(plan)
 
   -- drone:SyncCall("test")
 
+  local drone_battery
   xpcall(function()
-    depot:SyncCall("power_on_drone")
-    depot:SyncCall("power_on_remote")
-    drone:SyncCall("wait_to_boot_finish")
+    depot:SyncCall("power_on_drone_and_remote")
+    sleep("1s")
+    drone_battery = depot:SyncCall("get_drone_battery")
+    print(drone_battery)
   end, function()
     print(debug.traceback())
     drone:SyncCall("emergency_stop")
   end)
 
-  local data = drone:GetMsg("battery")
-  print(json.encode(data))
-  print(data.vol_cell)
-  print(data["vol_cell"])
-
   dialog = {
-    name = "Checker ~",
-    message = "Wow Wow Wow ~",
+    name = "起飞环境确认",
+    message = "确认剩余电量、风速、降雨概率等情况 ~",
     level = "success",
     items = {
-      {name = "剩余电量", message = data.remain .. '%', level = 'info'},
-      {name = "电池温度", message = data.temp .. '°C', level = 'success'},
+      {name = "剩余电量", message = drone_battery .. '%', level = 'info'},
+      -- {name = "电池温度", message = data.temp .. '°C', level = 'success'},
       {name = "风速", message = '0 m/s', level = 'danger'},
       {name = "降水", message = '可能有降水', level = 'warning'},
     },
@@ -93,8 +90,7 @@ function main(plan)
 
   xpcall(function()
     depot:SyncCall("dooropen")
-    depot:SyncCall("freedrone")
-
+    drone:SyncCall("wait_to_boot_finish")
     drone:SyncCall("check_drone_ready")
     drone:SyncCall("ncp", {"download", "map", plan:FileUrl("file")})
     drone:SyncCall("loadmap")
@@ -163,17 +159,24 @@ function main(plan)
     distanceLevel = 'success'
   end
 
+  local data = drone:GetMsg("battery")
+  print(json.encode(data))
+  print(data.vol_cell)
+  print(data["vol_cell"])
+
   if debug then
     plan:ToggleDialog({
       name = "最后确认",
-      message = "Wow Wow Wow ~",
+      message = "注意起飞点、电池温度是否正常 ~",
       level = distanceLevel,
       items = {
-        {name = "Distance ", message = string.format("%.2f",  distance) .. 'M', level = distanceLevel},
+        {name = "距离", message = string.format("%.2f",  distance) .. 'M', level = distanceLevel},
+        {name = "剩余电量", message = data.remain .. '%', level = 'info'},
+        {name = "电池温度", message = data.temp .. '°C', level = 'info'},
       },
       buttons = {
-        {name = "Cancel" , message = 'cancel', level = 'primary'},
-        {name = "Confirm", message = 'confirm', level = 'danger'},
+        {name = "取消" , message = 'cancel', level = 'primary'},
+        {name = "↑确认起飞↑", message = 'confirm', level = 'danger'},
       }
     })
   end
@@ -190,6 +193,7 @@ function main(plan)
   xpcall(function()
 
     drone:SyncCall("startmission_ready")
+    depot:AsyncCall("freedrone")
     drone:SyncCall("startmission")
     drone:SyncCall("check_land")
     drone:SyncCall("mission_preupload_cloud")
