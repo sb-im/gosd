@@ -38,5 +38,10 @@ func (s *Service) Close() error {
 		}
 		ch <- data
 	}
+
+	// Need Reset Kill status
+	// Maybe multiple click Kill button
+	// IOGets: need to sleep some time
+	s.ctx, s.cancel = context.WithCancel(context.Background())
 	return nil
 }
