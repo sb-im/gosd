@@ -1,3 +1,53 @@
+
+STOP = false
+
+function running(plan, drone)
+  xpcall(function()
+    drone:SyncCall("check_land")
+  end,
+  function()
+    plan:ToggleDialog({
+      name = "终止了任务",
+      message = "后续动作该如何执行？",
+      level = "danger",
+      buttons = {
+        {name = "悬停", message = 'mode_brake', level = 'danger'},
+        {name = "返航", message = 'mode_rtl', level = 'warning'},
+        {name = "取消后续动作", message = 'cancel', level = 'primary'},
+      }
+    })
+
+    -- Need Wait Stop reset
+    sleep("1ms")
+
+    local input = plan:Gets()
+    print("Gets:", input)
+    plan:CleanDialog()
+
+    if input == 'cancel' then
+      STOP = true
+      return
+    elseif input == 'mode_brake' then
+      xpcall(function()
+        drone:SyncCall("mode_brake")
+      end,
+      function()
+        print(debug.traceback())
+      end)
+    elseif input == 'mode_rtl' then
+      xpcall(function()
+        drone:SyncCall("mode_rtl")
+      end,
+      function()
+        print(debug.traceback())
+      end)
+    else
+      sleep("1ms")
+    end
+    return running(plan, drone)
+  end)
+end
+
 function main(plan)
   print("=== START Lua ===")
   sleep("1ms")
@@ -195,9 +245,19 @@ function main(plan)
     drone:SyncCall("startmission_ready")
     depot:AsyncCall("freedrone")
     drone:SyncCall("startmission")
-    drone:SyncCall("check_land")
-    drone:SyncCall("mission_preupload_cloud")
+  end,
+  function()
+    drone:SyncCall("emergency_stop")
+  end)
 
+  -- mission running
+  running(plan, drone)
+  if STOP then
+    return
+  end
+
+  xpcall(function()
+    drone:SyncCall("mission_preupload_cloud")
     local rfn1 = drone:AsyncCall("mission_upload_nas")
 
     depot:SyncCall("fixdrone")
