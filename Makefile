@@ -1,7 +1,7 @@
 OS=
 ARCH=
 PROFIX=
-GO_TEST=./jsonrpc2mqtt ./state ./luavm
+GO_TEST=./jsonrpc2mqtt ./state ./luavm ./cache
 VERSION=$(shell git describe --tags || git rev-parse --short HEAD || echo "unknown version")
 BUILD_DATE=$(shell date +%FT%T%z)
 LD_FLAGS='-X "miniflux.app/version.Version=$(VERSION)" -X "miniflux.app/version.BuildDate=$(BUILD_DATE)"'
