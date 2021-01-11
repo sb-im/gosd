@@ -89,11 +89,14 @@ function main(plan)
   -- drone:SyncCall("test")
 
   local drone_battery
+  local depot_weather
   xpcall(function()
     depot:SyncCall("power_on_drone_and_remote")
     sleep("1s")
     drone_battery = depot:SyncCall("get_drone_battery")
+    depot_weather = depot:SyncCall("get_weather")
     print(drone_battery)
+    print(depot_weather)
   end, function()
     print(debug.traceback())
     drone:SyncCall("emergency_stop")
@@ -106,14 +109,19 @@ function main(plan)
     items = {
       {name = "剩余电量", message = drone_battery .. '%', level = 'info'},
       -- {name = "电池温度", message = data.temp .. '°C', level = 'success'},
-      {name = "风速", message = '0 m/s', level = 'danger'},
-      {name = "降水", message = '可能有降水', level = 'warning'},
+      -- {name = "风速", message = '0 m/s', level = 'danger'},
+      -- {name = "降水", message = '可能有降水', level = 'warning'},
     },
     buttons = {
       {name = "Cancel", message = 'cancel', level = 'primary'},
       {name = "Confirm", message = 'confirm', level = 'danger'},
     }
   }
+
+  print("prepare depot_weather")
+  dialog.items = depot_weather
+  table.insert(dialog.items, 1, {name = "剩余电量", message = drone_battery .. '%', level = 'info'})
+  print(dialog.items)
 
   plan:ToggleDialog(dialog)
 
