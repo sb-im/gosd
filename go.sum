@@ -54,6 +54,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35/go.mod h1:prYjPmNq4d1NPVmpShWobRqXY3q7Vp+80DqgxxUrUIA=
 github.com/sb-im/jsonrpc-lite v0.1.0 h1:eSiHpIgIM6o/V8ubyAzyO7eT01sReuOEHaY++Gv48MQ=
 github.com/sb-im/jsonrpc-lite v0.1.0/go.mod h1:Cx0qWqPpJrVBPrglHjwlXWiYM3fX3ps+RUg5M+WEe4I=
+github.com/sb-im/jsonrpc-lite v0.1.1 h1:PPh0XHh6hwR+G4bg2eCwAx/i2TbixlAOjMxii4LDaAI=
+github.com/sb-im/jsonrpc-lite v0.1.1/go.mod h1:Cx0qWqPpJrVBPrglHjwlXWiYM3fX3ps+RUg5M+WEe4I=
 github.com/sb-im/jsonrpc2 v0.0.0-20200103125104-382421846c30 h1:MVMgn/FaMD/+FzrQHSlCGrxiggrILyhCH3gsZKQ+1sY=
 github.com/sb-im/jsonrpc2 v0.0.0-20200103125104-382421846c30/go.mod h1:b94nF2eF7ySeLWOBvLpwN0EKSbVxyV/uIXl1Y3690AM=
 github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
