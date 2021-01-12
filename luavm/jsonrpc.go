@@ -62,16 +62,13 @@ func (s *Service) RpcSend(nodeId string, raw []byte) (string, error) {
 
 func (s *Service) RpcRecv(id string) (string, error) {
 	if ch, ok := s.Rpc.pendings[id]; ok {
-
-		var raw []byte
 		select {
 		case <-s.ctx.Done():
 			return "", errors.New("Be killed")
-		case raw = <-ch:
+		case raw := <-ch:
+			delete(s.Rpc.pendings, jsonrpc.ParseObject(raw).ID.String())
+			return string(raw), nil
 		}
-
-		delete(s.Rpc.pendings, jsonrpc.ParseObject(raw).ID.String())
-		return string(raw), nil
 	}
 	return "", errors.New("Not pending")
 }

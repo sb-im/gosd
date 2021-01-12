@@ -1,11 +1,14 @@
 
 STOP = false
 
-function running(plan, drone)
+function Running(rfn, plan, drone)
   xpcall(function()
-    drone:SyncCall("check_land")
+    rfn()
   end,
   function()
+    -- Need Wait Stop reset
+    sleep("1s")
+
     plan:ToggleDialog({
       name = "终止了任务",
       message = "后续动作该如何执行？",
@@ -16,9 +19,6 @@ function running(plan, drone)
         {name = "取消后续动作", message = 'cancel', level = 'primary'},
       }
     })
-
-    -- Need Wait Stop reset
-    sleep("1ms")
 
     local input = plan:Gets()
     print("Gets:", input)
@@ -42,9 +42,11 @@ function running(plan, drone)
         print(debug.traceback())
       end)
     else
-      sleep("1ms")
+      sleep("1s")
     end
-    return running(plan, drone)
+
+    -- Recursion
+    return Running(rfn, plan, drone)
   end)
 end
 
@@ -259,7 +261,7 @@ function main(plan)
   end)
 
   -- mission running
-  running(plan, drone)
+  Running(drone:AsyncCall("check_land"), plan, drone)
   if STOP then
     return
   end

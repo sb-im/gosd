@@ -29,8 +29,8 @@ func NewService(task *Task) *Service {
 func (s *Service) Close() error {
 	s.cancel()
 
-	for id, ch := range s.Rpc.pendings {
-		rpc := jsonrpc.NewErrors(id)
+	for _, ch := range s.Rpc.pendings {
+		rpc := jsonrpc.NewErrors("user.killed")
 		rpc.Errors.InternalError("Be killed")
 		data, err := rpc.ToJSON()
 		if err != nil {
