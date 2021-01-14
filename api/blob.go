@@ -27,6 +27,16 @@ func handleDownload(filename string, reader io.Reader, w http.ResponseWriter) {
 	}
 }
 
+func (h *handler) createBlob(w http.ResponseWriter, r *http.Request) {
+	//params, file, err := h.formData2Blob(r)
+	_, file, err := h.formData2Blob(r)
+	if err != nil {
+		json.ServerError(w, r, err)
+		return
+	}
+	json.OK(w, r, file)
+}
+
 func (h *handler) blobByID(w http.ResponseWriter, r *http.Request) {
 	id := request.RouteInt64Param(r, "blobID")
 	item, err := h.store.BlobByID(id)
