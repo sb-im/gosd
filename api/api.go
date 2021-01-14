@@ -43,6 +43,11 @@ func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker, bas
 		w.Header().Set("Access-Control-Allow-Methods", strings.Join(allMethods, ","))
 	})
 
+	sr2.HandleFunc("/plans/", handler.createPlan2).Methods(http.MethodPost)
+	sr2.HandleFunc("/plans/", handler.plan2s).Methods(http.MethodGet)
+	sr2.HandleFunc("/plans/{planID:[0-9]+}", handler.updatePlan2).Methods(http.MethodPatch, http.MethodPut)
+	sr2.HandleFunc("/plans/{planID:[0-9]+}", handler.planDestroy).Methods(http.MethodDelete)
+
 	sr.HandleFunc("/plans/", handler.plans).Methods(http.MethodGet)
 	sr.HandleFunc("/plans/", handler.createPlan).Methods(http.MethodPost)
 	sr.HandleFunc("/plans/{planID:[0-9]+}", handler.planByID).Methods(http.MethodGet)
