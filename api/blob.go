@@ -93,3 +93,9 @@ func (h *handler) formData2Blob(r *http.Request) (map[string]string, map[string]
 
 	return params, file, nil
 }
+
+func (h *handler) destroyBlob(w http.ResponseWriter, r *http.Request) {
+	blobID := request.RouteInt64Param(r, "blobID")
+	// TODO: Need Add destroyBlob
+	json.OK(w, r, blobID)
+}
