@@ -20,6 +20,10 @@ func CORSOriginMiddleware(origin string) func(http.Handler) http.Handler {
 
 func (h handler) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if strings.HasPrefix(req.URL.Path, "/gosd/api/v2/ok") {
+			next.ServeHTTP(w, req)
+			return
+		}
 
 		if strings.HasPrefix(req.URL.Path, "/gosd/api/v1/blobs/") {
 			next.ServeHTTP(w, req)
