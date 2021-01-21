@@ -73,11 +73,13 @@ function main(plan)
   -- end
 
   plan:CleanDialog()
-  ask_status = {
-    name = "确定要执行任务吗？",
+  local ask_status = {
+    name = "[1准备开始]-->2环境确认-->3航线确认-->↑起飞↑",
+    message = "确定要开始执行任务吗？",
+    level = "info",
     buttons = {
-      {name = "不，手滑点错了", message = 'no', level = 'primary'},
-      {name = "是的，我要执行", message = 'yes', level = 'danger'},
+      {name = "不，返回", message = 'no', level = 'primary'},
+      {name = "是的，下一步", message = 'yes', level = 'danger'},
     }
   }
   plan:ToggleDialog(ask_status)
@@ -104,28 +106,23 @@ function main(plan)
     drone:SyncCall("emergency_stop")
   end)
 
-  dialog = {
-    name = "起飞环境确认",
-    message = "确认剩余电量、风速、降雨概率等情况 ~",
-    level = "success",
-    items = {
-      {name = "剩余电量", message = drone_battery .. '%', level = 'info'},
-      -- {name = "电池温度", message = data.temp .. '°C', level = 'success'},
-      -- {name = "风速", message = '0 m/s', level = 'danger'},
-      -- {name = "降水", message = '可能有降水', level = 'warning'},
-    },
+  local dialog_environment_check = {
+    name = "1准备开始-->[2环境确认]-->3航线确认-->↑起飞↑",
+    message = "请确认剩余电量、风速、降雨概率等情况",
+    level = "info",
+    items = {},
     buttons = {
-      {name = "Cancel", message = 'cancel', level = 'primary'},
-      {name = "Confirm", message = 'confirm', level = 'danger'},
+      {name = "取消任务", message = 'cancel', level = 'primary'},
+      {name = "下一步", message = 'confirm', level = 'danger'},
     }
   }
 
   print("prepare depot_weather")
-  dialog.items = depot_weather
-  table.insert(dialog.items, 1, {name = "剩余电量", message = drone_battery .. '%', level = 'info'})
-  print(dialog.items)
+  dialog_environment_check.items = depot_weather
+  table.insert(dialog_environment_check.items, 1, {name = "剩余电量", message = drone_battery .. '%', level = 'info'})
+  print(dialog_environment_check.items)
 
-  plan:ToggleDialog(dialog)
+  plan:ToggleDialog(dialog_environment_check)
 
   if plan:Gets() ~= 'confirm' then
     print("cancel")
@@ -148,11 +145,14 @@ function main(plan)
 
   -- 正片开始！！！ 开始执行任务
 
+  local check_waypoints
   xpcall(function()
     depot:SyncCall("dooropen")
     drone:SyncCall("wait_to_boot_finish")
     drone:SyncCall("ncp", {"download", "map", plan:FileUrl("file")})
     drone:SyncCall("loadmap")
+    check_waypoints = depot:SyncCall("check_waypoints")
+    print(check_waypoints)
     drone:SyncCall("check_gps")
 
   end,
@@ -176,8 +176,8 @@ function main(plan)
           {name = "Distance ", message = string.format("%.2f",  distance) .. 'M', level = 'danger'},
         },
         buttons = {
-          {name = "Cancel" , message = 'cancel', level = 'primary'},
-          {name = "Confirm", message = 'confirm', level = 'danger'},
+          {name = "取消任务" , message = 'cancel', level = 'primary'},
+          {name = "继续等待", message = 'confirm', level = 'danger'},
         }
       })
 
@@ -223,27 +223,41 @@ function main(plan)
   print(data.vol_cell)
   print(data["vol_cell"])
 
+  local dialog_last_check = {
+    name = "1准备开始->2环境确认-->[3航线确认]-->↑起飞↑",
+    message = "请核对剩余电量、航线是否正常",
+    level = distanceLevel,
+    items = {},
+    buttons = {
+      {name = "取消任务" , message = 'cancel', level = 'primary'},
+      {name = "↑开始起飞↑", message = 'confirm', level = 'danger'},
+    }
+  }
+
+  dialog_last_check.items = check_waypoints
+  table.insert(dialog_last_check.items, 1, {name = "电池温度", message = data.temp .. '°C', level = 'info'})
+  table.insert(dialog_last_check.items, 1, {name = "剩余电量", message = data.remain .. '%', level = 'info'})
+  -- table.insert(dialog_last_check.items, 1, {name = "距离", message = string.format("%.2f",  distance) .. 'M', level = distanceLevel})
+  print(dialog_last_check.items)
+
   if debug then
-    plan:ToggleDialog({
-      name = "最后确认",
-      message = "注意起飞点、电池温度是否正常 ~",
-      level = distanceLevel,
-      items = {
-        {name = "距离", message = string.format("%.2f",  distance) .. 'M', level = distanceLevel},
-        {name = "剩余电量", message = data.remain .. '%', level = 'info'},
-        {name = "电池温度", message = data.temp .. '°C', level = 'info'},
-      },
-      buttons = {
-        {name = "取消" , message = 'cancel', level = 'primary'},
-        {name = "↑确认起飞↑", message = 'confirm', level = 'danger'},
-      }
-    })
+    plan:ToggleDialog(dialog_last_check)
   end
 
   if plan:Gets() ~= 'confirm' then
     print("cancel")
     plan:CleanDialog()
-    drone:SyncCall("emergency_stop")
+    xpcall(function()
+      local rfn1 = depot:AsyncCall("power_off_drone")
+      local rfn2 = depot:AsyncCall("power_off_remote_smart")
+
+      rfn1()
+      rfn2()
+    end,
+    function()
+      drone:SyncCall("emergency_stop")
+
+    end)
 
     return
   end
