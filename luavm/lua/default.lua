@@ -77,7 +77,7 @@ function main(plan)
 
   plan:CleanDialog()
   local ask_status = {
-    name = "[1准备开始]-->2环境确认-->3航线确认-->↑起飞↑",
+    name = "[1准备开始]=>2环境确认=>3航线确认=>↑起飞↑",
     message = "确定要开始执行任务吗？",
     level = "info",
     buttons = {
@@ -110,7 +110,7 @@ function main(plan)
   end)
 
   local dialog_environment_check = {
-    name = "1准备开始-->[2环境确认]-->3航线确认-->↑起飞↑",
+    name = "1准备开始=>[2环境确认]=>3航线确认=>↑起飞↑",
     message = "请确认剩余电量、风速、降雨概率等情况",
     level = "info",
     items = {},
@@ -120,16 +120,16 @@ function main(plan)
     }
   }
 
-  local drone_battery_level = 'success'
+  local drone_predict_battery_level = 'success'
   if tonumber(drone_battery) < 30 then
-    drone_battery_level = 'danger'
+    drone_predict_battery_level = 'danger'
   elseif tonumber(drone_battery) < 60 then
-    drone_battery_level = 'warning'
+    drone_predict_battery_level = 'warning'
   end
 
   print("prepare depot_weather")
   dialog_environment_check.items = depot_weather_result
-  table.insert(dialog_environment_check.items, 1, {name = "剩余电量", message = drone_battery .. '%', level = drone_battery_level})
+  table.insert(dialog_environment_check.items, 1, {name = "预计剩余电量", message = drone_battery .. '%', level = drone_predict_battery_level})
   print(dialog_environment_check.items)
 
   plan:ToggleDialog(dialog_environment_check)
@@ -139,11 +139,8 @@ function main(plan)
     plan:CleanDialog()
 
     xpcall(function()
-      local rfn1 = depot:AsyncCall("power_off_drone")
-      local rfn2 = depot:AsyncCall("power_off_remote_smart")
-
-      rfn1()
-      rfn2()
+      depot:SyncCall("power_off_drone_and_remote")
+      depot:SyncCall("doorclose")
     end,
     function()
       drone:SyncCall("emergency_stop")
@@ -217,7 +214,7 @@ function main(plan)
       tonumber(depotGPS.lat)
     )
 
-    if distance < 5 then
+    if distance < 6 then
       print("Distance:", distance, "continue")
       break
     end
@@ -253,11 +250,11 @@ function main(plan)
   if battery_remain_level == 'danger' or battery_temp_level == 'danger' then
     dialog_last_check_level = 'danger'
   elseif battery_remain_level == 'warning' or battery_temp_level == 'warning' or distanceLevel == 'warning' then
-    battery_remain_level = 'warning'
+    dialog_last_check_level = 'warning'
   end
 
   local dialog_last_check = {
-    name = "1准备开始->2环境确认-->[3航线确认]-->↑起飞↑",
+    name = "1准备开始=>2环境确认=>[3航线确认]=>↑起飞↑",
     message = "请核对剩余电量、航线是否正常",
     level = dialog_last_check_level,
     items = {},
@@ -272,7 +269,6 @@ function main(plan)
   table.insert(dialog_last_check.items, 1, {name = "剩余电量", message = data.remain .. '%', level = battery_remain_level})
   -- table.insert(dialog_last_check.items, 1, {name = "距离", message = string.format("%.2f",  distance) .. 'M', level = distanceLevel})
   local final_check_result = drone:SyncCall("final_check")
-  print(final_check_result)
   if final_check_result ~= 'ok' then
     table.insert(dialog_last_check.items, 1, {name = "自检错误", message = final_check_result , level = 'danger'})
     dialog_last_check.buttons = {
@@ -281,7 +277,6 @@ function main(plan)
     dialog_last_check.message = "自检错误，无法起飞！"
     dialog_last_check.level = "danger"
   end
-  print(dialog_last_check.items)
 
   if debug then
     plan:ToggleDialog(dialog_last_check)
@@ -291,11 +286,8 @@ function main(plan)
     print("cancel")
     plan:CleanDialog()
     xpcall(function()
-      local rfn1 = depot:AsyncCall("power_off_drone")
-      local rfn2 = depot:AsyncCall("power_off_remote_smart")
-
-      rfn1()
-      rfn2()
+      depot:SyncCall("power_off_drone_and_remote")
+      depot:SyncCall("doorclose")
     end,
     function()
       drone:SyncCall("emergency_stop")
@@ -330,7 +322,7 @@ function main(plan)
     depot:SyncCall("doorclose")
 
     rfn1()
-    depot:SyncCall("power_off_drone")
+    depot:SyncCall("power_off_drone_and_remote")
 
 
   end,
