@@ -120,3 +120,96 @@ func (s *Storage) fetchPlanLogs(query string, args ...interface{}) (model.PlanLo
 
 	return logs, nil
 }
+
+// PlanLogByID finds by the ID.
+func (s *Storage) PlanLogByID(ID int64) (*model.PlanLog, error) {
+	query := `
+		SELECT
+			id,
+			log_id,
+			plan_id,
+			attachments,
+			extra
+		FROM
+			plan_logs
+		WHERE
+			id = $1
+	`
+
+	return s.fetchPlanLog(query, ID)
+}
+
+func (s *Storage) UpdatePlanLog(plan *model.PlanLog) error {
+	attachments := hstore.Hstore{Map: make(map[string]sql.NullString)}
+
+	if len(plan.Attachments) > 0 {
+		for key, value := range plan.Attachments {
+			attachments.Map[key] = sql.NullString{String: value, Valid: true}
+		}
+	}
+
+	extra := hstore.Hstore{Map: make(map[string]sql.NullString)}
+
+	if len(plan.Extra) > 0 {
+		for key, value := range plan.Extra {
+			extra.Map[key] = sql.NullString{String: value, Valid: true}
+		}
+	}
+
+	query := `
+		UPDATE
+			plan_logs
+		SET
+			attachments=$2, extra=$3, update_at=now()
+		WHERE
+			id=$1
+		RETURNING
+			id, log_id, plan_id
+	`
+	_, err := s.db.Exec(
+		query,
+		plan.ID,
+		attachments,
+		extra,
+	)
+
+	if err != nil {
+		return fmt.Errorf(`store: unable to update plan: %v`, err)
+	}
+
+	return nil
+}
+
+func (s *Storage) fetchPlanLog(query string, args ...interface{}) (*model.PlanLog, error) {
+	var attachments hstore.Hstore
+	var extra hstore.Hstore
+	plan := model.NewPlanLog()
+
+	err := s.db.QueryRow(query, args...).Scan(
+		&plan.ID,
+		&plan.LogID,
+		&plan.PlanID,
+		&attachments,
+		&extra,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf(`store: unable to fetch log: %v`, err)
+	}
+
+	for key, value := range attachments.Map {
+		if value.Valid {
+			plan.Attachments[key] = value.String
+		}
+	}
+
+	for key, value := range extra.Map {
+		if value.Valid {
+			plan.Extra[key] = value.String
+		}
+	}
+
+	return plan, nil
+}
