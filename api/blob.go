@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -119,13 +120,14 @@ func (h *handler) formData2Blob2(r *http.Request) (map[string]string, map[string
 				break
 			}
 
+			b, _ := ioutil.ReadAll(p)
 			if p.FileName() != "" {
 				files[p.FormName()] = struct {
 					Name   string
 					Reader io.Reader
 				}{
 					Name:   p.FileName(),
-					Reader: p,
+					Reader: bytes.NewReader(b),
 				}
 			} else {
 				slurp, err := ioutil.ReadAll(p)
