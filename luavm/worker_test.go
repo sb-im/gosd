@@ -5,14 +5,32 @@ import (
 	"os"
 	"testing"
 
+	"sb.im/gosd/config"
+	"sb.im/gosd/database"
+	"sb.im/gosd/storage"
 	"sb.im/gosd/jsonrpc2mqtt"
 	"sb.im/gosd/state"
 )
 
 func TestNewWorker(t *testing.T) {
+
+	parse := config.NewParser()
+	opts, err := parse.ParseEnvironmentVariables()
+	if err != nil {
+		panic(err)
+	}
+
+	db, err := database.NewConnectionPool(
+		opts.DatabaseURL(),
+		opts.DatabaseMinConns(),
+		opts.DatabaseMaxConns(),
+	)
+
+	store := storage.NewStorage(db)
+
 	s := state.NewState()
 	s.Mqtt = &jsonrpc2mqtt.MockClient{}
-	worker := NewWorker(s)
+	worker := NewWorker(s, store)
 
 	file, err := os.Open("lua/test_min.lua")
 	if err != nil {

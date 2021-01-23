@@ -30,9 +30,18 @@ go1.15:build:
 
 .gotest:
   stage: test
+  services:
+    - postgres:13
+  variables:
+    POSTGRES_DB: gosd
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: password
+    DATABASE_URL: "postgres://postgres:password@postgres/gosd?sslmode=disable"
   before_script:
     - go version
   script:
+    - make
+    - ./gosd -migrate
     - make cover
 
 go1.11:test:
