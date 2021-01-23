@@ -82,6 +82,8 @@ func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker, bas
 
 	sr.HandleFunc("/blobs/", handler.createBlob).Methods(http.MethodPost)
 	sr.HandleFunc("/blobs/{blobID:[0-9]+}", handler.blobByID).Methods(http.MethodGet)
+	sr.HandleFunc("/blobs/{blobID:[0-9]+}", handler.updateBlob).Methods(http.MethodPatch, http.MethodPut)
+	sr.HandleFunc("/blobs/{blobID:[0-9]+}", handler.destroyBlob).Methods(http.MethodDelete)
 
 	sr.HandleFunc("/user/", handler.currentUser).Methods(http.MethodGet)
 	sr.HandleFunc("/{action}/", handler.actionHandler).Methods(http.MethodGet)

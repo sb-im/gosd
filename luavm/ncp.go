@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	blob_url = "api/v2/blobs/%s"
+	blob_url = "api/v1/blobs/%s"
 )
 
 func (s *Service) FileUrl(key string) string {
