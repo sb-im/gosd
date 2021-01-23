@@ -28,20 +28,29 @@ func handleDownload(filename string, reader io.Reader, w http.ResponseWriter) {
 }
 
 func (h *handler) createBlob(w http.ResponseWriter, r *http.Request) {
-	//params, file, err := h.formData2Blob(r)
-	_, file, err := h.formData2Blob(r)
+	_, files, err := h.formData2Blob2(r)
 	if err != nil {
 		json.ServerError(w, r, err)
 		return
 	}
-	json.OK(w, r, file)
+
+	mapBlob := make(map[string]string)
+	for name, file := range files {
+		blob := model.NewBlob(file.Name, file.Reader)
+		if err := h.store.CreateBlob(blob); err != nil {
+			json.ServerError(w, r, err)
+		}
+		mapBlob[name] = strconv.FormatInt(blob.ID, 10)
+	}
+
+	json.OK(w, r, mapBlob)
 }
 
 func (h *handler) blobByID(w http.ResponseWriter, r *http.Request) {
 	id := request.RouteInt64Param(r, "blobID")
 	item, err := h.store.BlobByID(id)
 	if err != nil {
-		json.BadRequest(w, r, errors.New("Unable to fetch this plan from the database"))
+		json.BadRequest(w, r, errors.New("Unable to fetch this blob from the database"))
 		return
 	}
 
@@ -52,6 +61,83 @@ func (h *handler) blobByID(w http.ResponseWriter, r *http.Request) {
 
 	//json.OK(w, r, item)
 	handleDownload(item.FileName, item.Reader, w)
+}
+
+func (h *handler) updateBlob(w http.ResponseWriter, r *http.Request) {
+	_, files, err := h.formData2Blob2(r)
+	if err != nil {
+		json.ServerError(w, r, err)
+		return
+	}
+	for _, file := range files {
+		id := request.RouteInt64Param(r, "blobID")
+		blob, err := h.store.BlobByID(id)
+		if err != nil {
+			json.BadRequest(w, r, errors.New("Unable to fetch this blob from the database"))
+			return
+		}
+
+		if blob == nil {
+			json.NotFound(w, r)
+			return
+		}
+
+		blob.FileName = file.Name
+		blob.Reader = file.Reader
+
+		if err := h.store.UpdateBlob(blob); err != nil {
+			json.ServerError(w, r, err)
+		}
+
+		// Only First: range is random
+		json.OK(w, r, blob)
+		return
+	}
+	json.ServerError(w, r, errors.New("not found content"))
+}
+
+// -> extra, files, error
+func (h *handler) formData2Blob2(r *http.Request) (map[string]string, map[string]struct {
+	Name   string
+	Reader io.Reader
+}, error) {
+	extra := make(map[string]string)
+	files := make(map[string]struct {
+		Name   string
+		Reader io.Reader
+	})
+	mediaType, mimeParams, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	if err != nil {
+		return extra, files, err
+	}
+
+	if strings.HasPrefix(mediaType, "multipart/") {
+		mr := multipart.NewReader(r.Body, mimeParams["boundary"])
+		for {
+			p, err := mr.NextPart()
+			if err == io.EOF {
+				break
+			}
+
+			if p.FileName() != "" {
+				files[p.FormName()] = struct {
+					Name   string
+					Reader io.Reader
+				}{
+					Name:   p.FileName(),
+					Reader: p,
+				}
+			} else {
+				slurp, err := ioutil.ReadAll(p)
+				if err != nil {
+					return extra, files, err
+				}
+				extra[p.FormName()] = string(slurp)
+			}
+
+		}
+	}
+	return extra, files, err
 }
 
 // -> params, blobFileID, error

@@ -52,6 +52,37 @@ func (s *Storage) BlobByID(id int64) (*model.Blob, error) {
 	return s.fetchBlob(query, id)
 }
 
+func (s *Storage) UpdateBlob(blob *model.Blob) (err error) {
+	query := `
+		UPDATE
+			blobs
+		SET
+			filename=$2, content=$3, checksum=$4, update_at=now()
+		WHERE
+			id=$1
+		RETURNING
+			id, filename, checksum
+	`
+
+	data, err := ioutil.ReadAll(blob.Reader)
+	if err != nil {
+		return fmt.Errorf(`store: unable to read io: %v`, err)
+	}
+
+	_, err = s.db.Exec(
+		query,
+		blob.ID,
+		blob.FileName,
+		data,
+		fmt.Sprintf("%x", sha1.Sum(data)),
+	)
+
+	if err != nil {
+		return fmt.Errorf(`store: unable to update blob: %v`, err)
+	}
+	return nil
+}
+
 func (s *Storage) fetchBlob(query string, args ...interface{}) (*model.Blob, error) {
 	blob := &model.Blob{}
 
