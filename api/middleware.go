@@ -25,7 +25,7 @@ func (h handler) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if strings.HasPrefix(req.URL.Path, "/gosd/api/v1/blobs/") {
+		if strings.HasPrefix(req.URL.Path, "/gosd/api/v2/blobs/") {
 			next.ServeHTTP(w, req)
 			return
 		}

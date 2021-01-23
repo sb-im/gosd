@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"sb.im/gosd/state"
+	"sb.im/gosd/storage"
 
 	jsonrpc "github.com/sb-im/jsonrpc-lite"
 )
@@ -14,6 +15,7 @@ type Service struct {
 	Rpc    *Rpc
 	Task   *Task
 	State  *state.State
+	Store  *storage.Storage
 }
 
 func NewService(task *Task) *Service {

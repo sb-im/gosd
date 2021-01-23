@@ -93,6 +93,9 @@ function NewPlan(nodeID)
         error("key not found")
       end
       return data
+    end,
+    LogFileUrl = function(self, key)
+      return SD:LogFileUrl(key)
     end
   }
 end

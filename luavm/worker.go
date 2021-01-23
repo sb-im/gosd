@@ -8,6 +8,7 @@ import (
 	"sb.im/gosd/jsonrpc2mqtt"
 	"sb.im/gosd/model"
 	"sb.im/gosd/state"
+	"sb.im/gosd/storage"
 
 	lua "github.com/yuin/gopher-lua"
 	luajson "layeh.com/gopher-json"
@@ -18,17 +19,19 @@ type Worker struct {
 	Queue         chan *Task
 	Log           chan *model.PlanLog
 	State         *state.State
+	Store         *storage.Storage
 	Running       map[string]*Service
 	MqttProxy     *jsonrpc2mqtt.MqttProxy
 	StatusManager *StatusManager
 }
 
-func NewWorker(s *state.State) *Worker {
+func NewWorker(s *state.State, store *storage.Storage) *Worker {
 	mqttProxy, _ := jsonrpc2mqtt.OpenMqttProxy(s.Mqtt)
 	return &Worker{
 		Queue:         make(chan *Task, 1024),
 		Log:           make(chan *model.PlanLog, 1024),
 		State:         s,
+		Store:         store,
 		Running:       make(map[string]*Service),
 		MqttProxy:     mqttProxy,
 		StatusManager: NewStatusManager(s.Mqtt),
@@ -67,6 +70,7 @@ func (w Worker) doRun(task *Task) error {
 	service := NewService(task)
 	service.Rpc.MqttProxy = w.MqttProxy
 	service.State = w.State
+	service.Store = w.Store
 	w.Running[task.PlanID] = service
 	defer delete(w.Running, task.PlanID)
 	defer fmt.Println("==> luavm END")

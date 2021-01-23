@@ -33,7 +33,7 @@ func startDaemon(store *storage.Storage, opts *config.Options) {
 	// Wait mqtt connected
 	time.Sleep(3 * time.Second)
 
-	worker := luavm.NewWorker(state)
+	worker := luavm.NewWorker(state, store)
 	go worker.Run()
 
 	r := mux.NewRouter()
