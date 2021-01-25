@@ -1,6 +1,27 @@
 
 STOP = false
 
+--合并两个table
+function MergeTables(...)
+  local tabs = {...}
+  if not tabs then
+    return {}
+  end
+  local origin = tabs[1]
+  for i = 2,#tabs do
+    if origin then
+      if tabs[i] then
+        for k,v in pairs(tabs[i]) do
+          table.insert(origin,v)
+        end
+      end
+    else
+      origin = tabs[i]
+    end
+  end
+  return origin
+end
+
 function Running(rfn, plan, drone)
   xpcall(function()
     rfn()
@@ -94,6 +115,9 @@ function main(plan)
   plan:CleanDialog()
 
   -- drone:SyncCall("test")
+
+  -- 给机场设置保护状态，避免中途用户操作
+  depot:SyncCall("set_protectstatus_true")
 
   local drone_battery
   local depot_weather_result
@@ -235,24 +259,17 @@ function main(plan)
   print(data.vol_cell)
   print(data["vol_cell"])
 
-  local battery_temp_level = 'success'
-  if tonumber(data.temp) < 5 then
-    battery_temp_level = 'danger'
-  elseif tonumber(data.temp) < 10 then
-    battery_temp_level = 'warning'
-  end
-
-  local battery_remain_level = 'success'
-  if tonumber(data.remain) < 30 then
-    battery_remain_level = 'danger'
-  elseif tonumber(data.remain) < 60 then
-    battery_remain_level = 'warning'
+  local battery_level = 'success'
+  if tonumber(data.remain) < 30 or tonumber(data.temp) < 5 then
+    battery_level = 'danger'
+  elseif tonumber(data.remain) < 60 or tonumber(data.temp) < 10 then
+    battery_level = 'warning'
   end
 
   local dialog_last_check_level = 'success'
-  if battery_remain_level == 'danger' or battery_temp_level == 'danger' then
+  if battery_level == 'danger' then
     dialog_last_check_level = 'danger'
-  elseif battery_remain_level == 'warning' or battery_temp_level == 'warning' or distanceLevel == 'warning' then
+  elseif battery_level == 'warning' or distanceLevel == 'warning' then
     dialog_last_check_level = 'warning'
   end
 
@@ -267,11 +284,8 @@ function main(plan)
     }
   }
 
-  dialog_last_check.items = check_waypoints
-  table.insert(dialog_last_check.items, check_drone[1])
-  table.insert(dialog_last_check.items, check_drone[2])
-  table.insert(dialog_last_check.items, 1, {name = "电池温度", message = data.temp .. '°C', level = battery_temp_level})
-  table.insert(dialog_last_check.items, 1, {name = "剩余电量", message = data.remain .. '%', level = battery_remain_level})
+  dialog_last_check.items = MergeTables(check_waypoints, check_drone)
+  table.insert(dialog_last_check.items, 1, {name = "电池状态", message = '电量 ' .. data.remain .. '% ,温度 ' .. data.temp .. '°C' , level = battery_level})
   -- table.insert(dialog_last_check.items, 1, {name = "距离", message = string.format("%.2f",  distance) .. 'M', level = distanceLevel})
   local final_check_result = drone:SyncCall("final_check")
   if final_check_result ~= 'ok' then
@@ -326,6 +340,8 @@ function main(plan)
     depot:SyncCall("fixdrone")
     depot:SyncCall("power_chargedrone_on")
     depot:SyncCall("doorclose")
+    -- 复位机场的保护状态
+    depot:SyncCall("set_protectstatus_false")
 
     rfn1()
     depot:SyncCall("power_off_drone_and_remote")
