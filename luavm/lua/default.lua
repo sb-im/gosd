@@ -153,6 +153,7 @@ function main(plan)
   -- 正片开始！！！ 开始执行任务
 
   local check_waypoints
+  local check_drone
   xpcall(function()
     local download_map = drone:AsyncCall("ncp", {"download", "map", plan:FileUrl("file")})
     depot:SyncCall("dooropen")
@@ -160,6 +161,8 @@ function main(plan)
     -- drone:SyncCall("ncp", {"download", "map", plan:FileUrl("file")})
     download_map()
     drone:SyncCall("loadmap")
+    check_drone = drone:SyncCall("check_drone")
+    print(check_drone)
     check_waypoints = depot:SyncCall("check_waypoints")
     print(check_waypoints)
     drone:SyncCall("check_gps")
@@ -265,6 +268,8 @@ function main(plan)
   }
 
   dialog_last_check.items = check_waypoints
+  table.insert(dialog_last_check.items, check_drone[1])
+  table.insert(dialog_last_check.items, check_drone[2])
   table.insert(dialog_last_check.items, 1, {name = "电池温度", message = data.temp .. '°C', level = battery_temp_level})
   table.insert(dialog_last_check.items, 1, {name = "剩余电量", message = data.remain .. '%', level = battery_remain_level})
   -- table.insert(dialog_last_check.items, 1, {name = "距离", message = string.format("%.2f",  distance) .. 'M', level = distanceLevel})
@@ -316,7 +321,8 @@ function main(plan)
   xpcall(function()
     drone:SyncCall("mission_preupload_cloud")
     local rfn1 = drone:AsyncCall("mission_upload_nas")
-
+    drone:SyncCall("ncp", {"upload", "view_url", plan:LogFileUrl("查看原始数据")})
+    drone:SyncCall("ncp", {"upload", "view_login_url", plan:LogFileUrl("(登录)")})
     depot:SyncCall("fixdrone")
     depot:SyncCall("power_chargedrone_on")
     depot:SyncCall("doorclose")
