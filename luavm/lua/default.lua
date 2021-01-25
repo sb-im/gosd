@@ -118,6 +118,7 @@ function main(plan)
 
   -- 给机场设置保护状态，避免中途用户操作
   depot:SyncCall("set_protectstatus_true")
+  depot:SyncCall("power_off_fan")
 
   local drone_battery
   local depot_weather_result
@@ -130,6 +131,7 @@ function main(plan)
     print(depot_weather_result)
   end, function()
     print(debug.traceback())
+    depot:SyncCall("set_protectstatus_false")
     drone:SyncCall("emergency_stop")
   end)
 
@@ -165,8 +167,10 @@ function main(plan)
     xpcall(function()
       depot:SyncCall("power_off_drone_and_remote")
       depot:SyncCall("doorclose")
+      depot:SyncCall("set_protectstatus_false")
     end,
     function()
+      depot:SyncCall("set_protectstatus_false")
       drone:SyncCall("emergency_stop")
 
     end)
@@ -193,6 +197,7 @@ function main(plan)
 
   end,
   function()
+    depot:SyncCall("set_protectstatus_false")
     drone:SyncCall("emergency_stop")
   end)
 
@@ -220,6 +225,7 @@ function main(plan)
       if plan:Gets() ~= 'confirm' then
         print("cancel")
         plan:CleanDialog()
+        depot:SyncCall("set_protectstatus_false")
         drone:SyncCall("emergency_stop")
         print("=== Distance:", distance, "END ===")
 
@@ -307,8 +313,10 @@ function main(plan)
     xpcall(function()
       depot:SyncCall("power_off_drone_and_remote")
       depot:SyncCall("doorclose")
+      depot:SyncCall("set_protectstatus_false")
     end,
     function()
+      depot:SyncCall("set_protectstatus_false")
       drone:SyncCall("emergency_stop")
 
     end)
@@ -323,6 +331,7 @@ function main(plan)
     drone:SyncCall("startmission")
   end,
   function()
+    depot:SyncCall("set_protectstatus_false")
     drone:SyncCall("emergency_stop")
   end)
 
@@ -333,6 +342,7 @@ function main(plan)
   end
 
   xpcall(function()
+    depot:SyncCall("power_off_fan")
     drone:SyncCall("mission_preupload_cloud")
     local rfn1 = drone:AsyncCall("mission_upload_nas")
     drone:SyncCall("ncp", {"upload", "view_url", plan:LogFileUrl("查看原始数据")})
@@ -349,6 +359,7 @@ function main(plan)
 
   end,
   function()
+    depot:SyncCall("set_protectstatus_false")
     drone:SyncCall("emergency_stop")
   end)
 
