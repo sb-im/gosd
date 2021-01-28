@@ -53,6 +53,21 @@ func (w Worker) Run() {
 }
 
 func (w Worker) doRun(task *Task) error {
+
+	// Fix
+	// https://gitlab.com/sbim/superdock/cloud/gosd/-/issues/21
+	// https://gitlab.com/sbim/superdock/cloud/gosd/-/issues/22
+	// https://gitlab.com/sbim/superdock/cloud/gosd/-/issues/25
+
+	// Notice: This Change conflict With #24
+	// https://gitlab.com/sbim/superdock/cloud/gosd/-/issues/24
+	var err error
+	w.MqttProxy, err = jsonrpc2mqtt.OpenMqttProxy(w.MqttProxy.Client)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
 	l := lua.NewState()
 	planID := task.PlanID
 	defer func() {
@@ -79,7 +94,6 @@ func (w Worker) doRun(task *Task) error {
 	// Clean up the "Dialog" when exiting
 	defer service.CleanDialog()
 
-	var err error
 	if fn, err := l.Load(strings.NewReader(LuaMap["lib"]), "lib.lua"); err != nil {
 		return err
 	} else {
