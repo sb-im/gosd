@@ -4,12 +4,12 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
 	"testing"
 	"time"
-	"log"
 
 	"sb.im/gosd/state"
 )
@@ -53,7 +53,7 @@ func TestMqttd(t *testing.T) {
 
 	// status
 	rawStatus := `{"code":2,"msg":"neterror","timestamp":"1610965971","status":{"link_id":6,"position_ok":false,"lat":"22.6858109","lng":"114.2247189","alt":"80.0001"}}`
-	cmdRun("mosquitto_pub -L " + mqttAddr + "/nodes/"+id+"/status -m " + rawStatus)
+	cmdRun("mosquitto_pub -L " + mqttAddr + "/nodes/" + id + "/status -m " + rawStatus)
 
 	// Wait status sync
 	time.Sleep(1 * time.Millisecond)
@@ -64,7 +64,7 @@ func TestMqttd(t *testing.T) {
 
 	// Msg
 	rawMsg := `{"WD":0,"WS":0,"T":66115,"RH":426,"Pa":99780}`
-	cmdRun("mosquitto_pub -L "+mqttAddr+"/nodes/"+id+"/msg/weather -m " + rawMsg)
+	cmdRun("mosquitto_pub -L " + mqttAddr + "/nodes/" + id + "/msg/weather -m " + rawMsg)
 
 	if msg, err := store.NodeGet(id, "weather"); err != nil {
 		t.Error(err)
@@ -110,7 +110,7 @@ func TestMqttdRpc(t *testing.T) {
 	// Pub
 	req := fmt.Sprintf(rawRpcSend, 233)
 	chI <- MqttRpc{
-		ID: id,
+		ID:      id,
 		Payload: []byte(req),
 	}
 

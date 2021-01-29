@@ -73,8 +73,8 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 				case "network":
 					//fmt.Println(id, string(p.Payload))
 				case "rpc":
-					o<- MqttRpc{
-						ID: id,
+					o <- MqttRpc{
+						ID:      id,
 						Payload: p.Payload,
 					}
 				case "msg":
@@ -92,10 +92,10 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 			//WillRetain:  true,
 			//WillTopic:   fmt.Sprintf(config.Status, config.ID),
 			//WillQOS:     1,
-			Password:    []byte(password),
-			Username:    opt.User.Username(),
-			ClientID:    fmt.Sprintf(config.Client, config.ID),
-			CleanStart:  false,
+			Password:   []byte(password),
+			Username:   opt.User.Username(),
+			ClientID:   fmt.Sprintf(config.Client, config.ID),
+			CleanStart: false,
 			// interval 10s
 			KeepAlive: 10,
 			// TODO:
