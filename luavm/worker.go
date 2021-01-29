@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"sb.im/gosd/rpc2mqtt"
 	"sb.im/gosd/jsonrpc2mqtt"
 	"sb.im/gosd/model"
 	"sb.im/gosd/state"
@@ -16,6 +17,7 @@ import (
 )
 
 type Worker struct {
+	RpcServer     *rpc2mqtt.Rpc2mqtt
 	Queue         chan *Task
 	Log           chan *model.PlanLog
 	State         *state.State
@@ -25,7 +27,7 @@ type Worker struct {
 	StatusManager *StatusManager
 }
 
-func NewWorker(s *state.State, store *storage.Storage) *Worker {
+func NewWorker(s *state.State, store *storage.Storage, rpcServer *rpc2mqtt.Rpc2mqtt) *Worker {
 	mqttProxy, _ := jsonrpc2mqtt.OpenMqttProxy(s.Mqtt)
 	return &Worker{
 		Queue:         make(chan *Task, 1024),
@@ -34,6 +36,7 @@ func NewWorker(s *state.State, store *storage.Storage) *Worker {
 		Store:         store,
 		Running:       make(map[string]*Service),
 		MqttProxy:     mqttProxy,
+		RpcServer:     rpcServer,
 		StatusManager: NewStatusManager(s.Mqtt),
 	}
 }
@@ -86,6 +89,7 @@ func (w Worker) doRun(task *Task) error {
 	service.Rpc.MqttProxy = w.MqttProxy
 	service.State = w.State
 	service.Store = w.Store
+	service.Server = w.RpcServer
 	w.Running[task.PlanID] = service
 	defer delete(w.Running, task.PlanID)
 	defer fmt.Println("==> luavm END")

@@ -53,7 +53,8 @@ func (s *Service) RpcSend(nodeId string, raw []byte) (string, error) {
 		return "", err
 	}
 
-	err = s.Rpc.MqttProxy.AsyncRpc(nodeId, req, ch)
+	//err = s.Rpc.MqttProxy.AsyncRpc(nodeId, req, ch)
+	err = s.Server.AsyncRpc(nodeId, req, ch)
 	if err != nil {
 		return "", err
 	}

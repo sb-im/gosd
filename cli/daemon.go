@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"runtime"
@@ -10,6 +11,8 @@ import (
 	"sb.im/gosd/config"
 	"sb.im/gosd/luavm"
 	"sb.im/gosd/state"
+	"sb.im/gosd/rpc2mqtt"
+	"sb.im/gosd/mqttd"
 	"sb.im/gosd/storage"
 
 	"miniflux.app/logger"
@@ -33,7 +36,19 @@ func startDaemon(store *storage.Storage, opts *config.Options) {
 	// Wait mqtt connected
 	time.Sleep(3 * time.Second)
 
-	worker := luavm.NewWorker(state, store)
+	chI := make(chan mqttd.MqttRpc)
+	chO := make(chan mqttd.MqttRpc)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	mqttd := mqttd.NewMqttd(opts.MqttURL(), state, chI, chO)
+	go mqttd.Run(ctx)
+
+	rpcServer := rpc2mqtt.NewRpc2Mqtt(chO, chI)
+	go rpcServer.Run(ctx)
+
+	worker := luavm.NewWorker(state, store, rpcServer)
 	go worker.Run()
 
 	r := mux.NewRouter()

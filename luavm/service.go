@@ -3,6 +3,7 @@ package luavm
 import (
 	"context"
 
+	"sb.im/gosd/rpc2mqtt"
 	"sb.im/gosd/state"
 	"sb.im/gosd/storage"
 
@@ -15,6 +16,7 @@ type Service struct {
 	Rpc    *Rpc
 	Task   *Task
 	State  *state.State
+	Server *rpc2mqtt.Rpc2mqtt
 	Store  *storage.Storage
 }
 
