@@ -22,6 +22,9 @@ run: generate
 test: generate
 	go test ${GO_TEST} -cover -v
 
+test-broker: generate
+	go test ./mqttd -cover -v
+
 # \(statements\)(?:\s+)?(\d+(?:\.\d+)?%)
 # https://stackoverflow.com/questions/61246686/go-coverage-over-multiple-package-and-gitlab-coverage-badge
 cover: generate

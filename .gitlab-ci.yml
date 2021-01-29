@@ -1,5 +1,11 @@
 image: golang:1.13.1-buster
 
+stages:
+  - build
+  - test
+  - broker
+  - deploy
+
 .gobuild:
   stage: build
   before_script:
@@ -74,6 +80,47 @@ go1.15:test:
   image: golang:1.15-buster
   extends: .gotest
 
+.test-broker:
+  script:
+    - apt-get update -y && apt-get install -y mosquitto-clients
+    - make test-broker
+
+# Must Mosquitto >= 1.6
+# https://github.com/eclipse/mosquitto/blob/master/ChangeLog.txt#L616
+test mosquitto 1.6:
+  stage: broker
+  services:
+    - name: eclipse-mosquitto:1.6
+  variables:
+    MQTT: "eclipse-mosquitto:1883"
+  extends: .test-broker
+
+test emqx latest:
+  stage: broker
+  services:
+    - name: emqx/emqx:latest
+      alias: emqx
+  variables:
+    MQTT: "emqx:1883"
+  extends: .test-broker
+
+test emqx 4.2.6:
+  stage: broker
+  services:
+    - name: emqx/emqx:4.2.6
+      alias: emqx
+  variables:
+    MQTT: "emqx:1883"
+  extends: .test-broker
+
+test emqx deb:
+  stage: broker
+  before_script:
+    - apt-get update -y && apt-get install -y mosquitto-clients
+    - wget https://github.com/emqx/emqx/releases/download/v4.2.3/emqx-debian10-4.2.3-x86_64.deb
+    - dpkg -i emqx-debian10-4.2.3-x86_64.deb
+    - service emqx start
+  extends: .test-broker
 
 deploy_staging:
   stage: deploy
