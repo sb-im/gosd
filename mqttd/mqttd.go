@@ -10,7 +10,7 @@ import (
 
 	"sb.im/gosd/state"
 
-	"github.com/SB-IM/jsonrpc-lite"
+	"github.com/sb-im/jsonrpc-lite"
 	packets "github.com/eclipse/paho.golang/packets"
 	paho "github.com/eclipse/paho.golang/paho"
 
