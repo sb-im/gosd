@@ -38,6 +38,7 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 		logger.Println(err)
 	}
 
+	config.Broker = broker
 	opt, err := url.Parse(broker)
 	if err != nil {
 		logger.Println(err)
