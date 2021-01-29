@@ -56,7 +56,7 @@ func TestMqttd(t *testing.T) {
 	cmdRun("mosquitto_pub -L " + mqttAddr + "/nodes/" + id + "/status -m " + rawStatus)
 
 	// Wait status sync
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(1 * time.Second)
 
 	if store.Node[id].Status.Code != 2 {
 		t.Error("Error: Should has data")
