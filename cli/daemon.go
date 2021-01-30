@@ -45,7 +45,7 @@ func startDaemon(store *storage.Storage, opts *config.Options) {
 	mqttd := mqttd.NewMqttd(opts.MqttURL(), state, chI, chO)
 	go mqttd.Run(ctx)
 
-	rpcServer := rpc2mqtt.NewRpc2Mqtt(chO, chI)
+	rpcServer := rpc2mqtt.NewRpc2Mqtt(chI, chO)
 	go rpcServer.Run(ctx)
 
 	worker := luavm.NewWorker(state, store, rpcServer)
