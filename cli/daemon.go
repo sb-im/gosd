@@ -36,8 +36,8 @@ func startDaemon(store *storage.Storage, opts *config.Options) {
 	// Wait mqtt connected
 	time.Sleep(3 * time.Second)
 
-	chI := make(chan mqttd.MqttRpc)
-	chO := make(chan mqttd.MqttRpc)
+	chI := make(chan mqttd.MqttRpc, 128)
+	chO := make(chan mqttd.MqttRpc, 128)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

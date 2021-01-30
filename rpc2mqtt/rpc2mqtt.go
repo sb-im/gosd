@@ -13,19 +13,21 @@ import (
 type Rpc2mqtt struct {
 	pending map[jsonrpc.ID]chan []byte
 	mutex   sync.Mutex
-	i       <-chan mqttd.MqttRpc
-	o       chan<- mqttd.MqttRpc
+	i       chan<- mqttd.MqttRpc
+	o       <-chan mqttd.MqttRpc
 }
 
-func NewRpc2Mqtt(i <-chan mqttd.MqttRpc, o chan<- mqttd.MqttRpc) *Rpc2mqtt {
+func NewRpc2Mqtt(i chan<- mqttd.MqttRpc, o <-chan mqttd.MqttRpc) *Rpc2mqtt {
 	return &Rpc2mqtt{
+		i:       i,
+		o:       o,
 		pending: make(map[jsonrpc.ID]chan []byte),
 	}
 }
 
 func (t *Rpc2mqtt) AsyncRpc(id string, req []byte, ch_res chan []byte) error {
 	select {
-	case t.o <- mqttd.MqttRpc{
+	case t.i <- mqttd.MqttRpc{
 		ID:      id,
 		Payload: req,
 	}:
@@ -43,7 +45,7 @@ func (t *Rpc2mqtt) Run(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
-		case raw := <-t.i:
+		case raw := <-t.o:
 			rpc := jsonrpc.ParseObject(raw.Payload)
 			if pending := t.pending[*rpc.ID]; pending != nil && (rpc.Type == jsonrpc.TypeSuccess || rpc.Type == jsonrpc.TypeErrors) {
 				t.mutex.Lock()
