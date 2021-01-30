@@ -1,7 +1,7 @@
 OS=
 ARCH=
 PROFIX=
-GO_TEST=./jsonrpc2mqtt ./state ./luavm ./cache
+GO_TEST=./jsonrpc2mqtt ./state ./cache
 VERSION=$(shell git describe --tags || git rev-parse --short HEAD || echo "unknown version")
 BUILD_DATE=$(shell date +%FT%T%z)
 LD_FLAGS='-X "miniflux.app/version.Version=$(VERSION)" -X "miniflux.app/version.BuildDate=$(BUILD_DATE)"'
@@ -24,6 +24,9 @@ test: generate
 
 test-broker: generate
 	go test ./mqttd -cover -v
+
+test-simulation:
+	go test ./luavm -cover -v
 
 # \(statements\)(?:\s+)?(\d+(?:\.\d+)?%)
 # https://stackoverflow.com/questions/61246686/go-coverage-over-multiple-package-and-gitlab-coverage-badge

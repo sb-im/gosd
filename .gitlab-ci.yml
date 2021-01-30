@@ -4,6 +4,7 @@ stages:
   - build
   - test
   - broker
+  - simulation
   - deploy
 
 .gobuild:
@@ -112,6 +113,22 @@ test emqx 4.2.6:
   variables:
     MQTT: "emqx:1883"
   extends: .test-broker
+
+test-simulation:
+  stage: simulation
+  services:
+    - eclipse-mosquitto:1.6
+    - postgres:13
+  variables:
+    MQTT: "eclipse-mosquitto:1883"
+    POSTGRES_DB: gosd
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: password
+    DATABASE_URL: "postgres://postgres:password@postgres/gosd?sslmode=disable"
+  script:
+    - make
+    - ./gosd -migrate
+    - make test-simulation
 
 test emqx deb:
   stage: broker
