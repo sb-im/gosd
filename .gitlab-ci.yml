@@ -125,6 +125,12 @@ test-simulation:
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: password
     DATABASE_URL: "postgres://postgres:password@postgres/gosd?sslmode=disable"
+  before_script:
+    # - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/sbim/superdock/cloud/ncp.git".insteadOf git@gitlab.com:sbim/superdock/cloud/ncp.git
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/sbim/superdock/cloud/ncp.git
+    - cd ncp
+    - make
+    - make install
   script:
     - make
     - ./gosd -migrate
