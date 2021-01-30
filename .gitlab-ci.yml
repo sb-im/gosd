@@ -131,6 +131,7 @@ test-simulation:
     - cd ncp
     - make
     - make install
+    - cd ..
   script:
     - make
     - ./gosd -migrate
