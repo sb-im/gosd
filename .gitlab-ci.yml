@@ -121,6 +121,7 @@ test-simulation:
     - postgres:13
   variables:
     MQTT: "eclipse-mosquitto:1883"
+    MQTT_URL: "eclipse-mosquitto:1883"
     POSTGRES_DB: gosd
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: password
