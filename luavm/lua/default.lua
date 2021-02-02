@@ -183,7 +183,7 @@ function main(plan)
   local check_waypoints
   local check_drone
   xpcall(function()
-    local download_map = drone:AsyncCall("ncp", {"download", "map", plan:FileUrl("file")})
+    local download_map = drone:AsyncCall("ncp", {"download", "map", plan:FileUrl("waypoint")})
     depot:SyncCall("dooropen")
     drone:SyncCall("wait_to_boot_finish")
     -- drone:SyncCall("ncp", {"download", "map", plan:FileUrl("file")})
