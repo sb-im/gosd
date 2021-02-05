@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"net/url"
 
 	"sb.im/gosd/model"
 
@@ -23,7 +24,7 @@ func handleDownload(filename string, reader io.Reader, w http.ResponseWriter) {
 	// https://gitlab.com/sbim/superdock/cloud/sdwc/-/issues/123
 	// https://blog.csdn.net/liuyaqi1993/article/details/78275396
 	//w.Header().Add("content-disposition", "attachment; filename=\""+filename+"\"")
-	w.Header().Add("content-disposition", `attachment; filename* = UTF-8''`+filename)
+	w.Header().Add("content-disposition", `attachment; filename*=UTF-8''`+url.QueryEscape(filename))
 	_, err := io.Copy(w, reader)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
