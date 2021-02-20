@@ -6,14 +6,14 @@ import (
 	"sync"
 	"time"
 
-	"sb.im/gosd/jsonrpc2mqtt"
+	//"sb.im/gosd/jsonrpc2mqtt"
 
 	jsonrpc "github.com/sb-im/jsonrpc-lite"
 )
 
 type Rpc struct {
 	pendings  map[string]chan []byte
-	MqttProxy *jsonrpc2mqtt.MqttProxy
+	//MqttProxy *jsonrpc2mqtt.MqttProxy
 }
 
 func NewRpc() *Rpc {
@@ -53,7 +53,11 @@ func (s *Service) RpcSend(nodeId string, raw []byte) (string, error) {
 		return "", err
 	}
 
+	// === TODO: Remove ===
+	// MqttProxy is mqtt v3
 	//err = s.Rpc.MqttProxy.AsyncRpc(nodeId, req, ch)
+
+	// Server.AsyncRpc is mqtt v5 jsonrpc over mqtt
 	err = s.Server.AsyncRpc(nodeId, req, ch)
 	if err != nil {
 		return "", err
