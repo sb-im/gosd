@@ -37,10 +37,12 @@ func (s *State) Connect(clientId string, uri *url.URL) mqtt.Client {
 
 	opts.SetOnConnectHandler(func(client mqtt.Client) {
 		logger.Println("New Connect")
-		err := s.Sync(client)
-		if err != nil {
-			logger.Panicln("Sub error", err)
-		}
+
+		// Disable mqtt v3 Sync status
+		//err := s.Sync(client)
+		//if err != nil {
+		//	logger.Panicln("Sub error", err)
+		//}
 	})
 
 	client := mqtt.NewClient(opts)
