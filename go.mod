@@ -6,6 +6,7 @@ require (
 	github.com/SB-IM/jsonrpc-lite v0.1.1
 	github.com/eclipse/paho.golang v0.9.1-0.20210122134147-5617034fed14
 	github.com/eclipse/paho.mqtt.golang v1.2.0
+	github.com/gomodule/redigo v1.8.4
 	github.com/gorilla/mux v1.7.4
 	github.com/lib/pq v1.6.0
 	github.com/sb-im/jsonrpc-lite v0.1.1

@@ -41,6 +41,7 @@ func (n *NodeStatus) GetID(str string) int {
 	return n.Status.LinkId
 }
 
+// TODO: Remove
 func (n *NodeStatus) SetStatus(raw []byte) error {
 	err := json.Unmarshal(raw, n)
 	if err != nil {

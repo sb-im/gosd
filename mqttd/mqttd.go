@@ -69,8 +69,12 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 				// nodes/%s/msg/%s
 				switch strings.Split(p.Topic, "/")[2] {
 				case "status":
+					store.Record(p.Topic, p.Payload)
+
+					// TODO: Remove
 					store.SetNodeStatus(id, p.Payload)
 				case "network":
+					store.Record(p.Topic, p.Payload)
 					//fmt.Println(id, string(p.Payload))
 				case "rpc":
 					o <- MqttRpc{
@@ -78,8 +82,7 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 						Payload: p.Payload,
 					}
 				case "msg":
-					tag := strings.Split(p.Topic, "/")[3]
-					store.NodePut(id, tag, p.Payload)
+					store.Record(p.Topic, p.Payload)
 				}
 
 			}),
