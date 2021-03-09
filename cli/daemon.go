@@ -3,7 +3,6 @@ package cli
 import (
 	"context"
 	"net/http"
-	//"net/url"
 	"runtime"
 	"time"
 
@@ -24,20 +23,6 @@ func startDaemon(store *storage.Storage, opts *config.Options) {
 	logger.Info("Starting gosd...")
 
 	//go showProcessStatistics()
-
-	// === TODO: Remove ===
-	// mqtt connect start
-
-	//uri, err := url.Parse(opts.MqttURL())
-	//if err != nil {
-	//	panic(err)
-	//}
-
-	//state.Connect(opts.MqttClientID(), uri)
-
-	// Wait mqtt connected
-	//time.Sleep(3 * time.Second)
-	// === TODO: Remove ===
 
 	state := state.NewState()
 
