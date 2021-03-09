@@ -96,6 +96,20 @@ test mosquitto 1.6:
     MQTT: "eclipse-mosquitto:1883"
   extends: .test-broker
 
+# Must Mosquitto >= 2.0.8
+# https://github.com/eclipse/mosquitto/issues/2040
+test mosquitto 2.0:
+  stage: broker
+  services:
+    - name: eclipse-mosquitto:2.0.8
+      command:
+        - "mosquitto"
+        - "-c"
+        - "/mosquitto-no-auth.conf"
+  variables:
+    MQTT: "eclipse-mosquitto:1883"
+  extends: .test-broker
+
 test emqx latest:
   stage: broker
   services:

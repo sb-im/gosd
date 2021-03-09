@@ -3,7 +3,7 @@ package cli
 import (
 	"context"
 	"net/http"
-	"net/url"
+	//"net/url"
 	"runtime"
 	"time"
 
@@ -25,16 +25,21 @@ func startDaemon(store *storage.Storage, opts *config.Options) {
 
 	//go showProcessStatistics()
 
-	uri, err := url.Parse(opts.MqttURL())
-	if err != nil {
-		panic(err)
-	}
+	// === TODO: Remove ===
+	// mqtt connect start
 
-	state := state.NewState()
-	state.Connect(opts.MqttClientID(), uri)
+	//uri, err := url.Parse(opts.MqttURL())
+	//if err != nil {
+	//	panic(err)
+	//}
+
+	//state.Connect(opts.MqttClientID(), uri)
 
 	// Wait mqtt connected
-	time.Sleep(3 * time.Second)
+	//time.Sleep(3 * time.Second)
+	// === TODO: Remove ===
+
+	state := state.NewState()
 
 	chI := make(chan mqttd.MqttRpc, 128)
 	chO := make(chan mqttd.MqttRpc, 128)
