@@ -53,6 +53,13 @@ function NewNode(nodeID)
       end
       return json.decode(raw)
     end,
+    GetNetwork = function(self)
+      local raw, err = SD:GetNetwork(self.id)
+      if err ~= nil then
+        error(err)
+      end
+      return json.decode(raw)
+    end,
     GetID = function(self, str)
       if str == nil then
         str = "link_id"

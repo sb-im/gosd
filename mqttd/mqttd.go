@@ -70,12 +70,8 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 				switch strings.Split(p.Topic, "/")[2] {
 				case "status":
 					store.Record(p.Topic, p.Payload)
-
-					// TODO: Remove
-					store.SetNodeStatus(id, p.Payload)
 				case "network":
 					store.Record(p.Topic, p.Payload)
-					//fmt.Println(id, string(p.Payload))
 				case "rpc":
 					o <- MqttRpc{
 						ID:      id,

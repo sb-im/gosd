@@ -10,18 +10,12 @@ import (
 
 type State struct {
 	Plan map[int]PlanState
-	Node map[string]*NodeState
 	Mqtt mqtt.Client
 	Conn redis.Conn
 }
 
 type PlanState struct {
 	id int64
-}
-
-type NodeState struct {
-	Status NodeStatus
-	Msg    map[string][]byte
 }
 
 func NewState() *State {
@@ -33,7 +27,6 @@ func NewState() *State {
 	//defer c.Close()
 
 	return &State{
-		Node: make(map[string]*NodeState),
 		Conn: c,
 	}
 }
@@ -45,20 +38,14 @@ func (s *State) Record(key string, value []byte) error {
 	return nil
 }
 
+func (s *State) GetStatus(id string) (string, error) {
+	return redis.String(s.Conn.Do("GET", fmt.Sprintf("nodes/%s/status", id)))
+}
+
+func (s *State) GetNetwork(id string) (string, error) {
+	return redis.String(s.Conn.Do("GET", fmt.Sprintf("nodes/%s/network", id)))
+}
+
 func (s *State) NodeGet(id, msg string) ([]byte, error) {
 	return redis.Bytes(s.Conn.Do("GET", fmt.Sprintf("nodes/%s/msg/%s", id, msg)))
-}
-
-func (s *State) addNode(id string) error {
-	s.Node[id] = &NodeState{
-		Msg: map[string][]byte{},
-	}
-	return nil
-}
-
-func (s *State) SetNodeStatus(id string, payload []byte) error {
-	if s.Node[id] == nil {
-		s.addNode(id)
-	}
-	return s.Node[id].Status.SetStatus(payload)
 }
