@@ -85,7 +85,7 @@ go1.15:test:
 
 .test-broker:
   script:
-    - apt-get update -y && apt-get install -y mosquitto-clients
+    - apt-get update -y && apt-get install -y mosquitto-clients redis-server
     - make test-broker
 
 # Must Mosquitto >= 1.6

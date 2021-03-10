@@ -35,6 +35,14 @@ func helpGetMqttAddr() string {
 	return mqttAddr
 }
 
+func helpGetRedisAddr() string {
+	redisAddr := "redis://localhost:6379/0"
+	if addr := os.Getenv("REDIS_URL"); addr != "" {
+		redisAddr = addr
+	}
+	return redisAddr
+}
+
 func TestMqttd(t *testing.T) {
 	id := "000"
 	mqttAddr := helpGetMqttAddr()
@@ -44,29 +52,18 @@ func TestMqttd(t *testing.T) {
 	chI := make(chan MqttRpc)
 	chO := make(chan MqttRpc)
 
-	store := state.NewState()
+	store := state.NewState(helpGetRedisAddr())
 	mqttd := NewMqttd(mqttAddr, store, chI, chO)
 	go mqttd.Run(ctx)
 
 	// Wait for mqttd to start and subscribe successfully
-	time.Sleep(1 * time.Millisecond)
-
-	// status
-	rawStatus := `{"code":2,"msg":"neterror","timestamp":"1610965971","status":{"link_id":6,"position_ok":false,"lat":"22.6858109","lng":"114.2247189","alt":"80.0001"}}`
-	cmdRun("mosquitto_pub -L " + mqttAddr + "/nodes/" + id + "/status -m " + rawStatus)
-
-	// Wait status sync
 	time.Sleep(1 * time.Second)
-
-	if store.Node[id].Status.Code != 2 {
-		t.Error("Error: Should has data")
-	}
 
 	// Msg
 	rawMsg := `{"WD":0,"WS":0,"T":66115,"RH":426,"Pa":99780}`
 	cmdRun("mosquitto_pub -L " + mqttAddr + "/nodes/" + id + "/msg/weather -m " + rawMsg)
 
-	if msg, err := store.NodeGet(id, "weather"); err != nil {
+	if msg, err := store.GetNodeMsg(id, "weather"); err != nil {
 		t.Error(err)
 	} else if string(msg) != rawMsg {
 		t.Errorf("%s\n", msg)
@@ -85,7 +82,7 @@ func TestMqttdRpc(t *testing.T) {
 	chI := make(chan MqttRpc)
 	chO := make(chan MqttRpc)
 
-	store := state.NewState()
+	store := state.NewState(helpGetRedisAddr())
 	mqttd := NewMqttd(mqttAddr, store, chI, chO)
 	go mqttd.Run(ctx)
 	//time.Sleep(3 * time.Second)
