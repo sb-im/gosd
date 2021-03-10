@@ -39,11 +39,13 @@ go1.15:build:
   stage: test
   services:
     - postgres:13
+    - redis:latest
   variables:
     POSTGRES_DB: gosd
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: password
     DATABASE_URL: "postgres://postgres:password@postgres/gosd?sslmode=disable"
+    REDIS_URL: "redis://redis:6379/1"
   before_script:
     - go version
   script:
