@@ -38,14 +38,10 @@ func (s *State) Record(key string, value []byte) error {
 	return nil
 }
 
-func (s *State) GetStatus(id string) (string, error) {
-	return redis.String(s.Conn.Do("GET", fmt.Sprintf("nodes/%s/status", id)))
+func (s *State) GetNode(id, msg string) (string, error) {
+	return redis.String(s.Conn.Do("GET", fmt.Sprintf("nodes/%s/%s", id, msg)))
 }
 
-func (s *State) GetNetwork(id string) (string, error) {
-	return redis.String(s.Conn.Do("GET", fmt.Sprintf("nodes/%s/network", id)))
-}
-
-func (s *State) NodeGet(id, msg string) ([]byte, error) {
+func (s *State) GetNodeMsg(id, msg string) ([]byte, error) {
 	return redis.Bytes(s.Conn.Do("GET", fmt.Sprintf("nodes/%s/msg/%s", id, msg)))
 }

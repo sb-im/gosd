@@ -13,7 +13,7 @@ func Test_NodePutGet(t *testing.T) {
 	str := `{"test":23333333333333}`
 	state.Record(fmt.Sprintf("nodes/%s/msg/%s", id, msg), []byte(str))
 
-	payload, err := state.NodeGet(id, msg)
+	payload, err := state.GetNodeMsg(id, msg)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -25,7 +25,7 @@ func Test_NodePutGet(t *testing.T) {
 
 func Test_NodeGetIdNil(t *testing.T) {
 	state := NewState()
-	payload, err := state.NodeGet("2", "test")
+	payload, err := state.GetNodeMsg("2", "test")
 	if err == nil {
 		t.Error("Should no payload")
 		t.Errorf("%s\n", payload)
@@ -39,7 +39,7 @@ func Test_NodeGetMsgNil(t *testing.T) {
 	str := `{"test":23333333333333}`
 	state.Record(fmt.Sprintf("nodes/%s/msg/%s", id, msg), []byte(str))
 
-	payload, err := state.NodeGet(id, "test2")
+	payload, err := state.GetNodeMsg(id, "test2")
 	if err == nil {
 		t.Error("Should no Message")
 	}

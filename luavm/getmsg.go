@@ -1,15 +1,14 @@
 package luavm
 
-// TODO: Need Improve
 func (s *Service) GetMsg(id, msg string) (string, error) {
-	raw, err := s.State.NodeGet(id, msg)
+	raw, err := s.State.GetNodeMsg(id, msg)
 	return string(raw), err
 }
 
 func (s *Service) GetStatus(id string) (string, error) {
-	return s.State.GetStatus(id)
+	return s.State.GetNode(id, "status")
 }
 
 func (s *Service) GetNetwork(id string) (string, error) {
-	return s.State.GetNetwork(id)
+	return s.State.GetNode(id, "network")
 }
