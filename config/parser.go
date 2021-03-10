@@ -40,6 +40,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.mqttClientID = parseString(value, defaultMqttClientID)
 		case "MQTT_URL":
 			p.opts.mqttURL = parseString(value, defaultMqttURL)
+		case "REDIS_URL":
+			p.opts.redisURL = parseString(value, defaultRedisURL)
 		case "BASE_URL":
 			p.opts.baseURL, p.opts.rootURL, p.opts.basePath, err = parseBaseURL(value)
 			if err != nil {

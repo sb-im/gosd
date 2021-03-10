@@ -18,9 +18,9 @@ type PlanState struct {
 	id int64
 }
 
-func NewState() *State {
+func NewState(rawURL string) *State {
 	//c, err := redis.DialURL(os.Getenv("REDIS_URL"))
-	c, err := redis.DialURL("redis://localhost:6379/0")
+	c, err := redis.DialURL(rawURL)
 	if err != nil {
 		// TODO: handle connection error
 	}

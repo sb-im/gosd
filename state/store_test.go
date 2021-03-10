@@ -1,13 +1,14 @@
 package state
 
 import (
-	"fmt"
 	"bytes"
+	"fmt"
+	"os"
 	"testing"
 )
 
 func Test_NodePutGet(t *testing.T) {
-	state := NewState()
+	state := NewState(os.Getenv("REDIS_URL"))
 	id := "233"
 	msg := "test"
 	str := `{"test":23333333333333}`
@@ -24,7 +25,7 @@ func Test_NodePutGet(t *testing.T) {
 }
 
 func Test_NodeGetIdNil(t *testing.T) {
-	state := NewState()
+	state := NewState(os.Getenv("REDIS_URL"))
 	payload, err := state.GetNodeMsg("2", "test")
 	if err == nil {
 		t.Error("Should no payload")
@@ -33,7 +34,7 @@ func Test_NodeGetIdNil(t *testing.T) {
 }
 
 func Test_NodeGetMsgNil(t *testing.T) {
-	state := NewState()
+	state := NewState(os.Getenv("REDIS_URL"))
 	id := "233"
 	msg := "test"
 	str := `{"test":23333333333333}`

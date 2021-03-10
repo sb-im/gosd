@@ -6,6 +6,7 @@ const (
 	defaultMqttURL          = "mqtt://admin:public@localhost:1883"
 	defaultBaseURL          = "http://localhost/gosd"
 	defaultRootURL          = "http://localhost"
+	defaultRedisURL         = "redis://localhost:6379/0"
 	defaultBasePath         = ""
 	defaultDatabaseURL      = "postgres://postgres:password@localhost/gosd?sslmode=disable"
 	defaultDatabaseMaxConns = 20
@@ -20,6 +21,7 @@ type Options struct {
 	mqttURL          string
 	baseURL          string
 	rootURL          string
+	redisURL         string
 	basePath         string
 	databaseURL      string
 	databaseMaxConns int
@@ -35,6 +37,7 @@ func NewOptions() *Options {
 		mqttURL:          defaultMqttURL,
 		baseURL:          defaultBaseURL,
 		rootURL:          defaultRootURL,
+		redisURL:         defaultRedisURL,
 		basePath:         defaultBasePath,
 		databaseURL:      defaultDatabaseURL,
 		databaseMaxConns: defaultDatabaseMaxConns,
@@ -61,6 +64,10 @@ func (o *Options) BaseURL() string {
 
 func (o *Options) RootURL() string {
 	return o.rootURL
+}
+
+func (o *Options) RedisURL() string {
+	return o.redisURL
 }
 
 func (o *Options) DatabaseURL() string {

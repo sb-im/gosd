@@ -24,7 +24,7 @@ func startDaemon(store *storage.Storage, opts *config.Options) {
 
 	//go showProcessStatistics()
 
-	state := state.NewState()
+	state := state.NewState(opts.RedisURL())
 
 	chI := make(chan mqttd.MqttRpc, 128)
 	chO := make(chan mqttd.MqttRpc, 128)
