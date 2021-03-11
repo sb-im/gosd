@@ -31,7 +31,7 @@ func TestNewWorker(t *testing.T) {
 
 	store := storage.NewStorage(db)
 
-	s := state.NewState()
+	s := state.NewState(opts.RedisURL())
 	s.Mqtt = &jsonrpc2mqtt.MockClient{}
 
 	chI := make(chan mqttd.MqttRpc)
@@ -59,7 +59,8 @@ func TestNewWorker(t *testing.T) {
 	}
 
 	p := &Task{
-		NodeID: "1",
+		NodeID: "000",
+		PlanID: "000",
 		URL:    "1/12/3/4/4",
 		Script: script,
 	}
