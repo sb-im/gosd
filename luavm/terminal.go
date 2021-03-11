@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"errors"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	redis "github.com/gomodule/redigo/redis"
 )
 
 const (
@@ -14,13 +14,32 @@ const (
 func (s *Service) IOGets() (string, error) {
 	ch := make(chan []byte)
 	topic := fmt.Sprintf(topic_terminal, s.Task.PlanID)
-	token := s.State.Mqtt.Subscribe(topic, 2, func(client mqtt.Client, msg mqtt.Message) {
-		ch <- msg.Payload()
-	})
 
-	if err := token.Error(); err != nil {
-		return "", err
-	}
+	go func() {
+		keyspace := "__keyspace@0__:%s"
+		psc := redis.PubSubConn{Conn: s.State.Pool.Get()}
+		psc.PSubscribe(fmt.Sprintf(keyspace, topic))
+		for {
+			switch v := psc.Receive().(type) {
+			case redis.Message:
+				fmt.Printf("%s: message: %s\n", v.Channel, v.Data)
+
+				raw, err := s.State.BytesGet(topic)
+				if err != nil {
+					// TODO: error handling
+				}
+				ch <- raw
+				return
+			case redis.Subscription:
+				fmt.Printf("%s: %s %d\n", v.Channel, v.Kind, v.Count)
+			case error:
+				fmt.Println(v)
+				//return v
+			default:
+				fmt.Println("default")
+			}
+		}
+	}()
 
 	var raw []byte
 	select {
@@ -29,13 +48,9 @@ func (s *Service) IOGets() (string, error) {
 	case raw = <-ch:
 	}
 
-	token = s.State.Mqtt.Unsubscribe(topic)
-	if err := token.Error(); err != nil {
-		return string(raw), err
-	}
 	return string(raw), nil
 }
 
 func (s *Service) IOPuts(str string) error {
-	return s.State.Mqtt.Publish(fmt.Sprintf(topic_terminal, s.Task.PlanID), 1, false, []byte(str)).Error()
+	return s.State.Record(fmt.Sprintf(topic_terminal, s.Task.PlanID), []byte(str))
 }

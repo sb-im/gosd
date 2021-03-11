@@ -68,17 +68,16 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 				// nodes/%s/network
 				// nodes/%s/rpc/recv
 				// nodes/%s/msg/%s
+
+				// plans/%s/term
+
 				switch strings.Split(p.Topic, "/")[2] {
-				case "status":
-					store.Record(p.Topic, p.Payload)
-				case "network":
-					store.Record(p.Topic, p.Payload)
 				case "rpc":
 					o <- MqttRpc{
 						ID:      id,
 						Payload: p.Payload,
 					}
-				case "msg":
+				default:
 					store.Record(p.Topic, p.Payload)
 				}
 
@@ -302,6 +301,10 @@ func (t *Mqtt) doRun(parent context.Context) {
 			},
 			fmt.Sprintf(t.Config.Gtran.Prefix, "+", "+"): {
 				QoS: 1,
+			},
+			fmt.Sprintf("plans/%s/term", "+"): {
+				QoS: 1,
+				NoLocal: true,
 			},
 		},
 	})
