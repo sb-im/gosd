@@ -32,5 +32,5 @@ func (s *Service) ToggleDialog(dialog *Dialog) error {
 	if err != nil {
 		return err
 	}
-	return s.State.Mqtt.Publish(fmt.Sprintf(topic_dialog, s.Task.PlanID), 1, true, data).Error()
+	return s.State.Record(fmt.Sprintf(topic_dialog, s.Task.PlanID), data)
 }

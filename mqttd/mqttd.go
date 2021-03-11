@@ -10,9 +10,10 @@ import (
 
 	"sb.im/gosd/state"
 
-	"github.com/sb-im/jsonrpc-lite"
+	redis "github.com/gomodule/redigo/redis"
 	packets "github.com/eclipse/paho.golang/packets"
 	paho "github.com/eclipse/paho.golang/paho"
+	"github.com/sb-im/jsonrpc-lite"
 
 	logger "log"
 )
@@ -199,6 +200,50 @@ func (t *Mqtt) Run(ctx context.Context) {
 	if err != nil {
 		logger.Println(err)
 	}
+
+	go func() {
+		keyspace := "__keyspace@0__:%s"
+		psc := redis.PubSubConn{Conn: t.State.Pool.Get()}
+		psc.PSubscribe(fmt.Sprintf(keyspace, "plans/*"))
+		for {
+			switch v := psc.Receive().(type) {
+			case redis.Message:
+				fmt.Printf("%s: message: %s\n", v.Channel, v.Data)
+
+				topic := strings.Split(v.Channel, ":")[1]
+				fmt.Println(t.State.StringGet(topic))
+
+				raw, err := t.State.BytesGet(topic)
+				if err != nil {
+					// TODO: error handling
+				}
+
+				res, err := t.Client.Publish(ctx, &paho.Publish{
+					Payload: raw,
+					Topic:   topic,
+					QoS:     1,
+					Retain:	 true,
+				})
+
+				if err != nil {
+					if res != nil {
+						logger.Printf("%+v\n", res)
+					}
+					logger.Println(err)
+					//return err
+				}
+
+
+			case redis.Subscription:
+				fmt.Printf("%s: %s %d\n", v.Channel, v.Kind, v.Count)
+			case error:
+				fmt.Println(v)
+				//return v
+			default:
+				fmt.Println("default")
+			}
+		}
+	}()
 
 	for {
 		select {
