@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"sb.im/gosd/state"
 )
 
 const (
@@ -23,14 +23,14 @@ type Detail struct {
 }
 
 type StatusManager struct {
-	Plans  map[string]*Detail
-	Client mqtt.Client
+	Plans map[string]*Detail
+	State *state.State
 }
 
-func NewStatusManager(client mqtt.Client) *StatusManager {
+func NewStatusManager(store *state.State) *StatusManager {
 	return &StatusManager{
-		Plans:  map[string]*Detail{},
-		Client: client,
+		Plans: map[string]*Detail{},
+		State: store,
 	}
 }
 
@@ -39,7 +39,7 @@ func (s *StatusManager) SetRunning(planID string, status interface{}) error {
 	if err != nil {
 		return err
 	}
-	return s.Client.Publish(fmt.Sprintf(topic_detail, planID), 1, true, data).Error()
+	return s.State.Record(fmt.Sprintf(topic_detail, planID), data)
 }
 
 func (s *StatusManager) SetStatus(planID, status string) error {
@@ -55,7 +55,7 @@ func (s *StatusManager) SetStatus(planID, status string) error {
 		return err
 	}
 
-	return s.Client.Publish(fmt.Sprintf(topic_detail, planID), 1, true, data).Error()
+	return s.State.Record(fmt.Sprintf(topic_detail, planID), data)
 }
 
 func (s *StatusManager) GetStatus(planID string) string {
