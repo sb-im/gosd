@@ -8,7 +8,6 @@ import (
 
 	"sb.im/gosd/config"
 	"sb.im/gosd/database"
-	"sb.im/gosd/jsonrpc2mqtt"
 	"sb.im/gosd/mqttd"
 	"sb.im/gosd/rpc2mqtt"
 	"sb.im/gosd/state"
@@ -32,7 +31,6 @@ func TestNewWorker(t *testing.T) {
 	store := storage.NewStorage(db)
 
 	s := state.NewState(opts.RedisURL())
-	s.Mqtt = &jsonrpc2mqtt.MockClient{}
 
 	chI := make(chan mqttd.MqttRpc)
 	chO := make(chan mqttd.MqttRpc)

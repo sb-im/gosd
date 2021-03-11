@@ -3,14 +3,11 @@ package state
 import (
 	"fmt"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
-
 	redis "github.com/gomodule/redigo/redis"
 )
 
 type State struct {
 	Plan map[int]PlanState
-	Mqtt mqtt.Client
 	Pool *redis.Pool
 }
 
