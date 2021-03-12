@@ -88,15 +88,14 @@ func (h *handler) sendTask(log *model.PlanLog) error {
 
 	h.worker.Log <- log
 
-	h.worker.Queue <- &luavm.Task{
-		ID: strconv.FormatInt(log.ID, 10),
-		PlanID: strconv.FormatInt(plan.ID, 10),
-		Files:  plan.Attachments,
-		Extra:  plan.Extra,
-		NodeID: strconv.FormatInt(plan.NodeID, 10),
-		URL:    h.baseURL + "/api/v1/plans/" + strconv.FormatInt(log.PlanID, 10) + "/logs/" + strconv.FormatInt(log.LogID, 10),
-		Script: script,
-	}
+
+	task := luavm.NewTask(log.ID, plan.NodeID, plan.ID)
+	task.Files = plan.Attachments
+	task.Extra = plan.Extra
+	task.URL   = h.baseURL + "/api/v1/plans/" + strconv.FormatInt(log.PlanID, 10) + "/logs/" + strconv.FormatInt(log.LogID, 10)
+	task.Script = script
+
+	h.worker.Queue <- task
 
 	return nil
 }

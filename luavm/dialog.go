@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	topic_dialog = "plans/%s/dialog"
+	topic_dialog = "plans/%d/dialog"
 )
 
 type Dialog struct {
@@ -32,5 +32,5 @@ func (s *Service) ToggleDialog(dialog *Dialog) error {
 	if err != nil {
 		return err
 	}
-	return s.State.Record(fmt.Sprintf(topic_dialog, s.Task.PlanID), data)
+	return s.State.Record(fmt.Sprintf(topic_dialog, s.Task.planID), data)
 }

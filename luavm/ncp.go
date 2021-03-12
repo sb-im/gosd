@@ -16,11 +16,7 @@ const (
 func (s *Service) FileUrl(key string) string {
 	blobID, ok := s.Task.Files[key]
 	if !ok {
-		id, err := strconv.ParseInt(s.Task.PlanID, 10, 64)
-		if err != nil {
-			fmt.Println(err)
-		}
-		plan, err := s.Store.PlanByID(id)
+		plan, err := s.Store.PlanByID(s.Task.planID)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -40,11 +36,7 @@ func (s *Service) FileUrl(key string) string {
 }
 
 func (s *Service) LogFileUrl(key string) string {
-	id, err := strconv.ParseInt(s.Task.ID, 10, 64)
-	if err != nil {
-		fmt.Println(err)
-	}
-	plan, err := s.Store.PlanLogByID(id)
+	plan, err := s.Store.PlanLogByID(s.Task.id)
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -56,14 +56,10 @@ func TestNewWorker(t *testing.T) {
 		t.Error(err)
 	}
 
-	p := &Task{
-		NodeID: "000",
-		PlanID: "000",
-		URL:    "1/12/3/4/4",
-		Script: script,
-	}
+	task := NewTask(0, 0, 0)
+	task.Script = script
 
-	err = worker.doRun(p)
+	err = worker.doRun(task)
 	if err != nil {
 
 		// TODO: fix

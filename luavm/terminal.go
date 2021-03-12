@@ -8,12 +8,12 @@ import (
 )
 
 const (
-	topic_terminal = "plans/%s/term"
+	topic_terminal = "plans/%d/term"
 )
 
 func (s *Service) IOGets() (string, error) {
 	ch := make(chan []byte)
-	topic := fmt.Sprintf(topic_terminal, s.Task.PlanID)
+	topic := fmt.Sprintf(topic_terminal, s.Task.planID)
 
 	go func() {
 		keyspace := "__keyspace@0__:%s"
@@ -52,5 +52,5 @@ func (s *Service) IOGets() (string, error) {
 }
 
 func (s *Service) IOPuts(str string) error {
-	return s.State.Record(fmt.Sprintf(topic_terminal, s.Task.PlanID), []byte(str))
+	return s.State.Record(fmt.Sprintf(topic_terminal, s.Task.planID), []byte(str))
 }

@@ -55,7 +55,7 @@ func (w Worker) doRun(task *Task) error {
 	var err error
 
 	l := lua.NewState()
-	planID := task.PlanID
+	planID := task.PlanID()
 	defer func() {
 		l.Close()
 
@@ -72,8 +72,8 @@ func (w Worker) doRun(task *Task) error {
 	service.State = w.State
 	service.Store = w.Store
 	service.Server = w.RpcServer
-	w.Running[task.PlanID] = service
-	defer delete(w.Running, task.PlanID)
+	w.Running[task.PlanID()] = service
+	defer delete(w.Running, task.PlanID())
 	defer fmt.Println("==> luavm END")
 	l.SetGlobal("SD", luar.New(l, service))
 
@@ -101,7 +101,7 @@ func (w Worker) doRun(task *Task) error {
 		Fn:      l.GetGlobal("SD_main"),
 		NRet:    1,
 		Protect: true,
-	}, lua.LString(task.NodeID)); err != nil {
+	}, lua.LString(task.NodeID())); err != nil {
 		return err
 	}
 
