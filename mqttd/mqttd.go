@@ -50,7 +50,7 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 	cache := make(chan MqttRpc, 128)
 
 	// 2h
-	sessionExpiryInterval := uint32(7200)
+	//sessionExpiryInterval := uint32(7200)
 
 	return &Mqtt{
 		I:      i,
@@ -95,7 +95,8 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 			Password:   []byte(password),
 			Username:   opt.User.Username(),
 			ClientID:   fmt.Sprintf(config.Client, config.ID),
-			CleanStart: false,
+			//CleanStart: false,
+			CleanStart: true,
 			// interval 10s
 			KeepAlive: 10,
 			// TODO:
@@ -120,7 +121,7 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 				//SubscriptionIdentifier *uint32
 				//// SessionExpiryInterval is the time in seconds after a client disconnects
 				//// that the server should retain the session information (subscriptions etc)
-				SessionExpiryInterval: &sessionExpiryInterval,
+				//SessionExpiryInterval: &sessionExpiryInterval,
 				//// AssignedClientID is the server assigned client identifier in the case
 				//// that a client connected without specifying a clientID the server
 				//// generates one and returns it in the Connack
