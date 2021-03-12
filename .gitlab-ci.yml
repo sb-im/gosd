@@ -144,6 +144,7 @@ test-simulation:
   services:
     - eclipse-mosquitto:1.6
     - postgres:13
+    - redis:latest
   variables:
     MQTT: "eclipse-mosquitto:1883"
     MQTT_URL: "eclipse-mosquitto:1883"
@@ -151,6 +152,7 @@ test-simulation:
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: password
     DATABASE_URL: "postgres://postgres:password@postgres/gosd?sslmode=disable"
+    REDIS_URL: "redis://redis:6379"
   before_script:
     # - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/sbim/superdock/cloud/ncp.git".insteadOf git@gitlab.com:sbim/superdock/cloud/ncp.git
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/sbim/superdock/cloud/ncp.git
