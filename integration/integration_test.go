@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"net/url"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -96,7 +96,7 @@ ncpio:
 }
 
 func TestIntegration(t *testing.T) {
-	id := "000"
+	id := "0"
 	parse := config.NewParser()
 	opts, err := parse.ParseEnvironmentVariables()
 	if err != nil {
@@ -110,13 +110,7 @@ func TestIntegration(t *testing.T) {
 	)
 	store := storage.NewStorage(db)
 
-	uri, err := url.Parse(opts.MqttURL())
-	if err != nil {
-		panic(err)
-	}
-
-	state := state.NewState()
-	state.Connect(opts.MqttClientID(), uri)
+	state := state.NewState(opts.RedisURL())
 
 	// Start NCP
 	go startupNcp(id)
@@ -150,8 +144,9 @@ func TestIntegration(t *testing.T) {
 		t.Error(err)
 	}
 
+	id64, err := strconv.ParseInt(id, 10, 64)
 	worker.Queue <- &luavm.Task{
-		NodeID: id,
+		NodeID: id64,
 		URL:    "1/12/3/4/4",
 		Script: script,
 	}
