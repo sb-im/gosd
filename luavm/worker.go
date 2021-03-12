@@ -2,7 +2,6 @@ package luavm
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"sb.im/gosd/rpc2mqtt"
@@ -22,7 +21,6 @@ type Worker struct {
 	State         *state.State
 	Store         *storage.Storage
 	Running       map[string]*Service
-	StatusManager *StatusManager
 }
 
 func NewWorker(s *state.State, store *storage.Storage, rpcServer *rpc2mqtt.Rpc2mqtt) *Worker {
@@ -33,14 +31,13 @@ func NewWorker(s *state.State, store *storage.Storage, rpcServer *rpc2mqtt.Rpc2m
 		Store:         store,
 		Running:       make(map[string]*Service),
 		RpcServer:     rpcServer,
-		StatusManager: NewStatusManager(s),
 	}
 }
 
 func (w Worker) Run() {
 	go func() {
 		for l := range w.Log {
-			w.StatusManager.SetRunning(strconv.FormatInt(l.PlanID, 10), l)
+			w.SetRunning(l.PlanID, l)
 		}
 	}()
 
@@ -55,15 +52,15 @@ func (w Worker) doRun(task *Task) error {
 	var err error
 
 	l := lua.NewState()
-	planID := task.PlanID()
+	planID := task.planID
 	defer func() {
 		l.Close()
 
 		if r := recover(); r != nil {
-			fmt.Printf("Emergency stop planID: %s\n", planID)
+			fmt.Printf("Emergency stop planID: %d\n", planID)
 			fmt.Printf("Error：%s\n", r)
 		}
-		w.StatusManager.SetRunning(planID, &struct{}{})
+		w.SetRunning(planID, &struct{}{})
 	}()
 
 	luajson.Preload(l)
