@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"sb.im/gosd/api"
+	"sb.im/gosd/bindingdb"
 	"sb.im/gosd/config"
 	"sb.im/gosd/luavm"
 	"sb.im/gosd/state"
@@ -31,6 +32,9 @@ func startDaemon(store *storage.Storage, opts *config.Options) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	// binding: redis >>> database
+	go bindingdb.BindingDB(ctx, state, store)
 
 	mqttd := mqttd.NewMqttd(opts.MqttURL(), state, chI, chO)
 	go mqttd.Run(ctx)
