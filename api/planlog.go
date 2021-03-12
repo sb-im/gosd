@@ -91,7 +91,7 @@ func (h *handler) sendTask(log *model.PlanLog) error {
 	h.worker.Queue <- &luavm.Task{
 		ID: strconv.FormatInt(log.ID, 10),
 		PlanID: strconv.FormatInt(plan.ID, 10),
-		Attach: plan.Attachments,
+		Files:  plan.Attachments,
 		Extra:  plan.Extra,
 		NodeID: strconv.FormatInt(plan.NodeID, 10),
 		URL:    h.baseURL + "/api/v1/plans/" + strconv.FormatInt(log.PlanID, 10) + "/logs/" + strconv.FormatInt(log.LogID, 10),

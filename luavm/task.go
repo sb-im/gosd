@@ -1,11 +1,12 @@
 package luavm
 
 type Task struct {
-	ID     string
-	PlanID string
-	Attach map[string]string
-	Extra  map[string]string
-	NodeID string
-	URL    string
-	Script []byte
+	ID     string            `json:"id"`
+	Name   string            `json:"name"`
+	NodeID string            `json:"node_id"`
+	PlanID string            `json:"-"`
+	Files  map[string]string `json:"files"`
+	Extra  map[string]string `json:"extra"`
+	URL    string            `json:"-"`
+	Script []byte            `json:"-"`
 }

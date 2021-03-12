@@ -14,7 +14,7 @@ const (
 )
 
 func (s *Service) FileUrl(key string) string {
-	blobID, ok := s.Task.Attach[key]
+	blobID, ok := s.Task.Files[key]
 	if !ok {
 		id, err := strconv.ParseInt(s.Task.PlanID, 10, 64)
 		if err != nil {
