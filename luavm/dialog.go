@@ -32,5 +32,5 @@ func (s *Service) ToggleDialog(dialog *Dialog) error {
 	if err != nil {
 		return err
 	}
-	return s.State.Record(fmt.Sprintf(topic_dialog, s.Task.planID), data)
+	return s.State.Record(fmt.Sprintf(topic_dialog, s.Task.PlanID), data)
 }

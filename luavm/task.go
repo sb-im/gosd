@@ -5,9 +5,9 @@ import (
 )
 
 type Task struct {
-	id     int64             `json:"-"`
-	nodeID int64             `json:"-"`
-	planID int64             `json:"-"`
+	ID     int64             `json:"-"`
+	NodeID int64             `json:"-"`
+	PlanID int64             `json:"-"`
 	Files  map[string]string `json:"files"`
 	Extra  map[string]string `json:"extra"`
 	URL    string            `json:"-"`
@@ -17,21 +17,21 @@ type Task struct {
 
 func NewTask(id, nodeID, planID int64) *Task {
 	return &Task{
-		id: id,
-		nodeID: nodeID,
-		planID: planID,
+		ID: id,
+		NodeID: nodeID,
+		PlanID: planID,
 		Job: Job{
 			JobID: id,
 		},
 	}
 }
 
-func (t *Task) NodeID() string {
-	return strconv.FormatInt(t.nodeID, 10)
+func (t *Task) StringNodeID() string {
+	return strconv.FormatInt(t.NodeID, 10)
 }
 
-func (t *Task) PlanID() string {
-	return strconv.FormatInt(t.planID, 10)
+func (t *Task) StringPlanID() string {
+	return strconv.FormatInt(t.PlanID, 10)
 }
 
 type Job struct {

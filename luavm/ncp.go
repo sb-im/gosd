@@ -16,7 +16,7 @@ const (
 func (s *Service) FileUrl(key string) string {
 	blobID, ok := s.Task.Files[key]
 	if !ok {
-		plan, err := s.Store.PlanByID(s.Task.planID)
+		plan, err := s.Store.PlanByID(s.Task.PlanID)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -36,7 +36,7 @@ func (s *Service) FileUrl(key string) string {
 }
 
 func (s *Service) LogFileUrl(key string) string {
-	plan, err := s.Store.PlanLogByID(s.Task.id)
+	plan, err := s.Store.PlanLogByID(s.Task.ID)
 	if err != nil {
 		fmt.Println(err)
 	}

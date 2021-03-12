@@ -52,15 +52,14 @@ func (w Worker) doRun(task *Task) error {
 	var err error
 
 	l := lua.NewState()
-	planID := task.planID
 	defer func() {
 		l.Close()
 
 		if r := recover(); r != nil {
-			fmt.Printf("Emergency stop planID: %d\n", planID)
+			fmt.Printf("Emergency stop planID: %d\n", task.PlanID)
 			fmt.Printf("Error：%s\n", r)
 		}
-		w.SetRunning(planID, &struct{}{})
+		w.SetRunning(task.PlanID, &struct{}{})
 	}()
 
 	luajson.Preload(l)
@@ -69,8 +68,8 @@ func (w Worker) doRun(task *Task) error {
 	service.State = w.State
 	service.Store = w.Store
 	service.Server = w.RpcServer
-	w.Running[task.PlanID()] = service
-	defer delete(w.Running, task.PlanID())
+	w.Running[task.StringPlanID()] = service
+	defer delete(w.Running, task.StringPlanID())
 	defer fmt.Println("==> luavm END")
 	l.SetGlobal("SD", luar.New(l, service))
 
@@ -98,7 +97,7 @@ func (w Worker) doRun(task *Task) error {
 		Fn:      l.GetGlobal("SD_main"),
 		NRet:    1,
 		Protect: true,
-	}, lua.LString(task.NodeID())); err != nil {
+	}, lua.LString(task.StringNodeID())); err != nil {
 		return err
 	}
 
