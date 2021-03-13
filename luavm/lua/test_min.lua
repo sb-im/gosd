@@ -1,3 +1,3 @@
-function main(node_id)
-  return node_id
+function main(plan)
+  print("=== Test Run ===")
 end

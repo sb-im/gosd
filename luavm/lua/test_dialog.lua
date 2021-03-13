@@ -1,14 +1,13 @@
-local json = require("json")
+function main(plan)
+  print("=== START Lua ===")
+  plan:CleanDialog()
+  sleep("1s")
 
-function main(node_id)
-  SD:CleanDialog()
-  err = SD:Sleep("10s")
-  print(err)
-
-  err = SD:IOPuts("checking")
+  err = plan:Puts("checking")
   if err ~= nil then
     print(json.encode(err))
   end
+
 
   dialog = {
     name = "Checker ~",
@@ -26,12 +25,14 @@ function main(node_id)
     }
   }
 
-  err = SD:ToggleDialog(dialog)
+  err = plan:ToggleDialog(dialog)
   if err ~= nil then
     print(json.encode(err))
   end
 
-  msg, err = SD:IOGets()
+  sleep("1s")
+
+  msg, err = plan:Gets()
   if err ~= nil then
     print(msg)
     print(json.encode(err))
@@ -51,7 +52,7 @@ function main(node_id)
   }
   SD:ToggleDialog(ask_status)
 
-  msg, err = SD:IOGets()
+  msg, err = plan:Gets()
   if err ~= nil then
     print(msg)
     print(json.encode(err))
@@ -59,10 +60,10 @@ function main(node_id)
 
   SD:CleanDialog()
 
-  err = SD:IOPuts("checked")
+  err = plan:Puts("checked")
   if err ~= nil then
     print(json.encode(err))
   end
 
-  return node_id
+  print("=== END Lua END ===")
 end

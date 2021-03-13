@@ -2,9 +2,8 @@ package luavm
 
 import (
 	"context"
-	"io/ioutil"
-	"os"
 	"testing"
+	"time"
 
 	"sb.im/gosd/config"
 	"sb.im/gosd/database"
@@ -46,23 +45,33 @@ func TestNewWorker(t *testing.T) {
 
 	worker := NewWorker(s, store, rpcServer)
 
-	file, err := os.Open("lua/test_min.lua")
-	if err != nil {
-		t.Error(err)
-	}
 
-	script, err := ioutil.ReadAll(file)
-	if err != nil {
-		t.Error(err)
-	}
-
+	// test_min
 	task := NewTask(0, 0, 0)
-	task.Script = script
+	task.Script = []byte(LuaMap["test_min"])
 
 	err = worker.doRun(task)
 	if err != nil {
-
-		// TODO: fix
-		//t.Error(err)
+		t.Error(err)
 	}
+
+	// test_dialog
+	taskDialog := NewTask(0, 0, 0)
+	taskDialog.Script = []byte(LuaMap["test_dialog"])
+
+	go func() {
+		for {
+			worker.State.Record("plans/0/term", []byte("fine"))
+			time.Sleep(1*time.Second)
+			worker.State.Record("plans/0/term", []byte("confirm"))
+			time.Sleep(1*time.Second)
+		}
+	}()
+	err = worker.doRun(taskDialog)
+	if err != nil {
+		t.Error(err)
+	}
+
+
+
 }

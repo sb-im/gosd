@@ -25,7 +25,7 @@ test: generate
 test-broker: generate
 	go test ./mqttd -cover -v
 
-test-simulation:
+test-simulation: generate
 	go test ./luavm ./integration -cover -v
 
 # \(statements\)(?:\s+)?(\d+(?:\.\d+)?%)
