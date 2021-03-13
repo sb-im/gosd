@@ -92,7 +92,9 @@ func (h *handler) sendTask(log *model.PlanLog) error {
 	task := luavm.NewTask(log.ID, plan.NodeID, plan.ID)
 	task.Files = plan.Attachments
 	task.Extra = plan.Extra
-	task.URL   = h.baseURL + "/api/v1/plans/" + strconv.FormatInt(log.PlanID, 10) + "/logs/" + strconv.FormatInt(log.LogID, 10)
+	//task.URL   = h.baseURL + "/api/v1/plans/" + strconv.FormatInt(log.PlanID, 10) + "/logs/" + strconv.FormatInt(log.LogID, 10)
+	task.URL = "api/v1/plans/%d?files=%s&token=%s"
+	task.JobURL = "api/v1/plans/%d/jobs/%d?files=%s&token=%s"
 	task.Script = script
 
 	h.worker.Queue <- task
