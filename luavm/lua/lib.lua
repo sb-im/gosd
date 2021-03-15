@@ -94,31 +94,34 @@ function NewPlan(nodeID)
         error(err)
       end
     end,
-    GetExtra = function(self, key)
-      local data, err = SD:GetExtra(key)
+    GetAttach = function(self)
+      local raw, err = SD:GetAttach()
       if err ~= nil then
         error(err)
       end
-      return data
+      return json.decode(raw)
     end,
-    SetExtra = function(self, key, value)
-      local err = SD:SetExtra(key, value)
+    SetAttach = function(self, attach)
+      local err = SD:SetAttach(json.encode(attach))
       if err ~= nil then
         error(err)
       end
     end,
-    GetJobExtra = function(self, key)
-      local data, err = SD:GetJobExtra(key)
-      if err ~= nil then
-        error(err)
-      end
-      return data
+    GetExtra = function(self)
+      return self.GetAttach(self).extra
     end,
-    SetJobExtra = function(self, key, value)
-      local err = SD:SetJobExtra(key, value)
-      if err ~= nil then
-        error(err)
-      end
+    SetExtra = function(self, extra)
+      local data = self.GetAttach()
+      data.extra = extra
+      self.SetAttach(self, data)
+    end,
+    GetJobExtra = function(self)
+      return self.GetAttach(self).job.extra
+    end,
+    SetJobExtra = function(self, extra)
+      local data = self.GetAttach()
+      data.job.extra = extra
+      self.SetAttach(self, data)
     end,
     FileUrl = function(self, key)
       local data = SD:FileUrl(key)

@@ -23,6 +23,8 @@ func (s *Service) setBlob(id, filename, content string) {
 	s.Store.UpdateBlob(blob)
 }
 
+// TODO: Need Fix s.Task.Files == nil
+
 // GetFilesContent(key) filename, content
 func (s *Service) GetFilesContent(key string) (string, string) {
 	return s.getBlob(s.Task.Files[key])
