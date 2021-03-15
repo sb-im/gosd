@@ -94,6 +94,32 @@ function NewPlan(nodeID)
         error(err)
       end
     end,
+    GetExtra = function(self, key)
+      local data, err = SD:GetExtra(key)
+      if err ~= nil then
+        error(err)
+      end
+      return data
+    end,
+    SetExtra = function(self, key, value)
+      local err = SD:SetExtra(key, value)
+      if err ~= nil then
+        error(err)
+      end
+    end,
+    GetJobExtra = function(self, key)
+      local data, err = SD:GetJobExtra(key)
+      if err ~= nil then
+        error(err)
+      end
+      return data
+    end,
+    SetJobExtra = function(self, key, value)
+      local err = SD:SetJobExtra(key, value)
+      if err ~= nil then
+        error(err)
+      end
+    end,
     FileUrl = function(self, key)
       local data = SD:FileUrl(key)
       if data == "" then

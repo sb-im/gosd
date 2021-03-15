@@ -72,6 +72,14 @@ func TestNewWorker(t *testing.T) {
 		t.Error(err)
 	}
 
+	// test_extra
+	taskExtra := NewTask(1, 1, 1)
+	taskExtra.Script = []byte(LuaMap["test_extra"])
+
+	err = worker.doRun(taskExtra)
+	if err != nil {
+		t.Error(err)
+	}
 
 
 }
