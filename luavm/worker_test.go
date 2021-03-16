@@ -7,6 +7,7 @@ import (
 
 	"sb.im/gosd/config"
 	"sb.im/gosd/database"
+	"sb.im/gosd/model"
 	"sb.im/gosd/mqttd"
 	"sb.im/gosd/rpc2mqtt"
 	"sb.im/gosd/state"
@@ -28,6 +29,20 @@ func TestNewWorker(t *testing.T) {
 	)
 
 	store := storage.NewStorage(db)
+
+	// This unit test need:
+	// planID == 1
+	// jobID == 1
+	if plan, _ := store.PlanByID(1); plan == nil {
+		if err := store.CreatePlan(model.NewPlan()); err != nil {
+			panic(err)
+		}
+	}
+	if job, _ := store.PlanLogByID(1); job == nil {
+		if err := store.CreatePlanLog(model.NewPlanLog()); err != nil {
+			panic(err)
+		}
+	}
 
 	s := state.NewState(opts.RedisURL())
 
