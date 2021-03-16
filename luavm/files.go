@@ -5,8 +5,13 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"sb.im/gosd/model"
+)
+
+const (
+	blob_url = "api/v1/blobs/%s"
 )
 
 // Reader
@@ -34,20 +39,12 @@ func (s *Service) BlobCreate(filename, content string) int64 {
 // Delete
 // TODO: need storage blobs delete
 
-// FilesUrl(key)
-// api/v1/plans/{planID}?files={filesKey}&token={token}
-func (s *Service) FilesUrl(key string) string {
+// TODO: test token
+// api/v1/plans/{planID}?token={token}
+func (s *Service) BlobUrl(blobID string) string {
 	token, _ := genToken(16)
 	s.State.Record(fmt.Sprintf("token/%s", token), nil)
-	return fmt.Sprintf(s.Task.URL, s.Task.PlanID, key, token)
-}
-
-// JobFilesUrl(key)
-// api/v1/plans/{planID}/jobs/{jobID}?files={fileKey}&token={token}
-func (s *Service) JobFilesUrl(key string) string {
-	token, _ := genToken(16)
-	s.State.Record(fmt.Sprintf("token/%s", token), nil)
-	return fmt.Sprintf(s.Task.JobURL, s.Task.PlanID, s.Task.Job.JobID, key, token)
+	return fmt.Sprintf(os.Getenv("BASE_URL")+blob_url, blobID)
 }
 
 func genToken(n int) (string, error) {

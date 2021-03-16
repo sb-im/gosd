@@ -190,14 +190,24 @@ function NewPlan(nodeID)
       end
     end,
     FileUrl = function(self, key)
-      local data = SD:FileUrl(key)
-      if data == "" then
-        error("key not found")
+      local blobID = self.GetFiles(self)[key]
+      if not blobID then
+        blobID = tostring(SD:BlobCreate("filename", ""))
+        local files = self:GetFiles(self)
+        files[key] = blobID
+        self.SetFiles(self, files)
       end
-      return data
+      return SD:BlobUrl(blobID)
     end,
-    LogFileUrl = function(self, key)
-      return SD:LogFileUrl(key)
+    JobFileUrl = function(self, key)
+      local blobID = self.GetJobFiles(self)[key]
+      if not blobID then
+        blobID = tostring(SD:BlobCreate("filename", ""))
+        local files = self:GetJobFiles(self)
+        files[key] = blobID
+        self.SetJobFiles(self, files)
+      end
+      return SD:BlobUrl(blobID)
     end
   }
 end

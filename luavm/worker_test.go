@@ -90,4 +90,13 @@ func TestNewWorker(t *testing.T) {
 		t.Error(err)
 	}
 
+	// test_blobs
+	taskBlobs := NewTask(1, 1, 1)
+	taskBlobs.Script = []byte(LuaMap["test_blobs"])
+
+	err = worker.doRun(taskBlobs)
+	if err != nil {
+		t.Error(err)
+	}
+
 }
