@@ -114,4 +114,13 @@ func TestNewWorker(t *testing.T) {
 		t.Error(err)
 	}
 
+	// test_geo
+	taskGeo := NewTask(1, 1, 1)
+	taskGeo.Script = []byte(LuaMap["test_geo"])
+
+	err = worker.doRun(taskGeo)
+	if err != nil {
+		t.Error(err)
+	}
+
 }

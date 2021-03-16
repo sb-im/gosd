@@ -1,4 +1,6 @@
 
+Geo = {}
+
 --[[
 6371004*ACOS(
         (
@@ -11,7 +13,7 @@
 )
 --]]
 
-function GetDistance(aLng, aLat, bLng, bLat)
+function Geo:Distance(aLng, aLat, bLng, bLat)
   -- Earth Radius: 6371004
   return 6371004 * math.acos(
       math.sin(math.rad(aLat)) * math.sin(math.rad(bLat))
@@ -22,4 +24,7 @@ function GetDistance(aLng, aLat, bLng, bLat)
     )
 end
 
+function GetDistance(aLng, aLat, bLng, bLat)
+  return Geo:Distance(aLng, aLat, bLng, bLat)
+end
 
