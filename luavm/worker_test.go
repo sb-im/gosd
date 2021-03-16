@@ -81,5 +81,13 @@ func TestNewWorker(t *testing.T) {
 		t.Error(err)
 	}
 
+	// test_files
+	taskFiles := NewTask(1, 1, 1)
+	taskFiles.Script = []byte(LuaMap["test_files"])
+
+	err = worker.doRun(taskFiles)
+	if err != nil {
+		t.Error(err)
+	}
 
 }

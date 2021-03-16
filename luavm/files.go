@@ -5,45 +5,34 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io/ioutil"
-	"strconv"
+
+	"sb.im/gosd/model"
 )
 
-func (s *Service) getBlob(id string) (string, string) {
-	blobID, _ := strconv.ParseInt(id, 10 ,64)
-	blob, _ := s.Store.BlobByID(blobID)
-  content, _ := ioutil.ReadAll(blob.Reader)
+// Reader
+func (s *Service) BlobReader(id int64) (string, string) {
+	blob, _ := s.Store.BlobByID(id)
+	content, _ := ioutil.ReadAll(blob.Reader)
 	return blob.FileName, string(content)
 }
 
-func (s *Service) setBlob(id, filename, content string) {
-	blobID, _ := strconv.ParseInt(id, 10 ,64)
-	blob, _ := s.Store.BlobByID(blobID)
+// Update
+func (s *Service) BlobUpdate(id int64, filename, content string) {
+	blob, _ := s.Store.BlobByID(id)
 	blob.FileName = filename
-	blob.Reader =  bytes.NewReader([]byte(content))
+	blob.Reader = bytes.NewReader([]byte(content))
 	s.Store.UpdateBlob(blob)
 }
 
-// TODO: Need Fix s.Task.Files == nil
-
-// GetFilesContent(key) filename, content
-func (s *Service) GetFilesContent(key string) (string, string) {
-	return s.getBlob(s.Task.Files[key])
+// Create
+func (s *Service) BlobCreate(filename, content string) int64 {
+	blob := model.NewBlob(filename, bytes.NewReader([]byte(content)))
+	s.Store.CreateBlob(blob)
+	return blob.ID
 }
 
-// SetFilesContent(key, filename, content)
-func (s *Service) SetFilesContent(key, filename, content string) {
-	s.setBlob(s.Task.Files[key], filename, content)
-}
-
-// GetJobFilesContent(key) filename, content
-func (s *Service) GetJobFilesContent(key string) (string, string) {
-	return s.getBlob(s.Task.Job.Files[key])
-}
-
-// SetJobFilesContent(key, filename, content)
-func (s *Service) SetJobFilesContent(key, filename, content string) {
-	s.setBlob(s.Task.Job.Files[key], filename, content)
-}
+// Delete
+// TODO: need storage blobs delete
 
 // FilesUrl(key)
 // api/v1/plans/{planID}?files={filesKey}&token={token}

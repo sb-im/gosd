@@ -111,7 +111,7 @@ function NewPlan(nodeID)
       return self.GetAttach(self).extra
     end,
     SetExtra = function(self, extra)
-      local data = self.GetAttach()
+      local data = self.GetAttach(self)
       data.extra = extra
       self.SetAttach(self, data)
     end,
@@ -119,9 +119,75 @@ function NewPlan(nodeID)
       return self.GetAttach(self).job.extra
     end,
     SetJobExtra = function(self, extra)
-      local data = self.GetAttach()
+      local data = self.GetAttach(self)
       data.job.extra = extra
       self.SetAttach(self, data)
+    end,
+    GetFiles = function(self)
+      return self.GetAttach(self).files
+    end,
+    SetFiles = function(self, files)
+      local data = self.GetAttach(self)
+      data.files = files
+      self.SetAttach(self, data)
+    end,
+    GetJobFiles = function(self)
+      return self.GetAttach(self).job.files
+    end,
+    SetJobFiles = function(self, files)
+      local data = self.GetAttach(self)
+      data.job.files = files
+      self.SetAttach(self, data)
+    end,
+    GetFileContent = function(self, key)
+      local id = self.GetFiles(self)[key]
+      return SD:BlobReader(tonumber(id))
+    end,
+    SetFileContent = function(self, key, filename, content)
+      local id = tonumber(self.GetFiles(self)[key])
+      if filename == "" then
+        if id then
+          -- TODO:
+          -- SD:BlobDelete(id)
+        end
+        return
+      end
+
+      if id then
+        -- Update Blob
+        SD:BlobUpdate(id, filename, content)
+      else
+        -- Create Blob
+        local id = SD:BlobCreate(filename, content)
+        local files = self:GetFiles(self)
+        files[key] = tostring(id)
+        self.SetFiles(self, files)
+      end
+    end,
+    GetJobFileContent = function(self, key)
+      local id = self.GetJobFiles(self)[key]
+      return SD:BlobReader(tonumber(id))
+    end,
+    SetJobFileContent = function(self, key, filename, content)
+      local id = tonumber(self.GetJobFiles(self)[key])
+      if filename == "" then
+        if id then
+          -- TODO:
+          -- SD:BlobDelete(id)
+        end
+        return
+      end
+
+      if id then
+        -- Update Blob
+        SD:BlobUpdate(id, filename, content)
+      else
+        -- Create Blob
+        local id = SD:BlobCreate(filename, content)
+        local files = self:GetJobFiles(self)
+        files[key] = tostring(id)
+        self.SetJobFiles(self, files)
+      end
     end,
     FileUrl = function(self, key)
       local data = SD:FileUrl(key)
