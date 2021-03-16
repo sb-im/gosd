@@ -76,11 +76,14 @@ func (w Worker) doRun(task *Task) error {
 	// Clean up the "Dialog" when exiting
 	defer service.CleanDialog()
 
-	if fn, err := l.Load(strings.NewReader(LuaMap["lib"]), "lib.lua"); err != nil {
-		return err
-	} else {
-		l.Push(fn)
-		err = l.PCall(0, lua.MultRet, nil)
+	// Load Lib
+	for _, lib := range []string{"lib_plan", "lib_node", "lib_geo", "lib_main"} {
+		if fn, err := l.Load(strings.NewReader(LuaMap[lib]), lib + ".lua"); err != nil {
+			return err
+		} else {
+			l.Push(fn)
+			err = l.PCall(0, lua.MultRet, nil)
+		}
 	}
 
 	if len(task.Script) == 0 {
