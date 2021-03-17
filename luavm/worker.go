@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"sb.im/gosd/rpc2mqtt"
-	"sb.im/gosd/model"
 	"sb.im/gosd/state"
 	"sb.im/gosd/storage"
 
@@ -17,7 +16,6 @@ import (
 type Worker struct {
 	RpcServer     *rpc2mqtt.Rpc2mqtt
 	Queue         chan *Task
-	Log           chan *model.PlanLog
 	State         *state.State
 	Store         *storage.Storage
 	Running       map[string]*Service
@@ -26,7 +24,6 @@ type Worker struct {
 func NewWorker(s *state.State, store *storage.Storage, rpcServer *rpc2mqtt.Rpc2mqtt) *Worker {
 	return &Worker{
 		Queue:         make(chan *Task, 1024),
-		Log:           make(chan *model.PlanLog, 1024),
 		State:         s,
 		Store:         store,
 		Running:       make(map[string]*Service),
@@ -35,12 +32,6 @@ func NewWorker(s *state.State, store *storage.Storage, rpcServer *rpc2mqtt.Rpc2m
 }
 
 func (w Worker) Run() {
-	go func() {
-		for l := range w.Log {
-			w.SetRunning(l.PlanID, l)
-		}
-	}()
-
 	for task := range w.Queue {
 		if err := w.doRun(task); err != nil {
 			fmt.Println(err)
@@ -49,6 +40,7 @@ func (w Worker) Run() {
 }
 
 func (w Worker) doRun(task *Task) error {
+	w.SetRunning(task.PlanID, task)
 	var err error
 
 	l := lua.NewState()

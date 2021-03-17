@@ -86,9 +86,6 @@ func (h *handler) sendTask(log *model.PlanLog) error {
 		}
 	}
 
-	h.worker.Log <- log
-
-
 	task := luavm.NewTask(log.ID, plan.NodeID, plan.ID)
 	task.Files = plan.Attachments
 	task.Extra = plan.Extra
