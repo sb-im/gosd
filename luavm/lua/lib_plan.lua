@@ -23,6 +23,13 @@ function NewPlan(nodeID)
         error(err)
       end
     end,
+    Notification = function(self, msg, level)
+      return SD:Notification({
+        time = os.time(),
+        level = tonumber(level or 5),
+        msg = tostring(msg),
+      })
+    end,
     GetAttach = function(self)
       local raw, err = SD:GetAttach()
       if err ~= nil then

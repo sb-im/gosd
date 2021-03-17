@@ -123,4 +123,13 @@ func TestNewWorker(t *testing.T) {
 		t.Error(err)
 	}
 
+	// test_notice
+	taskNotice := NewTask(1, 1, 1)
+	taskNotice.Script = []byte(LuaMap["test_notice"])
+
+	err = worker.doRun(taskNotice)
+	if err != nil {
+		t.Error(err)
+	}
+
 }
