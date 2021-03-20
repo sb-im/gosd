@@ -10,11 +10,11 @@ import (
 )
 
 func (s *Storage) CreatePlan(plan *model.Plan) (err error) {
-	attachments := hstore.Hstore{Map: make(map[string]sql.NullString)}
+	files := hstore.Hstore{Map: make(map[string]sql.NullString)}
 
-	if len(plan.Attachments) > 0 {
-		for key, value := range plan.Attachments {
-			attachments.Map[key] = sql.NullString{String: value, Valid: true}
+	if len(plan.Files) > 0 {
+		for key, value := range plan.Files {
+			files.Map[key] = sql.NullString{String: value, Valid: true}
 		}
 	}
 
@@ -35,7 +35,7 @@ func (s *Storage) CreatePlan(plan *model.Plan) (err error) {
 			id, name, description, node_id, group_id
 	`
 
-	err = s.db.QueryRow(query, plan.Name, plan.Description, plan.NodeID, plan.GroupID, attachments, extra).Scan(
+	err = s.db.QueryRow(query, plan.Name, plan.Description, plan.NodeID, plan.GroupID, files, extra).Scan(
 		&plan.ID,
 		&plan.Name,
 		&plan.Description,
@@ -98,7 +98,7 @@ func (s *Storage) fetchPlans(query string, args ...interface{}) (model.Plans, er
 	var plans model.Plans
 
 	for rows.Next() {
-		var attachments hstore.Hstore
+		var files hstore.Hstore
 		var extra hstore.Hstore
 		plan := model.NewPlan()
 		err := rows.Scan(
@@ -106,7 +106,7 @@ func (s *Storage) fetchPlans(query string, args ...interface{}) (model.Plans, er
 			&plan.Name,
 			&plan.Description,
 			&plan.NodeID,
-			&attachments,
+			&files,
 			&extra,
 		)
 
@@ -114,9 +114,9 @@ func (s *Storage) fetchPlans(query string, args ...interface{}) (model.Plans, er
 			return nil, fmt.Errorf(`store: unable to fetch plans row: %v`, err)
 		}
 
-		for key, value := range attachments.Map {
+		for key, value := range files.Map {
 			if value.Valid {
-				plan.Attachments[key] = value.String
+				plan.Files[key] = value.String
 			}
 		}
 
@@ -152,7 +152,7 @@ func (s *Storage) PlanByID(planID int64) (*model.Plan, error) {
 }
 
 func (s *Storage) fetchPlan(query string, args ...interface{}) (*model.Plan, error) {
-	var attachments hstore.Hstore
+	var files hstore.Hstore
 	var extra hstore.Hstore
 	plan := model.NewPlan()
 
@@ -161,7 +161,7 @@ func (s *Storage) fetchPlan(query string, args ...interface{}) (*model.Plan, err
 		&plan.Name,
 		&plan.Description,
 		&plan.NodeID,
-		&attachments,
+		&files,
 		&extra,
 	)
 
@@ -171,9 +171,9 @@ func (s *Storage) fetchPlan(query string, args ...interface{}) (*model.Plan, err
 		return nil, fmt.Errorf(`store: unable to fetch user: %v`, err)
 	}
 
-	for key, value := range attachments.Map {
+	for key, value := range files.Map {
 		if value.Valid {
-			plan.Attachments[key] = value.String
+			plan.Files[key] = value.String
 		}
 	}
 
@@ -187,11 +187,11 @@ func (s *Storage) fetchPlan(query string, args ...interface{}) (*model.Plan, err
 }
 
 func (s *Storage) UpdatePlan(plan *model.Plan) error {
-	attachments := hstore.Hstore{Map: make(map[string]sql.NullString)}
+	files := hstore.Hstore{Map: make(map[string]sql.NullString)}
 
-	if len(plan.Attachments) > 0 {
-		for key, value := range plan.Attachments {
-			attachments.Map[key] = sql.NullString{String: value, Valid: true}
+	if len(plan.Files) > 0 {
+		for key, value := range plan.Files {
+			files.Map[key] = sql.NullString{String: value, Valid: true}
 		}
 	}
 
@@ -219,7 +219,7 @@ func (s *Storage) UpdatePlan(plan *model.Plan) error {
 		plan.Name,
 		plan.Description,
 		plan.NodeID,
-		attachments,
+		files,
 		extra,
 	)
 

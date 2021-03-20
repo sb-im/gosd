@@ -19,18 +19,6 @@ func decodePlanCreationPayload(r io.ReadCloser) (*model.Plan, error) {
 	return &plan, nil
 }
 
-// API v2
-func decodePlan2CreationPayload(r io.ReadCloser) (*model.Plan2, error) {
-	defer r.Close()
-
-	var plan model.Plan2
-	decoder := json.NewDecoder(r)
-	if err := decoder.Decode(&plan); err != nil {
-		return nil, fmt.Errorf("Unable to decode plan modification JSON object: %v", err)
-	}
-	return &plan, nil
-}
-
 func decodeLoginPayload(r io.ReadCloser) (*model.Login, error) {
 	defer r.Close()
 

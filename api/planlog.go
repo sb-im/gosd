@@ -69,7 +69,7 @@ func (h *handler) sendTask(log *model.PlanLog) error {
 	}
 
 	var script []byte
-	if blobID := plan.Attachments["lua"]; blobID != "" {
+	if blobID := plan.Files["lua"]; blobID != "" {
 		int64ID, err := strconv.ParseInt(blobID, 10, 64)
 		if err != nil {
 			return err
@@ -87,7 +87,7 @@ func (h *handler) sendTask(log *model.PlanLog) error {
 	}
 
 	task := luavm.NewTask(log.ID, plan.NodeID, plan.ID)
-	task.Files = plan.Attachments
+	task.Files = plan.Files
 	task.Extra = plan.Extra
 	//task.URL   = h.baseURL + "/api/v1/plans/" + strconv.FormatInt(log.PlanID, 10) + "/logs/" + strconv.FormatInt(log.LogID, 10)
 	task.URL = "api/v1/plans/%d?files=%s&token=%s"

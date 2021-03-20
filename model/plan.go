@@ -1,57 +1,21 @@
 package model
 
-import (
-	"encoding/json"
-	"strconv"
-)
-
 type Plan struct {
 	ID          int64             `json:"id"`
 	Name        string            `json:"name"`
 	Description string            `json:"description"`
 	NodeID      int64             `json:"node_id"`
-	GroupID     int64             `json:"group_id"`
-	Attachments map[string]string `json:"attachments"`
+	GroupID     int64             `json:"-"`
+	Files       map[string]string `json:"files"`
 	Extra       map[string]string `json:"extra"`
 	RecordTime
 }
 
 func NewPlan() *Plan {
 	return &Plan{
-		Attachments: make(map[string]string),
-		Extra:       make(map[string]string),
+		Files: make(map[string]string),
+		Extra: make(map[string]string),
 	}
-}
-
-func (plan *Plan) MarshalJSON() ([]byte, error) {
-	cycle_types_id, err := strconv.Atoi(plan.Extra["cycle_types_id"])
-	if err != nil {
-		cycle_types_id = 0
-	}
-
-	return json.Marshal(&struct {
-		ID             int64             `json:"id"`
-		Name           string            `json:"name"`
-		Description    string            `json:"description"`
-		File           string            `json:"map_path"`
-		Node_id        int64             `json:"node_id"`
-		Cycle_types_id int               `json:"cycle_types_id"`
-		Attachments    map[string]string `json:"attachments"`
-		Extra          map[string]string `json:"extra"`
-	}{
-		ID:             plan.ID,
-		Name:           plan.Name,
-		Description:    plan.Description,
-		File:           blobPath(plan.Attachments["file"]),
-		Node_id:        plan.NodeID,
-		Attachments:    plan.Attachments,
-		Extra:          plan.Extra,
-		Cycle_types_id: cycle_types_id,
-	})
-}
-
-func blobPath(id string) string {
-	return `/api/v1/blobs/` + id
 }
 
 type Plans []*Plan

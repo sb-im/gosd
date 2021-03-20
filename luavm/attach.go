@@ -11,7 +11,7 @@ func (s *Service) GetAttach() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	s.Task.Files = plan.Attachments
+	s.Task.Files = plan.Files
 	s.Task.Extra = plan.Extra
 
 	// Job
@@ -40,7 +40,7 @@ func (s *Service) SetAttach(raw string) error {
 	if err != nil {
 		return err
 	}
-	plan.Attachments = s.Task.Files
+	plan.Files = s.Task.Files
 	plan.Extra = s.Task.Extra
 	if err := s.Store.UpdatePlan(plan); err != nil {
 		return err

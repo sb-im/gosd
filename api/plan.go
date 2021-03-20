@@ -42,7 +42,7 @@ func (h *handler) createPlan(w http.ResponseWriter, r *http.Request) {
 		delete(params, "description")
 		delete(params, "node_id")
 
-		plan.Attachments = file
+		plan.Files = file
 		plan.Extra = params
 
 	} else {
@@ -81,24 +81,7 @@ func (h *handler) plans(w http.ResponseWriter, r *http.Request) {
 	json.OK(w, r, plans)
 }
 
-func (h *handler) planByID(w http.ResponseWriter, r *http.Request) {
-	planID := request.RouteInt64Param(r, "planID")
-	plan, err := h.store.PlanByID(planID)
-	if err != nil {
-		json.BadRequest(w, r, errors.New("Unable to fetch this plan from the database"))
-		return
-	}
-
-	if plan == nil {
-		json.NotFound(w, r)
-		return
-	}
-
-	//user.UseTimezone(request.UserTimezone(r))
-	json.OK(w, r, plan)
-}
-
-func (h *handler) planUpdate(w http.ResponseWriter, r *http.Request) {
+func (h *handler) updatePlan(w http.ResponseWriter, r *http.Request) {
 	planID := request.RouteInt64Param(r, "planID")
 	plan, err := h.store.PlanByID(planID)
 	if err != nil {
@@ -111,6 +94,7 @@ func (h *handler) planUpdate(w http.ResponseWriter, r *http.Request) {
 		json.ServerError(w, r, err)
 		return
 	}
+
 	if strings.HasPrefix(mediaType, "multipart/") {
 
 		params, file, err := h.formData2Blob(r)
@@ -122,23 +106,16 @@ func (h *handler) planUpdate(w http.ResponseWriter, r *http.Request) {
 		plan.Description = params["description"]
 		plan.NodeID, _ = strconv.ParseInt(params["node_id"], 10, 64)
 
-		// Only Update
-		delete(params, "id")
-
 		delete(params, "name")
 		delete(params, "description")
 		delete(params, "node_id")
 
-		for key, value := range file {
-			plan.Attachments[key] = value
-		}
-
-		for key, value := range params {
-			plan.Extra[key] = value
-		}
+		plan.Files = file
+		plan.Extra = params
 
 	} else {
 		plan, err = decodePlanCreationPayload(r.Body)
+		plan.ID = planID
 		if err != nil {
 			json.BadRequest(w, r, err)
 			return
@@ -150,7 +127,7 @@ func (h *handler) planUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.Created(w, r, plan)
+	json.OK(w, r, plan)
 }
 
 func (h *handler) planDestroy(w http.ResponseWriter, r *http.Request) {
