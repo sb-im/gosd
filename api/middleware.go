@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"strings"
 
-	"sb.im/gosd/auth"
-
 	"miniflux.app/http/response/json"
 )
 
@@ -30,14 +28,7 @@ func (h handler) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		key := strings.Split(req.Header.Get("Authorization"), " ")[1]
-		user := h.store.GetCurrentUser(key)
-
-		if auth.AuthMethod == auth.NoAuth {
-			user, _ = h.store.UserByID(1)
-		}
-
-		if user == nil {
+		if h.helpCurrentUser(w, req) == nil {
 			json.Unauthorized(w, req)
 			return
 		}
