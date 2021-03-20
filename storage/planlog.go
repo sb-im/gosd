@@ -10,11 +10,11 @@ import (
 )
 
 func (s *Storage) CreatePlanLog(item *model.PlanLog) (err error) {
-	attachments := hstore.Hstore{Map: make(map[string]sql.NullString)}
+	files := hstore.Hstore{Map: make(map[string]sql.NullString)}
 
-	if len(item.Attachments) > 0 {
-		for key, value := range item.Attachments {
-			attachments.Map[key] = sql.NullString{String: value, Valid: true}
+	if len(item.Files) > 0 {
+		for key, value := range item.Files {
+			files.Map[key] = sql.NullString{String: value, Valid: true}
 		}
 	}
 
@@ -42,7 +42,7 @@ func (s *Storage) CreatePlanLog(item *model.PlanLog) (err error) {
 			id, log_id, plan_id, create_at, update_at
 	`
 
-	err = s.db.QueryRow(query, item.PlanID, attachments, extra).Scan(
+	err = s.db.QueryRow(query, item.PlanID, files, extra).Scan(
 		&item.ID,
 		&item.LogID,
 		&item.PlanID,
@@ -87,13 +87,13 @@ func (s *Storage) fetchPlanLogs(query string, args ...interface{}) (model.PlanLo
 	var logs model.PlanLogs
 
 	for rows.Next() {
-		var attachments hstore.Hstore
+		var files hstore.Hstore
 		var extra hstore.Hstore
 		log := model.NewPlanLog()
 		err := rows.Scan(
 			&log.ID,
 			&log.LogID,
-			&attachments,
+			&files,
 			&extra,
 			&log.CreatedAt,
 			&log.UpdatedAt,
@@ -103,9 +103,9 @@ func (s *Storage) fetchPlanLogs(query string, args ...interface{}) (model.PlanLo
 			return nil, fmt.Errorf(`store: unable to fetch plan_logs row: %v`, err)
 		}
 
-		for key, value := range attachments.Map {
+		for key, value := range files.Map {
 			if value.Valid {
-				log.Attachments[key] = value.String
+				log.Files[key] = value.String
 			}
 		}
 
@@ -140,11 +140,11 @@ func (s *Storage) PlanLogByID(ID int64) (*model.PlanLog, error) {
 }
 
 func (s *Storage) UpdatePlanLog(plan *model.PlanLog) error {
-	attachments := hstore.Hstore{Map: make(map[string]sql.NullString)}
+	files := hstore.Hstore{Map: make(map[string]sql.NullString)}
 
-	if len(plan.Attachments) > 0 {
-		for key, value := range plan.Attachments {
-			attachments.Map[key] = sql.NullString{String: value, Valid: true}
+	if len(plan.Files) > 0 {
+		for key, value := range plan.Files {
+			files.Map[key] = sql.NullString{String: value, Valid: true}
 		}
 	}
 
@@ -169,7 +169,7 @@ func (s *Storage) UpdatePlanLog(plan *model.PlanLog) error {
 	_, err := s.db.Exec(
 		query,
 		plan.ID,
-		attachments,
+		files,
 		extra,
 	)
 
@@ -181,7 +181,7 @@ func (s *Storage) UpdatePlanLog(plan *model.PlanLog) error {
 }
 
 func (s *Storage) fetchPlanLog(query string, args ...interface{}) (*model.PlanLog, error) {
-	var attachments hstore.Hstore
+	var files hstore.Hstore
 	var extra hstore.Hstore
 	plan := model.NewPlanLog()
 
@@ -189,7 +189,7 @@ func (s *Storage) fetchPlanLog(query string, args ...interface{}) (*model.PlanLo
 		&plan.ID,
 		&plan.LogID,
 		&plan.PlanID,
-		&attachments,
+		&files,
 		&extra,
 	)
 
@@ -199,9 +199,9 @@ func (s *Storage) fetchPlanLog(query string, args ...interface{}) (*model.PlanLo
 		return nil, fmt.Errorf(`store: unable to fetch log: %v`, err)
 	}
 
-	for key, value := range attachments.Map {
+	for key, value := range files.Map {
 		if value.Valid {
-			plan.Attachments[key] = value.String
+			plan.Files[key] = value.String
 		}
 	}
 

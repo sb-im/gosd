@@ -44,7 +44,7 @@ func (h *handler) createPlanLog(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		log.Attachments = file
+		log.Files = file
 		log.Extra = params
 	}
 

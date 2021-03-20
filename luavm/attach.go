@@ -19,7 +19,7 @@ func (s *Service) GetAttach() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	s.Task.Job.Files = job.Attachments
+	s.Task.Job.Files = job.Files
 	s.Task.Job.Extra = job.Extra
 
 	data, err := json.Marshal(s.Task)
@@ -51,7 +51,7 @@ func (s *Service) SetAttach(raw string) error {
 	if err != nil {
 		return err
 	}
-	job.Attachments = s.Task.Job.Files
+	job.Files = s.Task.Job.Files
 	job.Extra = s.Task.Job.Extra
 	if err := s.Store.UpdatePlanLog(job); err != nil {
 		return err
