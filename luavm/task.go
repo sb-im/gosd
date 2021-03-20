@@ -10,8 +10,6 @@ type Task struct {
 	PlanID int64             `json:"-"`
 	Files  map[string]string `json:"files"`
 	Extra  map[string]string `json:"extra"`
-	URL    string            `json:"-"`
-	JobURL string            `json:"-"`
 	Script []byte            `json:"-"`
 	Job    Job               `json:"job"`
 }
