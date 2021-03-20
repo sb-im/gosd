@@ -44,12 +44,20 @@ func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker, bas
 	})
 
 	// Plan
-	sr2.HandleFunc("/plans/", handler.plans).Methods(http.MethodGet)
-	sr2.HandleFunc("/plans/", handler.createPlan).Methods(http.MethodPost)
-	sr2.HandleFunc("/plans/{planID:[0-9]+}", handler.updatePlan).Methods(http.MethodPut)
-	sr2.HandleFunc("/plans/{planID:[0-9]+}", handler.planDestroy).Methods(http.MethodDelete)
+	plan := sr2.PathPrefix("/plans").Subrouter()
+	plan.HandleFunc("/", handler.plans).Methods(http.MethodGet)
+	plan.HandleFunc("/", handler.createPlan).Methods(http.MethodPost)
+	plan.HandleFunc("/{planID:[0-9]+}", handler.updatePlan).Methods(http.MethodPut)
+	plan.HandleFunc("/{planID:[0-9]+}", handler.planDestroy).Methods(http.MethodDelete)
 
-	sr.HandleFunc("/plans/{planID:[0-9]+}/mission_queues/", handler.missionQueue).Methods(http.MethodGet)
+	plan.HandleFunc("/{planID:[0-9]+}/jobs/", handler.planLogs).Methods(http.MethodGet)
+	plan.HandleFunc("/{planID:[0-9]+}/jobs/", handler.createPlanLog).Methods(http.MethodPost)
+	plan.HandleFunc("/{planID:[0-9]+}/jobs/{logID:[0-9]+}/cancel", handler.missionStop).Methods(http.MethodPost)
+
+	// Debug use
+	plan.HandleFunc("/{planID:[0-9]+}/jobs/running", handler.missionStop).Methods(http.MethodDelete)
+
+	//sr.HandleFunc("/plans/{planID:[0-9]+}/mission_queues/", handler.missionQueue).Methods(http.MethodGet)
 
 	// How is this API designed WTF ???
 	sr.HandleFunc("/mission_queues/plan/{planID:[0-9]+}", handler.missionStop).Methods(http.MethodDelete)
@@ -59,16 +67,6 @@ func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker, bas
 
 	sr.HandleFunc("/plans/{planID:[0-9]+}/logs/", handler.planLogs).Methods(http.MethodGet)
 	sr.HandleFunc("/plans/{planID:[0-9]+}/logs/", handler.createPlanLog).Methods(http.MethodPost)
-
-	sr2.HandleFunc("/plans/{planID:[0-9]+}/jobs/", handler.planLogs).Methods(http.MethodGet)
-	sr2.HandleFunc("/plans/{planID:[0-9]+}/jobs/", handler.createPlanLog).Methods(http.MethodPost)
-	sr2.HandleFunc("/plans/{planID:[0-9]+}/jobs/{logID:[0-9]+}", handler.createPlanLog).Methods(http.MethodGet)
-	sr2.HandleFunc("/plans/{planID:[0-9]+}/jobs/{logID:[0-9]+}/cancel", handler.missionStop).Methods(http.MethodPost)
-
-	// Debug use
-	sr2.HandleFunc("/plans/{planID:[0-9]+}/jobs/running", handler.missionStop).Methods(http.MethodDelete)
-	//sr.HandleFunc("/plans/{planID:[0-9]+}/plan_logs/{logID:[0-9]+}/", handler.createPlanLog).Methods(http.MethodPost)
-
 
 	sr2.HandleFunc("/blobs/", handler.createBlob).Methods(http.MethodPost)
 	sr2.HandleFunc("/blobs/{blobID:[0-9]+}", handler.blobByID).Methods(http.MethodGet)
