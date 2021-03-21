@@ -14,7 +14,7 @@ func (h *handler) planRunning(w http.ResponseWriter, r *http.Request) {
 	if ok {
 		json.OK(w, r, service.Task)
 	} else {
-		json.OK(w, r, nil)
+		json.OK(w, r, &struct{}{})
 	}
 }
 
