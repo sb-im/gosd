@@ -17,3 +17,9 @@ func (h *handler) planRunning(w http.ResponseWriter, r *http.Request) {
 		json.OK(w, r, nil)
 	}
 }
+
+func (h *handler) planRunningDestroy(w http.ResponseWriter, r *http.Request) {
+	PlanID := request.RouteStringParam(r, "planID")
+	h.worker.Kill(PlanID)
+	json.OK(w, r, []string{})
+}
