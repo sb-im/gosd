@@ -54,6 +54,7 @@ func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker, bas
 	plan.HandleFunc("/{planID:[0-9]+}/jobs/", handler.createPlanLog).Methods(http.MethodPost)
 	plan.HandleFunc("/{planID:[0-9]+}/jobs/{logID:[0-9]+}/cancel", handler.missionStop).Methods(http.MethodPost)
 
+	plan.HandleFunc("/{planID:[0-9]+}/running", handler.planRunning).Methods(http.MethodGet)
 	// Debug use
 	plan.HandleFunc("/{planID:[0-9]+}/jobs/running", handler.missionStop).Methods(http.MethodDelete)
 
