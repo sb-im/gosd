@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"text/tabwriter"
 	"strconv"
+	"text/tabwriter"
 
 	users "sb.im/gosd/model"
 

@@ -15,7 +15,7 @@ var usersFindCmd = &cobra.Command{
 	Short: "Find a user by username or id",
 	Long:  `Find a user by username or id. If no flag is set, all users will be printed.`,
 	Args:  cobra.ExactArgs(1),
-	Run: findUsers,
+	Run:   findUsers,
 }
 
 var findUsers = ex(func(cmd *cobra.Command, args []string, d exData) {
@@ -39,7 +39,9 @@ var findUsers = ex(func(cmd *cobra.Command, args []string, d exData) {
 	}
 
 	// not found user == nil
-	if user == nil { return }
+	if user == nil {
+		return
+	}
 
 	checkErr(err)
 	printUsers(list)

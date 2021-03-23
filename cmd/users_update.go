@@ -37,7 +37,9 @@ options you want to change.`,
 		}
 		checkErr(err)
 		// not found user == nil
-		if user == nil { return }
+		if user == nil {
+			return
+		}
 
 		if newUsername != "" {
 			user.Username = newUsername

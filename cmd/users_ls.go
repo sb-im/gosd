@@ -14,7 +14,8 @@ var usersLsCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Run: ex(func(cmd *cobra.Command, args []string, d exData) {
 		users, err := d.store.Users()
-		if err != nil {}
+		if err != nil {
+		}
 		printUsers(users)
 	}, exConfig{}),
 }

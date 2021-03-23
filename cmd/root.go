@@ -5,22 +5,22 @@ import (
 	"runtime"
 
 	"sb.im/gosd/auth"
-	"sb.im/gosd/config"
 	"sb.im/gosd/cli"
+	"sb.im/gosd/config"
 	"sb.im/gosd/database"
 	"sb.im/gosd/storage"
 
 	"github.com/spf13/cobra"
 
-	"miniflux.app/version"
 	"miniflux.app/logger"
+	"miniflux.app/version"
 )
 
 var (
-	flagVersion     bool
-	flagMigrate     bool
-	flagDebugMode   bool
-	flagNoAuth      bool
+	flagVersion   bool
+	flagMigrate   bool
+	flagDebugMode bool
+	flagNoAuth    bool
 )
 
 func init() {

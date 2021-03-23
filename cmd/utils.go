@@ -38,7 +38,7 @@ func mustGetUint(flags *pflag.FlagSet, flag string) uint {
 type cobraFunc func(cmd *cobra.Command, args []string)
 type exCobraFunc func(cmd *cobra.Command, args []string, data exData)
 
-type exConfig struct {}
+type exConfig struct{}
 
 type exData struct {
 	store *storage.Storage
