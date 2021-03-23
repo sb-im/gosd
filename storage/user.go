@@ -111,8 +111,9 @@ func (s *Storage) UpdateUser(user *model.User) error {
 				password=$2,
 				language=$3,
 				timezone=$4,
+				group_id=$5
 			WHERE
-				id=$5
+				id=$6
 		`
 		_, err = s.db.Exec(
 			query,
@@ -120,6 +121,7 @@ func (s *Storage) UpdateUser(user *model.User) error {
 			hashedPassword,
 			user.Language,
 			user.Timezone,
+			user.Group.ID,
 			user.ID,
 		)
 
@@ -132,14 +134,16 @@ func (s *Storage) UpdateUser(user *model.User) error {
 				username=LOWER($1),
 				language=$2,
 				timezone=$3,
+				group_id=$4
 			WHERE
-				id=$8
+				id=$5
 		`
 		_, err := s.db.Exec(
 			query,
 			user.Username,
 			user.Language,
 			user.Timezone,
+			user.Group.ID,
 			user.ID,
 		)
 
