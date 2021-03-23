@@ -19,7 +19,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func startDaemon(store *storage.Storage, opts *config.Options) {
+func StartDaemon(store *storage.Storage, opts *config.Options) {
 	logger.Info("Starting gosd...")
 
 	//go showProcessStatistics()

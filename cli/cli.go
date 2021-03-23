@@ -83,5 +83,5 @@ func Parse() {
 		return
 	}
 
-	startDaemon(store, opts)
+	StartDaemon(store, opts)
 }

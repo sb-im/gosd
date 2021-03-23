@@ -3,9 +3,9 @@ package main
 //go:generate go run generate.go
 
 import (
-	"sb.im/gosd/cli"
+	"sb.im/gosd/cmd"
 )
 
 func main() {
-	cli.Parse()
+	cmd.Execute()
 }

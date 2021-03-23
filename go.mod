@@ -9,6 +9,8 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/lib/pq v1.6.0
 	github.com/sb-im/jsonrpc-lite v0.1.1
+	github.com/spf13/cobra v1.1.3
+	github.com/spf13/pflag v1.0.5
 	github.com/yuin/gopher-lua v0.0.0-20200521060427-6ff375d91eab
 	golang.org/x/crypto v0.0.0-20200423211502-4bdfaf469ed5
 	layeh.com/gopher-json v0.0.0-20190114024228-97fed8db8427
