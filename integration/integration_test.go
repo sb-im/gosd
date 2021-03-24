@@ -3,7 +3,6 @@ package integration
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
@@ -13,6 +12,7 @@ import (
 
 	"sb.im/gosd/config"
 	"sb.im/gosd/database"
+	"sb.im/gosd/model"
 	"sb.im/gosd/luavm"
 	"sb.im/gosd/mqttd"
 	"sb.im/gosd/rpc2mqtt"
@@ -133,23 +133,26 @@ func TestIntegration(t *testing.T) {
 	worker := luavm.NewWorker(state, store, rpcServer)
 	go worker.Run()
 
-	// === start ===
-	file, err := os.Open("../luavm/lua/test_rpc.lua")
-	if err != nil {
-		t.Error(err)
+	// This unit test need:
+	// planID == 1
+	// jobID == 1
+	if plan, _ := store.PlanByID(1); plan == nil {
+		if err := store.CreatePlan(model.NewPlan()); err != nil {
+			panic(err)
+		}
 	}
-
-	script, err := ioutil.ReadAll(file)
-	if err != nil {
-		t.Error(err)
+	if job, _ := store.PlanLogByID(1); job == nil {
+		if err := store.CreatePlanLog(model.NewPlanLog()); err != nil {
+			panic(err)
+		}
 	}
 
 	id64, err := strconv.ParseInt(id, 10, 64)
-	worker.Queue <- &luavm.Task{
-		NodeID: id64,
-		URL:    "1/12/3/4/4",
-		Script: script,
-	}
+	// test_rpc
+	task := luavm.NewTask(1, id64, 1)
+	task.Script = []byte(luavm.LuaMap["test_rpc"])
+
+	worker.Queue <- task
 
 	time.Sleep(3 * time.Second)
 }
