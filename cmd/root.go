@@ -7,8 +7,6 @@ import (
 	"sb.im/gosd/auth"
 	"sb.im/gosd/cli"
 	"sb.im/gosd/config"
-	"sb.im/gosd/database"
-	"sb.im/gosd/storage"
 
 	"github.com/spf13/cobra"
 
@@ -18,7 +16,6 @@ import (
 
 var (
 	flagVersion   bool
-	flagMigrate   bool
 	flagDebugMode bool
 	flagNoAuth    bool
 )
@@ -26,7 +23,6 @@ var (
 func init() {
 	flags := rootCmd.Flags()
 	flags.BoolVarP(&flagVersion, "version", "v", false, "Show application version")
-	flags.BoolVar(&flagMigrate, "migrate", false, "Run SQL migrations")
 	flags.BoolVar(&flagDebugMode, "debug", false, "Show debug logs")
 	flags.BoolVar(&flagNoAuth, "noauth", false, "Use the noauth auther. user.ID == 1")
 }
@@ -58,22 +54,6 @@ TODO
 			logger.EnableDebug()
 		}
 
-		db, err := database.NewConnectionPool(
-			opts.DatabaseURL(),
-			opts.DatabaseMinConns(),
-			opts.DatabaseMaxConns(),
-		)
-
-		if err != nil {
-			panic(err)
-		}
-
-		if flagMigrate {
-			database.Migrate(db)
-			return
-		}
-
-		store := storage.NewStorage(db)
-		cli.StartDaemon(store, opts)
+		cli.StartDaemon(d.store, opts)
 	}, exConfig{}),
 }

@@ -16,3 +16,7 @@ type Storage struct {
 func NewStorage(db *sql.DB) *Storage {
 	return &Storage{db, userToken{token: make(map[string]*model.User)}}
 }
+
+func (s *Storage) Database() *sql.DB {
+	return s.db
+}

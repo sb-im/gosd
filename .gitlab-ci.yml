@@ -162,7 +162,7 @@ test-simulation:
     - cd ..
   script:
     - make
-    - ./gosd -migrate
+    - ./gosd database migrate
     - make test-simulation
 
 deploy_staging:
