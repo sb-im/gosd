@@ -14,10 +14,6 @@ stages:
   script:
     - make build
 
-go1.11:build:
-  image: golang:1.11-buster
-  extends: .gobuild
-
 go1.12:build:
   image: golang:1.12-buster
   extends: .gobuild
@@ -52,12 +48,6 @@ go1.15:build:
     - make
     - ./gosd -migrate
     - make cover
-
-go1.11:test:
-  needs:
-    - go1.11:build
-  image: golang:1.11-buster
-  extends: .gotest
 
 go1.12:test:
   needs:
@@ -168,7 +158,6 @@ test-simulation:
 deploy_staging:
   stage: deploy
   needs:
-    - go1.11:test
     - go1.12:test
     - go1.13:test
     - go1.14:test
