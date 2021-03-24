@@ -46,7 +46,7 @@ go1.15:build:
     - go version
   script:
     - make
-    - ./gosd -migrate
+    - ./gosd database migrate
     - make cover
 
 go1.12:test:
