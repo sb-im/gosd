@@ -34,7 +34,7 @@ go1.16:build:
   image: golang:1.16-buster
   extends: .gobuild
 
-.gotest:
+test database:
   stage: test
   services:
     - postgres:13
@@ -51,36 +51,6 @@ go1.16:build:
     - make
     - ./gosd database migrate
     - make cover
-
-go1.12:test:
-  needs:
-    - go1.12:build
-  image: golang:1.12-buster
-  extends: .gotest
-
-go1.13:test:
-  needs:
-    - go1.13:build
-  image: golang:1.13-buster
-  extends: .gotest
-
-go1.14:test:
-  needs:
-    - go1.14:build
-  image: golang:1.14-buster
-  extends: .gotest
-
-go1.15:test:
-  needs:
-    - go1.15:build
-  image: golang:1.15-buster
-  extends: .gotest
-
-go1.16:test:
-  needs:
-    - go1.16:build
-  image: golang:1.16-buster
-  extends: .gotest
 
 .test-broker:
   services:
@@ -170,12 +140,6 @@ test-simulation:
 
 deploy_staging:
   stage: deploy
-  needs:
-    - go1.12:test
-    - go1.13:test
-    - go1.14:test
-    - go1.15:test
-    - go1.16:test
   only:
     refs:
       - dev
