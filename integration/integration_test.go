@@ -147,9 +147,6 @@ func TestIntegration(t *testing.T) {
 		}
 	}
 
-	// Maybe Wait mqtt broker ready
-	time.Sleep(1 * time.Second)
-
 	id64, err := strconv.ParseInt(id, 10, 64)
 	// test_rpc
 	task := luavm.NewTask(1, id64, 1)
