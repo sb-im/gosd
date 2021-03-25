@@ -53,10 +53,6 @@ test database:
     - make cover
 
 .test-broker:
-  services:
-    - redis:latest
-  variables:
-    REDIS_URL: "redis://redis:6379"
   script:
     - apt-get update -y && apt-get install -y mosquitto-clients redis-server
     - make test-broker
@@ -66,8 +62,10 @@ test database:
 test mosquitto 1.6:
   stage: broker
   services:
+    - redis:latest
     - name: eclipse-mosquitto:1.6
   variables:
+    REDIS_URL: "redis://redis:6379"
     MQTT: "eclipse-mosquitto:1883"
   extends: .test-broker
 
@@ -76,35 +74,45 @@ test mosquitto 1.6:
 test mosquitto 2.0:
   stage: broker
   services:
+    - redis:latest
     - name: eclipse-mosquitto:2.0.8
       command:
         - "mosquitto"
         - "-c"
         - "/mosquitto-no-auth.conf"
   variables:
+    REDIS_URL: "redis://redis:6379"
     MQTT: "eclipse-mosquitto:1883"
   extends: .test-broker
 
 test emqx latest:
   stage: broker
   services:
+    - redis:latest
     - name: emqx/emqx:latest
       alias: emqx
   variables:
+    REDIS_URL: "redis://redis:6379"
     MQTT: "emqx:1883"
   extends: .test-broker
 
 test emqx 4.2.6:
   stage: broker
   services:
+    - redis:latest
     - name: emqx/emqx:4.2.6
       alias: emqx
   variables:
+    REDIS_URL: "redis://redis:6379"
     MQTT: "emqx:1883"
   extends: .test-broker
 
 test emqx deb:
   stage: broker
+  services:
+    - redis:latest
+  variables:
+    REDIS_URL: "redis://redis:6379"
   before_script:
     - apt-get update -y && apt-get install -y mosquitto-clients
     - wget https://github.com/emqx/emqx/releases/download/v4.2.3/emqx-debian10-4.2.3-x86_64.deb
