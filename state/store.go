@@ -33,6 +33,10 @@ func (s *State) do(commandName string, args ...interface{}) (interface{}, error)
 	return s.Pool.Get().Do(commandName, args...)
 }
 
+func (s *State) Do(commandName string, args ...interface{}) (interface{}, error) {
+	return s.Pool.Get().Do(commandName, args...)
+}
+
 func (s *State) StringGet(key string) (string, error) {
 	return redis.String(s.do("GET", key))
 }

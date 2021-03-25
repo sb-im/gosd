@@ -44,7 +44,7 @@ func StartDaemon(store *storage.Storage, opts *config.Options) {
 	r := mux.NewRouter()
 
 	logger.Info("=========")
-	api.Serve(r, store, worker, opts.BaseURL())
+	api.Serve(r, state, store, worker, opts.BaseURL())
 	http.ListenAndServe(opts.ListenAddr(), r)
 
 	logger.Info("Process gracefully stopped")

@@ -6,16 +6,17 @@ import (
 	"strings"
 
 	"sb.im/gosd/luavm"
+	"sb.im/gosd/state"
 	"sb.im/gosd/storage"
 
 	"github.com/gorilla/mux"
 )
 
 // Serve declares API routes for the application.
-func Serve(router *mux.Router, store *storage.Storage, worker *luavm.Worker, baseURL string) {
+func Serve(router *mux.Router, cache *state.State, store *storage.Storage, worker *luavm.Worker, baseURL string) {
 	u, _ := url.Parse(baseURL)
 
-	handler := &handler{store, worker, baseURL}
+	handler := &handler{cache, store, worker, baseURL}
 	sr := router.PathPrefix(u.Path + "/api/v1").Subrouter()
 	//middleware := newMiddleware(store)
 

@@ -4,9 +4,12 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"fmt"
 
 	"sb.im/gosd/auth"
 	"sb.im/gosd/model"
+
+	"github.com/gomodule/redigo/redis"
 
 	"miniflux.app/http/response/json"
 )
@@ -30,7 +33,21 @@ func (h *handler) helpCurrentUser(w http.ResponseWriter, r *http.Request) *model
 	}
 	token := strings.Split(r.Header.Get("Authorization"), " ")
 	if len(token) == 2 {
-		return h.store.GetCurrentUser(token[1])
+		key := token[1]
+		if user := h.store.GetCurrentUser(key); user != nil {
+			return user
+		} else {
+			uniquekey := fmt.Sprintf("users/token/%s", key)
+			if userID, err := redis.Int64(h.cache.Do("GET", uniquekey)); err != nil {
+				return user
+			} else {
+				user, _ := h.store.UserByID(userID)
+				if user != nil {
+					h.store.CreateToken(key, user)
+				}
+				return user
+			}
+		}
 	}
 	return nil
 }
