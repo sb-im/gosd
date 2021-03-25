@@ -63,6 +63,10 @@ func TestMqttd(t *testing.T) {
 	rawMsg := `{"WD":0,"WS":0,"T":66115,"RH":426,"Pa":99780}`
 	cmdRun("mosquitto_pub -L " + mqttAddr + "/nodes/" + id + "/msg/weather -m " + rawMsg)
 
+	// Wait for mqttd write redis
+	// https://gitlab.com/sbim/superdock/cloud/gosd/-/issues/32#note_528668713
+	time.Sleep(1 * time.Second)
+
 	if msg, err := store.GetNodeMsg(id, "weather"); err != nil {
 		t.Error(err)
 	} else if string(msg) != rawMsg {
