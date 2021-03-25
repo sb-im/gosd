@@ -66,7 +66,7 @@ test mosquitto 1.6:
     - name: eclipse-mosquitto:1.6
   variables:
     REDIS_URL: "redis://redis:6379"
-    MQTT: "eclipse-mosquitto:1883"
+    MQTT_URL: "mqtt://eclipse-mosquitto:1883"
   extends: .test-broker
 
 # Must Mosquitto >= 2.0.8
@@ -82,7 +82,7 @@ test mosquitto 2.0:
         - "/mosquitto-no-auth.conf"
   variables:
     REDIS_URL: "redis://redis:6379"
-    MQTT: "eclipse-mosquitto:1883"
+    MQTT_URL: "mqtt://eclipse-mosquitto:1883"
   extends: .test-broker
 
 test emqx latest:
@@ -93,7 +93,7 @@ test emqx latest:
       alias: emqx
   variables:
     REDIS_URL: "redis://redis:6379"
-    MQTT: "emqx:1883"
+    MQTT_URL: "mqtt://emqx:1883"
   extends: .test-broker
 
 test emqx 4.2.6:
@@ -104,7 +104,7 @@ test emqx 4.2.6:
       alias: emqx
   variables:
     REDIS_URL: "redis://redis:6379"
-    MQTT: "emqx:1883"
+    MQTT_URL: "mqtt://emqx:1883"
   extends: .test-broker
 
 test emqx deb:
@@ -127,7 +127,6 @@ test-simulation:
     - postgres:13
     - redis:latest
   variables:
-    MQTT: "eclipse-mosquitto:1883"
     MQTT_URL: "mqtt://eclipse-mosquitto:1883"
     POSTGRES_DB: gosd
     POSTGRES_USER: postgres

@@ -2,7 +2,6 @@ package integration
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -38,9 +37,8 @@ func CmdRun(str string) ([]byte, error) {
 func startupNcp(id string) {
 	mqttRpcRecv, mqttRpcSend := "nodes/%s/rpc/recv", "nodes/%s/rpc/send"
 	mqttAddr := "mqtt://localhost:1883"
-	if addr := os.Getenv("MQTT"); addr != "" {
-		// addr "localhost:1883"
-		mqttAddr = fmt.Sprintf("mqtt://%s", addr)
+	if addr := os.Getenv("MQTT_URL"); addr != "" {
+		mqttAddr = addr
 	}
 
 	mqttdConfigPath := "/tmp/test_mqttd.yml"

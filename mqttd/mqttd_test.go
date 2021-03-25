@@ -29,8 +29,8 @@ func helpCmdRun(str string) ([]byte, error) {
 
 func helpGetMqttAddr() string {
 	mqttAddr := "mqtt://localhost:1883"
-	if addr := os.Getenv("MQTT"); addr != "" {
-		mqttAddr = fmt.Sprintf("mqtt://%s", addr)
+	if addr := os.Getenv("MQTT_URL"); addr != "" {
+		mqttAddr = addr
 	}
 	return mqttAddr
 }
