@@ -30,6 +30,9 @@ go1.15:build:
   image: golang:1.15-buster
   extends: .gobuild
 
+go1.16:build:
+  image: golang:1.16-buster
+  extends: .gobuild
 
 .gotest:
   stage: test
@@ -71,6 +74,12 @@ go1.15:test:
   needs:
     - go1.15:build
   image: golang:1.15-buster
+  extends: .gotest
+
+go1.16:test:
+  needs:
+    - go1.16:build
+  image: golang:1.16-buster
   extends: .gotest
 
 .test-broker:
@@ -162,6 +171,7 @@ deploy_staging:
     - go1.13:test
     - go1.14:test
     - go1.15:test
+    - go1.16:test
   only:
     refs:
       - dev
