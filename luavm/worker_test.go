@@ -60,6 +60,8 @@ func TestNewWorker(t *testing.T) {
 
 	worker := NewWorker(s, store, rpcServer)
 
+	// Maybe Wait mqtt broker ready
+	time.Sleep(1 * time.Second)
 
 	// test_min
 	task := NewTask(0, 0, 0)
