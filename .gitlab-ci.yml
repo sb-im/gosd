@@ -83,6 +83,10 @@ go1.16:test:
   extends: .gotest
 
 .test-broker:
+  services:
+    - redis:latest
+  variables:
+    REDIS_URL: "redis://redis:6379"
   script:
     - apt-get update -y && apt-get install -y mosquitto-clients redis-server
     - make test-broker
