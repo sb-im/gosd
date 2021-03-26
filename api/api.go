@@ -33,15 +33,19 @@ func Serve(router *mux.Router, cache *state.State, store *storage.Storage, worke
 	router.HandleFunc(u.Path+"/oauth/token", handler.authHandler).Methods(http.MethodPost, http.MethodOptions)
 
 	router.PathPrefix(u.Path + "/api").Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
+		//w.Header().Set("Access-Control-Allow-Headers", "*")
+		w.Header().Set("Access-Control-Allow-Headers", strings.Join([]string{
+			"Authorization",
+			"Content-Type",
+		}, ","))
 
-		allMethods := []string{
+		w.Header().Set("Access-Control-Allow-Methods", strings.Join([]string{
+			http.MethodPut,
+			http.MethodPost,
 			http.MethodPatch,
 			http.MethodDelete,
-		}
-
-		w.Header().Set("Access-Control-Allow-Methods", strings.Join(allMethods, ","))
+		}, ","))
 	})
 
 	// Plan
