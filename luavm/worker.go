@@ -106,3 +106,14 @@ func (w Worker) Kill(planID string) {
 		fmt.Println("==> luavm Kill")
 	}
 }
+
+func (w Worker) Close() {
+	// Stop Create running
+	close(w.Queue)
+
+	for _, service := range w.Running {
+		service.Close()
+	}
+
+	fmt.Println("==> luaVM Worker Close")
+}

@@ -3,15 +3,17 @@ package cli
 import (
 	"context"
 	"net/http"
+	"os"
+	"os/signal"
 	"runtime"
 	"time"
 
 	"sb.im/gosd/api"
 	"sb.im/gosd/config"
 	"sb.im/gosd/luavm"
-	"sb.im/gosd/state"
-	"sb.im/gosd/rpc2mqtt"
 	"sb.im/gosd/mqttd"
+	"sb.im/gosd/rpc2mqtt"
+	"sb.im/gosd/state"
 	"sb.im/gosd/storage"
 
 	"miniflux.app/logger"
@@ -41,11 +43,20 @@ func StartDaemon(store *storage.Storage, opts *config.Options) {
 	worker := luavm.NewWorker(state, store, rpcServer)
 	go worker.Run()
 
-	r := mux.NewRouter()
+	go func() {
+		r := mux.NewRouter()
+		logger.Info("=========")
+		api.Serve(r, state, store, worker, opts.BaseURL())
+		http.ListenAndServe(opts.ListenAddr(), r)
+	}()
 
-	logger.Info("=========")
-	api.Serve(r, state, store, worker, opts.BaseURL())
-	http.ListenAndServe(opts.ListenAddr(), r)
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, os.Interrupt)
+	<-sigs
+
+	// This Worker Need Wait data sync
+	worker.Close()
+	time.Sleep(1 * time.Second)
 
 	logger.Info("Process gracefully stopped")
 }
