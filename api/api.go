@@ -3,7 +3,6 @@ package api
 import (
 	"net/http"
 	"net/url"
-	"strings"
 
 	"sb.im/gosd/luavm"
 	"sb.im/gosd/state"
@@ -35,17 +34,13 @@ func Serve(router *mux.Router, cache *state.State, store *storage.Storage, worke
 	router.PathPrefix(u.Path + "/api").Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		//w.Header().Set("Access-Control-Allow-Headers", "*")
-		w.Header().Set("Access-Control-Allow-Headers", strings.Join([]string{
-			"Authorization",
-			"Content-Type",
-		}, ","))
+		w.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type")
 
-		w.Header().Set("Access-Control-Allow-Methods", strings.Join([]string{
-			http.MethodPut,
-			http.MethodPost,
-			http.MethodPatch,
-			http.MethodDelete,
-		}, ","))
+		w.Header().Set("Access-Control-Allow-Methods",
+			http.MethodPut + "," +
+			http.MethodPost + "," +
+			http.MethodPatch + "," +
+			http.MethodDelete)
 	})
 
 	// Plan
