@@ -47,6 +47,9 @@ func (t *Rpc2mqtt) Run(ctx context.Context) {
 			return
 		case raw := <-t.o:
 			rpc := jsonrpc.ParseObject(raw.Payload)
+			if rpc.Type == jsonrpc.TypeInvalid {
+				continue
+			}
 			if pending := t.pending[*rpc.ID]; pending != nil && (rpc.Type == jsonrpc.TypeSuccess || rpc.Type == jsonrpc.TypeErrors) {
 				t.mutex.Lock()
 				delete(t.pending, *rpc.ID)
