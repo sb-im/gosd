@@ -144,6 +144,9 @@ function NewPlan(nodeID)
         self.SetJobFiles(self, files)
       end
       return SD:BlobUrl(blobID)
+    end,
+    LogFileUrl = function(self, key)
+      return self.JobFileUrl(self, key)
     end
   }
 end
