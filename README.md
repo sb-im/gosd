@@ -4,19 +4,42 @@ replace RSD-backend
 
 ## Build
 
-* golang >= 1.11.x
+* golang >= 1.12.x
 * make
 
 ```sh
 make
 ```
 
+## Dependencies
+
+* PostgreSQL >= 13
+* Redis
+* Mqtt broker (Mosquitto Or Emqx)
+  * Mosquitto >= 1.6
+
 ## Run
 
 ```sh
+# Create database tables
 MQTT_URL=mqtt://admin:public@localhost:1883 \
+REDIS_URL=redis://localhost:6379/0 \
 DATABASE_URL=postgres://postgres:password@localhost/gosd?sslmode=disable \
-./gosd -migrate
+./gosd database migrate
+
+
+# Create User
+# gosd users add <username> <password>
+MQTT_URL=mqtt://admin:public@localhost:1883 \
+REDIS_URL=redis://localhost:6379/0 \
+DATABASE_URL=postgres://postgres:password@localhost/gosd?sslmode=disable \
+./gosd users add demo demodemo
+
+# Run
+MQTT_URL=mqtt://admin:public@localhost:1883 \
+REDIS_URL=redis://localhost:6379/0 \
+DATABASE_URL=postgres://postgres:password@localhost/gosd?sslmode=disable \
+./gosd
 ```
 
 ## Environment Variables
@@ -32,6 +55,7 @@ Variable Name        | Description                                              
 `BASE_URL`           | Base URL to generate HTML links and base path for cookies | `http://localhost/`
 `MQTT_URL`           | MQTT broker Server address                                | `mqtt://admin:public@localhost:1883`
 `MQTT_CLIENT_ID`     | MQTT Client ID                                            | `cloud.0`
+`REDIS_URL`          | Redis Server URL                                          | `redis://localhost:6379/0`
 
 ### New Plan
 
@@ -60,7 +84,7 @@ curl -X POST localhost:8000/v1/plans \
   "name":"233",
   "description":"test",
   "node_id":1,
-  "attachments": {
+  "files": {
     "file":"30"
   }
 }
