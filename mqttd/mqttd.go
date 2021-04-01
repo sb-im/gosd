@@ -77,6 +77,7 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 						ID:      id,
 						Payload: p.Payload,
 					}
+					store.Record(p.Topic, p.Payload)
 				default:
 					store.Record(p.Topic, p.Payload)
 				}
@@ -199,6 +200,51 @@ func (t *Mqtt) Run(ctx context.Context) {
 	if err != nil {
 		logger.Println(err)
 	}
+
+	go func() {
+		keyspace := "__keyspace@0__:%s"
+		psc := redis.PubSubConn{Conn: t.State.Pool.Get()}
+		psc.PSubscribe(fmt.Sprintf(keyspace, "nodes/*"))
+		for {
+			switch v := psc.Receive().(type) {
+			case redis.Message:
+				fmt.Printf("%s: message: %s\n", v.Channel, v.Data)
+
+				topic := strings.Split(v.Channel, ":")[1]
+				if ttt := strings.Split(topic, "/"); len(ttt) == 4 && ttt[3] == "send" {
+					fmt.Println(t.State.StringGet(topic))
+
+					raw, err := t.State.BytesGet(topic)
+					if err != nil {
+						// TODO: error handling
+					}
+
+					res, err := t.Client.Publish(ctx, &paho.Publish{
+						Payload: raw,
+						Topic:   topic,
+						QoS:     0,
+						Retain:	 false,
+					})
+
+					if err != nil {
+						if res != nil {
+							logger.Printf("%+v\n", res)
+						}
+						logger.Println(err)
+						//return err
+					}
+			}
+
+			case redis.Subscription:
+				fmt.Printf("%s: %s %d\n", v.Channel, v.Kind, v.Count)
+			case error:
+				fmt.Println(v)
+				//return v
+			default:
+				fmt.Println("default")
+			}
+		}
+	}()
 
 	go func() {
 		keyspace := "__keyspace@0__:%s"
