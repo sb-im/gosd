@@ -78,4 +78,7 @@ func Serve(router *mux.Router, cache *state.State, store *storage.Storage, worke
 	sr.HandleFunc("/{action}/", handler.actionHandler).Methods(http.MethodGet)
 
 	sr2.HandleFunc("/ok", handler.ok).Methods(http.MethodGet)
+
+	sr2.PathPrefix("/mqtt/").HandlerFunc(handler.mqttGet).Methods(http.MethodGet)
+	sr2.PathPrefix("/mqtt/").HandlerFunc(handler.mqttPut).Methods(http.MethodPost)
 }
