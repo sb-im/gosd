@@ -7,7 +7,7 @@ import (
 type Task struct {
 	ID     int64             `json:"id"`
 	NodeID int64             `json:"-"`
-	PlanID int64             `json:"-"`
+	PlanID int64             `json:"plan_id"`
 	Files  map[string]string `json:"files"`
 	Extra  map[string]string `json:"extra"`
 	Script []byte            `json:"-"`
