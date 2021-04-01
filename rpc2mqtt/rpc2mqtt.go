@@ -7,6 +7,7 @@ import (
 	"math"
 	"sync"
 	"time"
+	"log"
 
 	"sb.im/gosd/mqttd"
 
@@ -64,11 +65,13 @@ func (t *Rpc2mqtt) Run(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case raw := <-t.o:
+			log.Printf("RECV: %s", raw.Payload)
 			rpc := jsonrpc.ParseObject(raw.Payload)
 			if rpc.Type == jsonrpc.TypeInvalid {
 				continue
 			}
 			if pending, ok := t.pending[*rpc.ID]; ok && (rpc.Type == jsonrpc.TypeSuccess || rpc.Type == jsonrpc.TypeErrors) {
+				log.Printf("res: %s", raw.Payload)
 				t.mutex.Lock()
 				delete(t.pending, *rpc.ID)
 				t.mutex.Unlock()
