@@ -204,26 +204,51 @@ func (t *Mqtt) Run(ctx context.Context) {
 	go func() {
 		keyspace := "__keyspace@0__:%s"
 		psc := redis.PubSubConn{Conn: t.State.Pool.Get()}
-		psc.PSubscribe(fmt.Sprintf(keyspace, "nodes/*"))
+		psc.PSubscribe(fmt.Sprintf(keyspace, "nodes/*"), fmt.Sprintf(keyspace, "plans/*"))
 		for {
 			switch v := psc.Receive().(type) {
 			case redis.Message:
-				fmt.Printf("%s: message: %s\n", v.Channel, v.Data)
+				logger.Printf("%s: message: %s\n", v.Channel, v.Data)
 
+				// topic:
+				// plans/1/running
+				// nodes/4/msg/weather
 				topic := strings.Split(v.Channel, ":")[1]
-				if ttt := strings.Split(topic, "/"); len(ttt) == 4 && ttt[3] == "send" {
-					fmt.Println(t.State.StringGet(topic))
+				logger.Println(t.State.StringGet(topic))
+				raw, err := t.State.BytesGet(topic)
+				if err != nil {
+					logger.Println(err)
+				}
 
-					raw, err := t.State.BytesGet(topic)
-					if err != nil {
-						// TODO: error handling
+				// prefix:
+				// plans
+				// nodes
+				prefix := strings.Split(topic, "/")[0]
+
+				switch prefix {
+				case "nodes":
+					// nodes/+/rpc/send
+					if ks := strings.Split(topic, "/"); len(ks) == 4 && ks[3] == "send" {
+						res, err := t.Client.Publish(ctx, &paho.Publish{
+							Payload: raw,
+							Topic:   topic,
+							QoS:     0,
+							Retain:	 false,
+						})
+
+						if err != nil {
+							if res != nil {
+								logger.Printf("%+v\n", res)
+							}
+							logger.Println(err)
+						}
 					}
-
+				case "plans":
 					res, err := t.Client.Publish(ctx, &paho.Publish{
 						Payload: raw,
 						Topic:   topic,
-						QoS:     0,
-						Retain:	 false,
+						QoS:     1,
+						Retain:	 true,
 					})
 
 					if err != nil {
@@ -231,61 +256,16 @@ func (t *Mqtt) Run(ctx context.Context) {
 							logger.Printf("%+v\n", res)
 						}
 						logger.Println(err)
-						//return err
 					}
-			}
-
-			case redis.Subscription:
-				fmt.Printf("%s: %s %d\n", v.Channel, v.Kind, v.Count)
-			case error:
-				fmt.Println(v)
-				//return v
-			default:
-				fmt.Println("default")
-			}
-		}
-	}()
-
-	go func() {
-		keyspace := "__keyspace@0__:%s"
-		psc := redis.PubSubConn{Conn: t.State.Pool.Get()}
-		psc.PSubscribe(fmt.Sprintf(keyspace, "plans/*"))
-		for {
-			switch v := psc.Receive().(type) {
-			case redis.Message:
-				fmt.Printf("%s: message: %s\n", v.Channel, v.Data)
-
-				topic := strings.Split(v.Channel, ":")[1]
-				fmt.Println(t.State.StringGet(topic))
-
-				raw, err := t.State.BytesGet(topic)
-				if err != nil {
-					// TODO: error handling
+				default:
+					logger.Printf("ignore -- %s: %s\n", topic, raw)
 				}
-
-				res, err := t.Client.Publish(ctx, &paho.Publish{
-					Payload: raw,
-					Topic:   topic,
-					QoS:     1,
-					Retain:	 true,
-				})
-
-				if err != nil {
-					if res != nil {
-						logger.Printf("%+v\n", res)
-					}
-					logger.Println(err)
-					//return err
-				}
-
-
 			case redis.Subscription:
-				fmt.Printf("%s: %s %d\n", v.Channel, v.Kind, v.Count)
+				logger.Printf("%s: %s %d\n", v.Channel, v.Kind, v.Count)
 			case error:
-				fmt.Println(v)
-				//return v
+				logger.Println(v)
 			default:
-				fmt.Println("default")
+				logger.Println("default")
 			}
 		}
 	}()
