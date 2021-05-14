@@ -55,7 +55,7 @@ Variable Name        | Description                                              
 `BASE_URL`           | Base URL to generate HTML links and base path for cookies | `http://localhost/`
 `MQTT_URL`           | MQTT broker Server address                                | `mqtt://admin:public@localhost:1883`
 `MQTT_CLIENT_ID`     | MQTT Client ID                                            | `cloud.0`
-`REDIS_URL`          | Redis Server URL                                          | `redis://localhost:6379/0`
+`REDIS_URL`          | Redis Server URL, **Only use db `0`**                     | `redis://localhost:6379/0`
 
 ### New Plan
 

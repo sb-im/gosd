@@ -41,6 +41,14 @@ func (p *Parser) parseLines(lines []string) (err error) {
 		case "MQTT_URL":
 			p.opts.mqttURL = parseString(value, defaultMqttURL)
 		case "REDIS_URL":
+			url, err := url_parser.Parse(value)
+			if err == nil && url.Path != "" && url.Path != "/0"{
+				old := value
+				url.Path = "0"
+				value = url.String()
+				fmt.Println("ERROR: Only use redis 0, Automatic conversion ===")
+				fmt.Printf("%s => %s\n", old , url.String())
+			}
 			p.opts.redisURL = parseString(value, defaultRedisURL)
 		case "BASE_URL":
 			p.opts.baseURL, p.opts.rootURL, p.opts.basePath, err = parseBaseURL(value)
