@@ -10,9 +10,9 @@ import (
 
 	"sb.im/gosd/state"
 
-	redis "github.com/gomodule/redigo/redis"
 	packets "github.com/eclipse/paho.golang/packets"
 	paho "github.com/eclipse/paho.golang/paho"
+	redis "github.com/gomodule/redigo/redis"
 	"github.com/sb-im/jsonrpc-lite"
 
 	logger "log"
@@ -92,9 +92,9 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 			//WillRetain:  true,
 			//WillTopic:   fmt.Sprintf(config.Status, config.ID),
 			//WillQOS:     1,
-			Password:   []byte(password),
-			Username:   opt.User.Username(),
-			ClientID:   fmt.Sprintf(config.Client, config.ID),
+			Password: []byte(password),
+			Username: opt.User.Username(),
+			ClientID: fmt.Sprintf(config.Client, config.ID),
 			//CleanStart: false,
 			CleanStart: true,
 			// interval 10s
@@ -233,7 +233,7 @@ func (t *Mqtt) Run(ctx context.Context) {
 							Payload: raw,
 							Topic:   topic,
 							QoS:     0,
-							Retain:	 false,
+							Retain:  false,
 						})
 
 						if err != nil {
@@ -248,7 +248,7 @@ func (t *Mqtt) Run(ctx context.Context) {
 						Payload: raw,
 						Topic:   topic,
 						QoS:     1,
-						Retain:	 true,
+						Retain:  true,
 					})
 
 					if err != nil {
@@ -329,7 +329,7 @@ func (t *Mqtt) doRun(parent context.Context) {
 				QoS: 1,
 			},
 			fmt.Sprintf("plans/%s/term", "+"): {
-				QoS: 1,
+				QoS:     1,
 				NoLocal: true,
 			},
 		},
