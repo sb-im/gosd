@@ -69,7 +69,7 @@ func (w Worker) doRun(task *Task) error {
 	defer service.CleanDialog()
 
 	// Load Lib
-	for _, lib := range []string{"lib_plan", "lib_node", "lib_geo", "lib_main"} {
+	for _, lib := range []string{"lib_plan", "lib_node", "lib_geo", "lib_log", "lib_main"} {
 		if fn, err := l.Load(strings.NewReader(LuaMap[lib]), lib + ".lua"); err != nil {
 			return err
 		} else {
