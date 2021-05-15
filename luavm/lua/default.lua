@@ -2,6 +2,12 @@
 _raw_print = print
 local log = NewLog(function(line, nu)
   return tostring(nu) .. ": \t" .. os.date("%Y/%m/%d %H:%M:%S") .. " " .. line
+end,
+function(word, nu)
+  if type(word) == "table" then
+    return json.encode(word)
+  end
+  return tostring(word)
 end)
 print = function(...)
   _raw_print(arg)
