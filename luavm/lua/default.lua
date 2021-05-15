@@ -1,4 +1,13 @@
 
+_raw_print = print
+local log = NewLog(function(line, nu)
+  return tostring(nu) .. ": \t" .. os.date("%Y/%m/%d %H:%M:%S") .. " " .. line
+end)
+print = function(...)
+  _raw_print(arg)
+  log:Println(arg)
+end
+
 STOP = false
 
 --合并两个table
@@ -364,5 +373,6 @@ function main(plan)
   end)
 
   print("=== END Lua END ===")
+  plan:SetJobFileContent("luavm", "luavm.txt", log:GetContent())
   return
 end
