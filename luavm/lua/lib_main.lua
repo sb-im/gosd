@@ -5,13 +5,5 @@ sleep = function(time)
 end
 
 function SD_main(node_id)
-  print("Running")
-  local plan = NewPlan(node_id)
-
-  -- Main
-  local ret = main(plan)
-
-  -- Record print log
-  plan:SetJobFileContent("luavm", "luavm.log", _SD_printResult)
-  return ret
+  return main(NewPlan(node_id))
 end
