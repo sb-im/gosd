@@ -10,8 +10,8 @@ function(word, nu)
   return tostring(word)
 end)
 print = function(...)
-  _raw_print(arg)
-  log:Println(arg)
+  _raw_print(unpack(arg))
+  log:Println(unpack(arg))
 end
 
 STOP = false
