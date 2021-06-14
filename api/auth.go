@@ -2,6 +2,7 @@ package api
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"mime"
 	"net/http"
@@ -59,6 +60,13 @@ func (h *handler) authHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := h.store.UserByUsername(item.Username)
 	if err != nil {
 		json.ServerError(w, r, err)
+		return
+	}
+
+	// TODO: This UserByUsername sql.ErrNoRows not return error
+	// Maybe this need Change
+	if user == nil {
+		json.ServerError(w, r, errors.New("Not user found"))
 		return
 	}
 
