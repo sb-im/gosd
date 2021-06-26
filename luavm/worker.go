@@ -1,12 +1,13 @@
 package luavm
 
 import (
-	"fmt"
 	"strings"
 
 	"sb.im/gosd/rpc2mqtt"
 	"sb.im/gosd/state"
 	"sb.im/gosd/storage"
+
+	log "github.com/sirupsen/logrus"
 
 	lua "github.com/yuin/gopher-lua"
 	luajson "layeh.com/gopher-json"
@@ -34,7 +35,7 @@ func NewWorker(s *state.State, store *storage.Storage, rpcServer *rpc2mqtt.Rpc2m
 func (w Worker) Run() {
 	for task := range w.Queue {
 		if err := w.doRun(task); err != nil {
-			fmt.Println(err)
+			log.Error(err)
 		}
 	}
 }
@@ -48,8 +49,8 @@ func (w Worker) doRun(task *Task) error {
 		l.Close()
 
 		if r := recover(); r != nil {
-			fmt.Printf("Emergency stop planID: %d\n", task.PlanID)
-			fmt.Printf("Error：%s\n", r)
+			log.Errorf("Emergency stop planID: %d\n", task.PlanID)
+			log.Errorf("Error：%s\n", r)
 		}
 		w.SetRunning(task.PlanID, &struct{}{})
 	}()
@@ -62,7 +63,7 @@ func (w Worker) doRun(task *Task) error {
 	service.Server = w.RpcServer
 	w.Running[task.StringPlanID()] = service
 	defer delete(w.Running, task.StringPlanID())
-	defer fmt.Println("==> luavm END")
+	defer log.Warn("==> luavm END")
 	l.SetGlobal("SD", luar.New(l, service))
 
 	// Clean up the "Dialog" when exiting
@@ -96,14 +97,14 @@ func (w Worker) doRun(task *Task) error {
 		return err
 	}
 
-	fmt.Println("==> luavm no panic")
+	log.Warn("==> luavm no panic")
 	return nil
 }
 
 func (w Worker) Kill(planID string) {
 	if service, ok := w.Running[planID]; ok {
 		service.Close()
-		fmt.Println("==> luavm Kill")
+		log.Warn("==> luavm Kill")
 	}
 }
 
@@ -115,5 +116,5 @@ func (w Worker) Close() {
 		service.Close()
 	}
 
-	fmt.Println("==> luaVM Worker Close")
+	log.Warn("==> luaVM Worker Close")
 }

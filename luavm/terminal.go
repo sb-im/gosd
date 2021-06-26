@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"errors"
 
+	log "github.com/sirupsen/logrus"
+
 	redis "github.com/gomodule/redigo/redis"
 )
 
@@ -22,7 +24,7 @@ func (s *Service) IOGets() (string, error) {
 		for {
 			switch v := psc.Receive().(type) {
 			case redis.Message:
-				fmt.Printf("%s: message: %s\n", v.Channel, v.Data)
+				log.Debugf("%s: message: %s\n", v.Channel, v.Data)
 
 				raw, err := s.State.BytesGet(topic)
 				if err != nil {
@@ -31,12 +33,11 @@ func (s *Service) IOGets() (string, error) {
 				ch <- raw
 				return
 			case redis.Subscription:
-				fmt.Printf("%s: %s %d\n", v.Channel, v.Kind, v.Count)
+				log.Warnf("%s: %s %d\n", v.Channel, v.Kind, v.Count)
 			case error:
-				fmt.Println(v)
-				//return v
+				log.Error(v)
 			default:
-				fmt.Println("default")
+				log.Warn("default")
 			}
 		}
 	}()
