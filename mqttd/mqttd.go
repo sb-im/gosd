@@ -10,12 +10,12 @@ import (
 
 	"sb.im/gosd/state"
 
+	log "github.com/sirupsen/logrus"
+
 	packets "github.com/eclipse/paho.golang/packets"
 	paho "github.com/eclipse/paho.golang/paho"
 	redis "github.com/gomodule/redigo/redis"
 	"github.com/sb-im/jsonrpc-lite"
-
-	logger "log"
 )
 
 type Mqtt struct {
@@ -36,16 +36,16 @@ type MqttRpc struct {
 func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- MqttRpc) *Mqtt {
 	config, err := loadMqttConfigDefault()
 	if err != nil {
-		logger.Println(err)
+		log.Error(err)
 	}
 
 	config.Broker = broker
 	opt, err := url.Parse(broker)
 	if err != nil {
-		logger.Println(err)
+		log.Error(err)
 		return nil
 	}
-	logger.Printf("%+v\n", config)
+	log.Infof("%+v\n", config)
 
 	password, _ := opt.User.Password()
 	cache := make(chan MqttRpc, 128)
@@ -198,7 +198,7 @@ func (t *Mqtt) Run(ctx context.Context) {
 
 	opt, err := url.Parse(t.Config.Broker)
 	if err != nil {
-		logger.Println(err)
+		log.Error(err)
 	}
 
 	go func() {
@@ -208,16 +208,16 @@ func (t *Mqtt) Run(ctx context.Context) {
 		for {
 			switch v := psc.Receive().(type) {
 			case redis.Message:
-				logger.Printf("%s: message: %s\n", v.Channel, v.Data)
+				log.Debugf("%s: message: %s\n", v.Channel, v.Data)
 
 				// topic:
 				// plans/1/running
 				// nodes/4/msg/weather
 				topic := strings.Split(v.Channel, ":")[1]
-				logger.Println(t.State.StringGet(topic))
+				log.Trace(t.State.StringGet(topic))
 				raw, err := t.State.BytesGet(topic)
 				if err != nil {
-					logger.Println(err)
+					log.Error(err)
 				}
 
 				// prefix:
@@ -238,9 +238,9 @@ func (t *Mqtt) Run(ctx context.Context) {
 
 						if err != nil {
 							if res != nil {
-								logger.Printf("%+v\n", res)
+								log.Errorf("%+v\n", res)
 							}
-							logger.Println(err)
+							log.Error(err)
 						}
 					}
 				case "plans":
@@ -253,19 +253,19 @@ func (t *Mqtt) Run(ctx context.Context) {
 
 					if err != nil {
 						if res != nil {
-							logger.Printf("%+v\n", res)
+							log.Errorf("%+v\n", res)
 						}
-						logger.Println(err)
+						log.Error(err)
 					}
 				default:
-					logger.Printf("ignore -- %s: %s\n", topic, raw)
+					log.Warnf("ignore -- %s: %s\n", topic, raw)
 				}
 			case redis.Subscription:
-				logger.Printf("%s: %s %d\n", v.Channel, v.Kind, v.Count)
+				log.Warnf("%s: %s %d\n", v.Channel, v.Kind, v.Count)
 			case error:
-				logger.Println(v)
+				log.Error(v)
 			default:
-				logger.Println("default")
+				log.Warn("default")
 			}
 		}
 	}()
@@ -275,11 +275,11 @@ func (t *Mqtt) Run(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		default:
-			logger.Println("MQTT Try Connect")
+			log.Info("MQTT Try Connect")
 			if conn, err := net.Dial("tcp", opt.Hostname()+":"+opt.Port()); err != nil {
-				logger.Println(err)
+				log.Error(err)
 			} else {
-				logger.Println("MQTT TCP Connected")
+				log.Info("MQTT TCP Connected")
 				t.Client.Conn = conn
 				t.doRun(ctx)
 				conn.Close()
@@ -296,20 +296,20 @@ func (t *Mqtt) doRun(parent context.Context) {
 
 	ctx, cancel := context.WithCancel(parent)
 	t.Client.OnServerDisconnect = func(p *paho.Disconnect) {
-		fmt.Println("OnServerDisconnect")
-		logger.Panicln(p)
+		log.Warn("OnServerDisconnect")
+		log.Error(p)
 		cancel()
 	}
 
 	t.Client.OnClientError = func(err error) {
-		fmt.Println("OnClientError")
-		logger.Println(err)
+		log.Warn("OnClientError")
+		log.Error(err)
 		cancel()
 	}
 
-	defer logger.Println("MQTT Close")
+	defer log.Info("MQTT Close")
 	t.Client.Connect(ctx, t.Connect)
-	logger.Println("MQTT Connected")
+	log.Info("MQTT Connected")
 
 	res, err := t.Client.Subscribe(ctx, &paho.Subscribe{
 		Subscriptions: map[string]paho.SubscribeOptions{
@@ -337,9 +337,9 @@ func (t *Mqtt) doRun(parent context.Context) {
 
 	if err != nil {
 		if res != nil {
-			logger.Printf("%+v\n", res)
+			log.Errorf("%+v\n", res)
 		}
-		logger.Println(err)
+		log.Error(err)
 		return
 	}
 
@@ -381,13 +381,13 @@ func (t *Mqtt) send(ctx context.Context, packet MqttRpc) error {
 
 		if err != nil {
 			if res != nil {
-				logger.Printf("%+v\n", res)
+				log.Errorf("%+v\n", res)
 			}
-			logger.Println(err)
+			log.Error(err)
 			return err
 		}
 	} else {
-		fmt.Println("[Drop]: ", string(raw))
+		log.Warnf("[Drop]: %s", raw)
 	}
 	return nil
 }

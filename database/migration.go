@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"miniflux.app/logger"
+	logger "github.com/sirupsen/logrus"
 )
 
 const schemaVersion = 1

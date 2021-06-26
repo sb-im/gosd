@@ -10,7 +10,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"miniflux.app/logger"
+	log "github.com/sirupsen/logrus"
+
 	"miniflux.app/version"
 )
 
@@ -40,7 +41,7 @@ TODO
 		}
 
 		if flagNoAuth {
-			fmt.Println("=== Enable noauth ===")
+			log.Warn("=== Enable noauth ===")
 			auth.SetAuthMethod(auth.NoAuth)
 		}
 
@@ -51,7 +52,7 @@ TODO
 		}
 
 		if flagDebugMode || opts.HasDebugMode() {
-			logger.EnableDebug()
+			log.SetLevel(log.DebugLevel)
 		}
 
 		cli.StartDaemon(d.store, opts)

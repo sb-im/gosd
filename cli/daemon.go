@@ -16,7 +16,7 @@ import (
 	"sb.im/gosd/state"
 	"sb.im/gosd/storage"
 
-	"miniflux.app/logger"
+	logger "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/mux"
 )
