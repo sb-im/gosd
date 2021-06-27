@@ -56,6 +56,8 @@ Variable Name        | Description                                              
 `MQTT_URL`           | MQTT broker Server address                                | `mqtt://admin:public@localhost:1883`
 `MQTT_CLIENT_ID`     | MQTT Client ID                                            | `cloud.0`
 `REDIS_URL`          | Redis Server URL, **Only use db `0`**                     | `redis://localhost:6379/0`
+`LOG_FILE`           | Log File                                                  | `STDOUT`
+`LOG_LEVEL`          | Log Level: `panic`, `fatal`, `error`, `warn`, `info`, `debug`, `trace` | `info`
 
 ### New Plan
 

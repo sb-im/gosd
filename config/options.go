@@ -11,6 +11,8 @@ const (
 	defaultDatabaseURL      = "postgres://postgres:password@localhost/gosd?sslmode=disable"
 	defaultDatabaseMaxConns = 20
 	defaultDatabaseMinConns = 1
+	defaultLogFile          = "STDOUT"
+	defaultLogLevel         = "info"
 	defaultListenAddr       = "127.0.0.1:8000"
 )
 
@@ -26,6 +28,8 @@ type Options struct {
 	databaseURL      string
 	databaseMaxConns int
 	databaseMinConns int
+	logFile          string
+	logLevel         string
 	listenAddr       string
 }
 
@@ -42,6 +46,8 @@ func NewOptions() *Options {
 		databaseURL:      defaultDatabaseURL,
 		databaseMaxConns: defaultDatabaseMaxConns,
 		databaseMinConns: defaultDatabaseMinConns,
+		logFile:          defaultLogFile,
+		logLevel:         defaultLogLevel,
 		listenAddr:       defaultListenAddr,
 	}
 }
@@ -80,6 +86,14 @@ func (o *Options) DatabaseMaxConns() int {
 
 func (o *Options) DatabaseMinConns() int {
 	return o.databaseMinConns
+}
+
+func (o *Options) LogFile() string {
+	return o.logFile
+}
+
+func (o *Options) LogLevel() string {
+	return o.logLevel
 }
 
 func (o *Options) ListenAddr() string {

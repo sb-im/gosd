@@ -24,6 +24,20 @@ import (
 func StartDaemon(store *storage.Storage, opts *config.Options) {
 	logger.Info("Starting gosd...")
 
+	if opts.LogFile() != "STDOUT" {
+		file, err := os.Create(opts.LogFile())
+		if err != nil {
+			panic(err)
+		}
+		logger.SetOutput(file)
+	}
+	lvl, err := logger.ParseLevel(opts.LogLevel())
+	if err != nil {
+		panic(err)
+	}
+	logger.SetLevel(lvl)
+	logger.Warn("log level: ", logger.GetLevel().String())
+
 	//go showProcessStatistics()
 
 	state := state.NewState(opts.RedisURL())

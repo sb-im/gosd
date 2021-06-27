@@ -65,6 +65,10 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.databaseMaxConns = parseInt(value, defaultDatabaseMaxConns)
 		case "DATABASE_MIN_CONNS":
 			p.opts.databaseMinConns = parseInt(value, defaultDatabaseMinConns)
+		case "LOG_FILE":
+			p.opts.logFile = parseString(value, defaultLogFile)
+		case "LOG_LEVEL":
+			p.opts.logLevel = parseString(value, defaultLogLevel)
 		}
 	}
 
