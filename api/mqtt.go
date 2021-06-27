@@ -1,11 +1,10 @@
 package api
 
 import (
-	//"fmt"
-	"log"
 	"net/http"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/gomodule/redigo/redis"
 	"miniflux.app/http/response/json"
 )
@@ -17,7 +16,7 @@ func (h *handler) mqttPut(w http.ResponseWriter, r *http.Request) {
 	raw := make([]byte, 4096)
 	defer r.Body.Close()
 	n, _ := r.Body.Read(raw)
-	log.Println("SET: ", key, string(raw))
+	log.Debugf("SET: %s, %s", key, raw)
 	data, err := redis.Bytes(h.cache.Do("GET", key))
 	if err != nil {
 		json.ServerError(w, r, err)
@@ -29,7 +28,7 @@ func (h *handler) mqttPut(w http.ResponseWriter, r *http.Request) {
 
 func (h *handler) mqttGet(w http.ResponseWriter, r *http.Request) {
 	key := strings.Split(r.URL.Path, "/mqtt/")[1]
-	log.Println("GET: ", key)
+	log.Debugf("GET: %s", key)
 	data, err := redis.Bytes(h.cache.Do("GET", key))
 	if err != nil {
 		json.ServerError(w, r, err)

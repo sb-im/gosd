@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -12,6 +11,8 @@ import (
 	"time"
 
 	"sb.im/gosd/state"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func cmdRun(str string) {
@@ -75,7 +76,7 @@ func TestMqttd(t *testing.T) {
 }
 
 func TestMqttdRpc(t *testing.T) {
-	log.SetFlags(log.Lshortfile | log.LstdFlags)
+	log.SetReportCaller(true)
 	id := "000"
 	mqttRpcRecv, mqttRpcSend := "nodes/%s/rpc/recv", "nodes/%s/rpc/send"
 	mqttAddr := helpGetMqttAddr()

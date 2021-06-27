@@ -3,14 +3,13 @@ package rpc2mqtt
 import (
 	"context"
 	"errors"
-	"fmt"
 	"math"
 	"sync"
 	"time"
-	"log"
 
 	"sb.im/gosd/mqttd"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/sb-im/jsonrpc-lite"
 )
 
@@ -65,13 +64,13 @@ func (t *Rpc2mqtt) Run(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case raw := <-t.o:
-			log.Printf("RECV: %s", raw.Payload)
+			log.Tracef("RECV: %s", raw.Payload)
 			rpc := jsonrpc.ParseObject(raw.Payload)
 			if rpc.Type == jsonrpc.TypeInvalid {
 				continue
 			}
 			if pending, ok := t.pending[*rpc.ID]; ok && (rpc.Type == jsonrpc.TypeSuccess || rpc.Type == jsonrpc.TypeErrors) {
-				log.Printf("res: %s", raw.Payload)
+				log.Debugf("res: %s", raw.Payload)
 				t.mutex.Lock()
 				delete(t.pending, *rpc.ID)
 				t.mutex.Unlock()
@@ -99,7 +98,7 @@ func (t *Rpc2mqtt) Resend(ctx context.Context) {
 						pending.Count++
 
 					default:
-						fmt.Println("Buffer full")
+						log.Error("Buffer full")
 					}
 				} else if now > timeout {
 					rpc := jsonrpc.NewError(id, 1, "timeout", nil)

@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"log"
-
 	"sb.im/gosd/config"
 	"sb.im/gosd/database"
 	"sb.im/gosd/storage"
@@ -13,7 +11,7 @@ import (
 
 func checkErr(err error) {
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 }
 
