@@ -8,9 +8,6 @@ import (
 	"sb.im/gosd/state"
 	"sb.im/gosd/storage"
 
-	log "github.com/sirupsen/logrus"
-
-	"github.com/go-oauth2/oauth2/v4/errors"
 	"github.com/go-oauth2/oauth2/v4/manage"
 	"github.com/go-oauth2/oauth2/v4/models"
 	"github.com/go-oauth2/oauth2/v4/server"
@@ -37,20 +34,9 @@ func Serve(router *mux.Router, cache *state.State, store *storage.Storage, worke
 	manager.MapClientStorage(clientStore)
 
 	srv := server.NewDefaultServer(manager)
-	srv.SetAllowGetAccessRequest(true)
-	srv.SetClientInfoHandler(server.ClientFormHandler)
 
-	srv.SetInternalErrorHandler(func(err error) (re *errors.Response) {
-		log.Println("Internal Error:", err.Error())
-		return
-	})
-
-	srv.SetResponseErrorHandler(func(re *errors.Response) {
-		log.Println("Response Error:", re.Error.Error())
-	})
-
-
-	handler := &handler{cache, store, worker, baseURL}
+	handler := &handler{cache, srv, store, worker, baseURL}
+	handler.oauthInit()
 	sr := router.PathPrefix(u.Path + "/api/v1").Subrouter()
 	//middleware := newMiddleware(store)
 
@@ -65,16 +51,9 @@ func Serve(router *mux.Router, cache *state.State, store *storage.Storage, worke
 
 
 	// new oauth2
-	router.HandleFunc(u.Path+"/authorize", func(w http.ResponseWriter, r *http.Request) {
-		err := srv.HandleAuthorizeRequest(w, r)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-		}
-	})
+	router.HandleFunc(u.Path+"/authorize", handler.authorizeHandler)
 
-	router.HandleFunc(u.Path+"/token", func(w http.ResponseWriter, r *http.Request) {
-		srv.HandleTokenRequest(w, r)
-	})
+	router.HandleFunc(u.Path+"/token", handler.oAuthHandler)
 
 	//router.Use(mux.CORSMethodMiddleware(sr))
 	router.HandleFunc(u.Path+"/oauth/token", handler.authHandler).Methods(http.MethodPost, http.MethodOptions)
