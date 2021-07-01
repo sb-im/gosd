@@ -51,14 +51,17 @@ func Serve(router *mux.Router, cache *state.State, store *storage.Storage, worke
 
 
 	// new oauth2
+	router.Use(CORSOriginMiddleware("*"))
 	router.HandleFunc(u.Path+"/authorize", handler.authorizeHandler)
 
-	router.HandleFunc(u.Path+"/token", handler.oAuthHandler)
+	router.HandleFunc(u.Path+"/oauth/token", handler.oAuthHandler).Methods(http.MethodGet, http.MethodPost)
 
 	//router.Use(mux.CORSMethodMiddleware(sr))
-	router.HandleFunc(u.Path+"/oauth/token", handler.authHandler).Methods(http.MethodPost, http.MethodOptions)
+	//router.Use(mux.CORSMethodMiddleware(sr))
+	//router.HandleFunc(u.Path+"/oauth/token", handler.authHandler).Methods(http.MethodPost, http.MethodOptions)
 
-	router.PathPrefix(u.Path + "/api").Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	//router.PathPrefix(u.Path + "/api").Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	router.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		//w.Header().Set("Access-Control-Allow-Headers", "*")
 		w.Header().Set("Access-Control-Allow-Headers", "Authorization,Content-Type")

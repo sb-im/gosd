@@ -1,10 +1,9 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
-
-	"miniflux.app/http/response/json"
 )
 
 func CORSOriginMiddleware(origin string) func(http.Handler) http.Handler {
@@ -28,9 +27,11 @@ func (h handler) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if h.helpCurrentUser(w, req) == nil {
-			json.Unauthorized(w, req)
+		if userInfo, err := h.oauth.ValidationBearerToken(req); err != nil {
+			fmt.Println(userInfo)
 			return
+		} else {
+			fmt.Println("userID: ", userInfo.GetUserID())
 		}
 
 		next.ServeHTTP(w, req)
