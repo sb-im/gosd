@@ -51,16 +51,12 @@ func Serve(router *mux.Router, cache *state.State, store *storage.Storage, worke
 
 
 	// new oauth2
-	router.Use(CORSOriginMiddleware("*"))
-	router.HandleFunc(u.Path+"/authorize", handler.authorizeHandler)
+	// Only use Oauth password authentication
+	// sr2.HandleFunc("/oauth/authorize", handler.authorizeHandler)
+	sr2.HandleFunc("/oauth/token", handler.oAuthHandler).Methods(http.MethodGet, http.MethodPost)
 
-	router.HandleFunc(u.Path+"/oauth/token", handler.oAuthHandler).Methods(http.MethodGet, http.MethodPost)
+	router.HandleFunc(u.Path+"/oauth/token", handler.authHandler).Methods(http.MethodPost, http.MethodOptions)
 
-	//router.Use(mux.CORSMethodMiddleware(sr))
-	//router.Use(mux.CORSMethodMiddleware(sr))
-	//router.HandleFunc(u.Path+"/oauth/token", handler.authHandler).Methods(http.MethodPost, http.MethodOptions)
-
-	//router.PathPrefix(u.Path + "/api").Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	router.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		//w.Header().Set("Access-Control-Allow-Headers", "*")

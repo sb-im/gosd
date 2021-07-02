@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"miniflux.app/http/response/json"
 )
 
 func CORSOriginMiddleware(origin string) func(http.Handler) http.Handler {
@@ -27,13 +29,29 @@ func (h handler) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if userInfo, err := h.oauth.ValidationBearerToken(req); err != nil {
+		if strings.HasPrefix(req.URL.Path, "/gosd/api/v2/oauth/token") {
+			next.ServeHTTP(w, req)
+			return
+		}
+
+		if h.helpCurrentUser(w, req) == nil {
+			json.Unauthorized(w, req)
+			return
+		}
+
+		next.ServeHTTP(w, req)
+	})
+}
+
+
+func (h handler) Oauth2Middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if userInfo, err := h.oauth.ValidationBearerToken(r); err != nil {
 			fmt.Println(userInfo)
 			return
 		} else {
 			fmt.Println("userID: ", userInfo.GetUserID())
 		}
-
-		next.ServeHTTP(w, req)
+		next.ServeHTTP(w, r)
 	})
 }
