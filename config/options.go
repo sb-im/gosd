@@ -14,6 +14,8 @@ const (
 	defaultLogFile          = "STDOUT"
 	defaultLogLevel         = "info"
 	defaultListenAddr       = "127.0.0.1:8000"
+	defaultOauthID          = "000000"
+	defaultOauthSecret      = "999999"
 )
 
 // Options contains configuration options.
@@ -31,6 +33,8 @@ type Options struct {
 	logFile          string
 	logLevel         string
 	listenAddr       string
+	oauthID          string
+	oauthSecret      string
 }
 
 // NewOptions returns Options with default values.
@@ -49,6 +53,8 @@ func NewOptions() *Options {
 		logFile:          defaultLogFile,
 		logLevel:         defaultLogLevel,
 		listenAddr:       defaultListenAddr,
+		oauthID:          defaultOauthID,
+		oauthSecret:      defaultOauthSecret,
 	}
 }
 
@@ -98,4 +104,12 @@ func (o *Options) LogLevel() string {
 
 func (o *Options) ListenAddr() string {
 	return o.listenAddr
+}
+
+func (o *Options) OauthID() string {
+	return o.oauthID
+}
+
+func (o *Options) OauthSecret() string {
+	return o.oauthSecret
 }

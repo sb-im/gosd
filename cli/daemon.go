@@ -60,7 +60,11 @@ func StartDaemon(store *storage.Storage, opts *config.Options) {
 	go func() {
 		r := mux.NewRouter()
 		logger.Info("=========")
-		api.Serve(r, state, store, worker, opts.BaseURL())
+		api.Serve(r, state, store, worker, api.ServeConfig{
+			BaseURL: opts.BaseURL(),
+			OauthID: opts.OauthID(),
+			OauthSecret: opts.OauthSecret(),
+		})
 		http.ListenAndServe(opts.ListenAddr(), r)
 	}()
 

@@ -16,9 +16,15 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type ServeConfig struct {
+	BaseURL string
+	OauthID string
+	OauthSecret string
+}
+
 // Serve declares API routes for the application.
-func Serve(router *mux.Router, cache *state.State, store *storage.Storage, worker *luavm.Worker, baseURL string) {
-	u, _ := url.Parse(baseURL)
+func Serve(router *mux.Router, cache *state.State, store *storage.Storage, worker *luavm.Worker, opt ServeConfig) {
+	u, _ := url.Parse(opt.BaseURL)
 
 	manager := manage.NewDefaultManager()
 	// token memory store
@@ -26,16 +32,16 @@ func Serve(router *mux.Router, cache *state.State, store *storage.Storage, worke
 
 	// client memory store
 	clientStore := ostore.NewClientStore()
-	clientStore.Set("000000", &models.Client{
-		ID:     "000000",
-		Secret: "999999",
-		Domain: "http://localhost",
+	clientStore.Set(opt.OauthID, &models.Client{
+		ID:     opt.OauthID,
+		Secret: opt.OauthSecret,
+		Domain: opt.BaseURL,
 	})
 	manager.MapClientStorage(clientStore)
 
 	srv := server.NewDefaultServer(manager)
 
-	handler := &handler{cache, srv, store, worker, baseURL}
+	handler := &handler{cache, srv, store, worker, opt.BaseURL}
 	handler.oauthInit()
 	sr := router.PathPrefix(u.Path + "/api/v1").Subrouter()
 	//middleware := newMiddleware(store)

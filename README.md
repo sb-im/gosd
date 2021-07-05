@@ -58,6 +58,22 @@ Variable Name        | Description                                              
 `REDIS_URL`          | Redis Server URL, **Only use db `0`**                     | `redis://localhost:6379/0`
 `LOG_FILE`           | Log File                                                  | `STDOUT`
 `LOG_LEVEL`          | Log Level: `panic`, `fatal`, `error`, `warn`, `info`, `debug`, `trace` | `info`
+`OAUTH_CLIENT_ID`    | OAuth id | `000000`
+`OAUTH_CLIENT_SECRET` | OAuthSecret | `999999`
+
+
+### Auth
+
+```sh
+curl -X POST 'http://localhost:8000/gosd/api/v2/oauth/token' \
+-F grant_type=password \
+-F client_id=000000 \
+-F client_secret=999999 \
+-F scope=read \
+-F username=demo \
+-F password=demodemo
+```
+
 
 ### New Plan
 

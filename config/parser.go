@@ -69,6 +69,10 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.logFile = parseString(value, defaultLogFile)
 		case "LOG_LEVEL":
 			p.opts.logLevel = parseString(value, defaultLogLevel)
+		case "OAUTH_CLIENT_ID":
+			p.opts.oauthID = parseString(value, defaultOauthID)
+		case "OAUTH_CLIENT_SECRET":
+			p.opts.oauthSecret = parseString(value, defaultOauthSecret)
 		}
 	}
 
