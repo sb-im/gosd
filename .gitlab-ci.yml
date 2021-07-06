@@ -5,6 +5,7 @@ stages:
   - test
   - broker
   - simulation
+  - artifact
   - deploy
 
 .gobuild:
@@ -145,11 +146,30 @@ test-simulation:
     - ./gosd database migrate
     - make test-simulation
 
+build-binary:
+  stage: artifact
+  script:
+    - make
+  artifacts:
+    paths:
+      - gosd
+    expire_in: 1 week
+
+build-docker:
+  image: docker:20.10.5
+  stage: artifact
+  services:
+    - docker:20.10.5-dind
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $CI_REGISTRY/sbim/superdock/cloud/gosd/image:latest .
+    - docker push $CI_REGISTRY/sbim/superdock/cloud/gosd/image:latest
+
 deploy_staging:
   stage: deploy
   only:
     refs:
-      - dev
+      - master
   before_script:
     - apt-get update -y && apt-get install xz-utils
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
