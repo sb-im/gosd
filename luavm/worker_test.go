@@ -58,7 +58,7 @@ func TestNewWorker(t *testing.T) {
 	rpcServer := rpc2mqtt.NewRpc2Mqtt(chO, chI)
 	go rpcServer.Run(ctx)
 
-	worker := NewWorker(s, store, rpcServer)
+	worker := NewWorker(s, store, rpcServer, []byte{})
 
 	// test_min
 	task := NewTask(0, 0, 0)

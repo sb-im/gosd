@@ -73,6 +73,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.oauthID = parseString(value, defaultOauthID)
 		case "OAUTH_CLIENT_SECRET":
 			p.opts.oauthSecret = parseString(value, defaultOauthSecret)
+		case "LUA_FILE":
+			p.opts.luaFile = parseString(value, defaultLuaFile)
 		}
 	}
 

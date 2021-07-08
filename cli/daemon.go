@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
@@ -54,7 +55,14 @@ func StartDaemon(store *storage.Storage, opts *config.Options) {
 	rpcServer := rpc2mqtt.NewRpc2Mqtt(chI, chO)
 	go rpcServer.Run(ctx)
 
-	worker := luavm.NewWorker(state, store, rpcServer)
+	luaStr := []byte{}
+	if luaFile, err := os.Open(opts.LuaFile()); err == nil {
+		if luaStr, err = ioutil.ReadAll(luaFile); err == nil {
+			logger.Warn("lua file: ", opts.LuaFile())
+		}
+	}
+
+	worker := luavm.NewWorker(state, store, rpcServer, luaStr)
 	go worker.Run()
 
 	go func() {

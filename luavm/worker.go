@@ -15,6 +15,7 @@ import (
 )
 
 type Worker struct {
+	defaultLua    []byte
 	RpcServer     *rpc2mqtt.Rpc2mqtt
 	Queue         chan *Task
 	State         *state.State
@@ -22,13 +23,17 @@ type Worker struct {
 	Running       map[string]*Service
 }
 
-func NewWorker(s *state.State, store *storage.Storage, rpcServer *rpc2mqtt.Rpc2mqtt) *Worker {
+func NewWorker(s *state.State, store *storage.Storage, rpcServer *rpc2mqtt.Rpc2mqtt, defaultLua []byte) *Worker {
+	if len(defaultLua) == 0 {
+		defaultLua = []byte(LuaMap["default"])
+	}
 	return &Worker{
 		Queue:         make(chan *Task, 1024),
 		State:         s,
 		Store:         store,
 		Running:       make(map[string]*Service),
 		RpcServer:     rpcServer,
+		defaultLua:    defaultLua,
 	}
 }
 
@@ -80,7 +85,7 @@ func (w Worker) doRun(task *Task) error {
 	}
 
 	if len(task.Script) == 0 {
-		err = l.DoString(LuaMap["default"])
+		err = l.DoString(string(w.defaultLua))
 	} else {
 		err = l.DoString(string(task.Script))
 	}

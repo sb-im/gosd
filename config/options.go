@@ -16,6 +16,7 @@ const (
 	defaultListenAddr       = "127.0.0.1:8000"
 	defaultOauthID          = "000000"
 	defaultOauthSecret      = "999999"
+	defaultLuaFile          = "default.lua"
 )
 
 // Options contains configuration options.
@@ -35,6 +36,7 @@ type Options struct {
 	listenAddr       string
 	oauthID          string
 	oauthSecret      string
+	luaFile          string
 }
 
 // NewOptions returns Options with default values.
@@ -55,6 +57,7 @@ func NewOptions() *Options {
 		listenAddr:       defaultListenAddr,
 		oauthID:          defaultOauthID,
 		oauthSecret:      defaultOauthSecret,
+		luaFile:          defaultLuaFile,
 	}
 }
 
@@ -112,4 +115,8 @@ func (o *Options) OauthID() string {
 
 func (o *Options) OauthSecret() string {
 	return o.oauthSecret
+}
+
+func (o *Options) LuaFile() string {
+	return o.luaFile
 }

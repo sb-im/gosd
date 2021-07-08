@@ -60,6 +60,7 @@ Variable Name        | Description                                              
 `LOG_LEVEL`          | Log Level: `panic`, `fatal`, `error`, `warn`, `info`, `debug`, `trace` | `info`
 `OAUTH_CLIENT_ID`    | OAuth id | `000000`
 `OAUTH_CLIENT_SECRET` | OAuthSecret | `999999`
+`LUA_FILE` | Plan lua > `LUA_FILE` > System Default lua (need build-in: `luavm/lua/default.lua`) | `default.lua`
 
 
 ### Auth
