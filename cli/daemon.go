@@ -73,6 +73,8 @@ func StartDaemon(store *storage.Storage, opts *config.Options) {
 			OauthID: opts.OauthID(),
 			OauthSecret: opts.OauthSecret(),
 		})
+
+		logger.Warn(opts.ListenAddr())
 		http.ListenAndServe(opts.ListenAddr(), r)
 	}()
 
