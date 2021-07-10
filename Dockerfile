@@ -13,4 +13,6 @@ COPY --from=builder /src/gosd /usr/bin/gosd
 
 EXPOSE 8000/tcp
 
+WORKDIR /var/lib/gosd
+
 ENTRYPOINT ["/usr/bin/gosd"]
