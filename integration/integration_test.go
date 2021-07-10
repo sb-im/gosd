@@ -128,7 +128,7 @@ func TestIntegration(t *testing.T) {
 	rpcServer := rpc2mqtt.NewRpc2Mqtt(chI, chO)
 	go rpcServer.Run(ctx)
 
-	worker := luavm.NewWorker(state, store, rpcServer)
+	worker := luavm.NewWorker(state, store, rpcServer, []byte{})
 	go worker.Run()
 
 	// This unit test need:
