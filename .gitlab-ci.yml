@@ -160,10 +160,13 @@ build-docker:
   stage: artifact
   services:
     - docker:20.10.5-dind
-  script:
+  before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $CI_REGISTRY/sbim/superdock/cloud/gosd/image:latest .
-    - docker push $CI_REGISTRY/sbim/superdock/cloud/gosd/image:latest
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - docker build --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
 
 deploy_staging:
   stage: deploy
