@@ -1,0 +1,38 @@
+[
+  {
+    "icon": "summary",
+    "name": "概览",
+    "type": "path",
+    "args": "/#/panel/plan/new"
+  },
+  {
+    "icon": "new-plan",
+    "name": "新建任务",
+    "type": "path",
+    "args": "/#/panel/plan/new"
+  },
+  {
+    "icon": "plan",
+    "name": "任务",
+    "type": "plan",
+    "args": ""
+  },
+  {
+    "icon": "drone",
+    "name": "飞机",
+    "type": "node",
+    "args": "drone"
+  },
+  {
+    "icon": "depot",
+    "name": "机场",
+    "type": "node",
+    "args": "depot"
+  },
+  {
+    "icon": "log",
+    "name": "日志",
+    "type": "iframe",
+    "args": "https://cloud.sbnet.xyz/logger"
+  }
+]
