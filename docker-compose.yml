@@ -25,6 +25,8 @@ services:
     image: redis
     container_name: redis
     hostname: redis
+    ports:
+      - "6379:6379/tcp"
 
   mosquitto:
     image: eclipse-mosquitto:2.0.8
@@ -34,6 +36,8 @@ services:
       - mosquitto
       - -c
       - /mosquitto-no-auth.conf
+    ports:
+      - "1883:1883/tcp"
 
   postgres:
     image: postgres
