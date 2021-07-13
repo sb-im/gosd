@@ -3,7 +3,7 @@
     "icon": "summary",
     "name": "概览",
     "type": "path",
-    "args": "/#/panel/plan/new"
+    "args": "/#/panel/overview"
   },
   {
     "icon": "new-plan",
