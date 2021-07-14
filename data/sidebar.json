@@ -6,12 +6,6 @@
     "args": "/#/panel/overview"
   },
   {
-    "icon": "new-plan",
-    "name": "新建任务",
-    "type": "path",
-    "args": "/#/panel/plan/new"
-  },
-  {
     "icon": "plan",
     "name": "任务",
     "type": "plan",
