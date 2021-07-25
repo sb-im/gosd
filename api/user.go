@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
+	//"strconv"
 	"strings"
 
 	"sb.im/gosd/auth"
@@ -33,11 +33,13 @@ func (h *handler) helpCurrentUser(w http.ResponseWriter, r *http.Request) *model
 		return user
 	}
 
-	if info, err := h.oauth.ValidationBearerToken(r); err == nil {
-		userID, _ := strconv.ParseInt(info.GetUserID(), 10, 0)
-		user, _ := h.store.UserByID(userID)
-		return user
-	}
+	// Disable api/v2/token
+	// This Create Blobs panic
+	//if info, err := h.oauth.ValidationBearerToken(r); err == nil {
+	//	userID, _ := strconv.ParseInt(info.GetUserID(), 10, 0)
+	//	user, _ := h.store.UserByID(userID)
+	//	return user
+	//}
 
 	token := strings.Split(r.Header.Get("Authorization"), " ")
 	if len(token) == 2 {
