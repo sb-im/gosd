@@ -94,6 +94,9 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 			//WillQOS:     1,
 			Password: []byte(password),
 			Username: opt.User.Username(),
+			// https://stackoverflow.com/questions/65314401/cannot-connect-to-mosquitto-2-0-with-paho-library
+			PasswordFlag: true,
+			UsernameFlag: true,
 			ClientID: fmt.Sprintf(config.Client, config.ID),
 			//CleanStart: false,
 			CleanStart: true,
