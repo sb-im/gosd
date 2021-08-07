@@ -216,5 +216,5 @@ deploy:develop:
     - chmod 700 ~/.ssh
     - ssh-keyscan ${HOST_CLOUD_DEVELOP} > ~/.ssh/known_hosts
   script:
-    - ssh ${USER_CLOUD_DEVELOP}@${HOST_CLOUD_DEVELOP} 'cd deployment && docker-compose pull && bin/sdup-develop-sitl'
+    - ssh ${USER_CLOUD_DEVELOP}@${HOST_CLOUD_DEVELOP} 'cd deployment && bin/develop-sitl pull && bin/develop-sitl up -d'
 
