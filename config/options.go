@@ -17,6 +17,8 @@ const (
 	defaultOauthID          = "000000"
 	defaultOauthSecret      = "999999"
 	defaultLuaFile          = "default.lua"
+	defaultAdminUsername    = "demo"
+	defaultAdminPassword    = "demodemo"
 )
 
 // Options contains configuration options.
@@ -37,6 +39,8 @@ type Options struct {
 	oauthID          string
 	oauthSecret      string
 	luaFile          string
+	AdminUsername    string
+	AdminPassword    string
 }
 
 // NewOptions returns Options with default values.
@@ -58,6 +62,8 @@ func NewOptions() *Options {
 		oauthID:          defaultOauthID,
 		oauthSecret:      defaultOauthSecret,
 		luaFile:          defaultLuaFile,
+		AdminUsername:    defaultAdminUsername,
+		AdminPassword:    defaultAdminPassword,
 	}
 }
 
