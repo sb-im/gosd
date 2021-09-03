@@ -21,4 +21,4 @@ EXPOSE 8000/tcp
 
 WORKDIR /var/lib/gosd
 
-ENTRYPOINT ["/usr/bin/gosd", "container"]
+ENTRYPOINT ["/usr/bin/gosd"]
