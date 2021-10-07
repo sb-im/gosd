@@ -15,11 +15,15 @@ import (
 	"sb.im/gosd/mqttd"
 	"sb.im/gosd/rpc2mqtt"
 	"sb.im/gosd/state"
+	"sb.im/gosd/model"
 	"sb.im/gosd/storage"
 
 	logger "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/mux"
+
+	"gorm.io/gorm"
+	"gorm.io/driver/postgres"
 )
 
 func StartDaemon(store *storage.Storage, opts *config.Options) {
@@ -38,6 +42,12 @@ func StartDaemon(store *storage.Storage, opts *config.Options) {
 	}
 	logger.SetLevel(lvl)
 	logger.Warn("log level: ", logger.GetLevel().String())
+
+	//dsn := "host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
+	//dsn := "host=localhost user=postgres password=password dbname=gosd port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+	dsn := opts.DatabaseURL()
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db.AutoMigrate(&model.Schedule{})
 
 	//go showProcessStatistics()
 
@@ -68,7 +78,7 @@ func StartDaemon(store *storage.Storage, opts *config.Options) {
 	go func() {
 		r := mux.NewRouter()
 		logger.Info("=========")
-		api.Serve(r, state, store, worker, api.ServeConfig{
+		api.Serve(r, db, state, store, worker, api.ServeConfig{
 			BaseURL: opts.BaseURL(),
 			OauthID: opts.OauthID(),
 			OauthSecret: opts.OauthSecret(),

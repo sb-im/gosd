@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"gorm.io/gorm"
 	"sb.im/gosd/luavm"
 	"sb.im/gosd/state"
 	"sb.im/gosd/storage"
@@ -23,7 +24,7 @@ type ServeConfig struct {
 }
 
 // Serve declares API routes for the application.
-func Serve(router *mux.Router, cache *state.State, store *storage.Storage, worker *luavm.Worker, opt ServeConfig) {
+func Serve(router *mux.Router, orm *gorm.DB, cache *state.State, store *storage.Storage, worker *luavm.Worker, opt ServeConfig) {
 	u, _ := url.Parse(opt.BaseURL)
 
 	manager := manage.NewDefaultManager()
@@ -113,4 +114,15 @@ func Serve(router *mux.Router, cache *state.State, store *storage.Storage, worke
 
 	sr2.PathPrefix("/mqtt/").HandlerFunc(handler.mqttGet).Methods(http.MethodGet)
 	sr2.PathPrefix("/mqtt/").HandlerFunc(handler.mqttPut).Methods(http.MethodPost)
+
+	sr3 := router.PathPrefix(u.Path + "/api").Subrouter()
+	sr3.PathPrefix("/v3").Handler(v3Handler(orm)).Methods(
+		http.MethodGet,
+		http.MethodPost,
+		http.MethodPut,
+		http.MethodHead,
+		http.MethodPatch,
+		http.MethodOptions,
+		http.MethodDelete,
+	)
 }
