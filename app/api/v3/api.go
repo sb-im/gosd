@@ -21,9 +21,10 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 	})
 
 	handler := NewHandler(orm, service.NewService(orm, worker))
-	sr.GET("schedule", handler.ScheduleIndex)
-	sr.POST("schedule", handler.ScheduleCreate)
-	sr.POST("schedule/:id/toggle", handler.ScheduleToggle)
+	sr.GET("schedules", handler.scheduleIndex)
+	sr.POST("schedules", handler.scheduleCreate)
+	sr.PATCH("schedules/:id", handler.scheduleUpdate)
+	sr.DELETE("schedules/:id", handler.scheduleDestroy)
 
 	sr.GET("tasks", handler.TaskIndex)
 	sr.POST("tasks", handler.TaskCreate)
