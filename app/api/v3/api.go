@@ -1,16 +1,17 @@
-package api
+package v3
 
 import (
 	"fmt"
 	"net/http"
 
 	"gorm.io/gorm"
-	"sb.im/gosd/api/v3"
+	"sb.im/gosd/app/service"
+	"sb.im/gosd/luavm"
 
 	"github.com/gin-gonic/gin"
 )
 
-func v3Handler(orm *gorm.DB) http.Handler {
+func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 	r := gin.Default()
 	sr := r.Group("/gosd/api/v3")
 	sr.GET("/ping", func(c *gin.Context) {
@@ -19,9 +20,13 @@ func v3Handler(orm *gorm.DB) http.Handler {
 		})
 	})
 
-	handler := v3.NewHandler(orm)
+	handler := NewHandler(orm, service.NewService(orm, worker))
 	sr.GET("schedule", handler.ScheduleIndex)
 	sr.POST("schedule", handler.ScheduleCreate)
+	sr.POST("schedule/:id/toggle", handler.ScheduleToggle)
+
+	sr.GET("tasks", handler.TaskIndex)
+	sr.POST("tasks", handler.TaskCreate)
 
 	r.NoRoute(func(c *gin.Context) {
 		fmt.Println(c.Request.URL)
@@ -29,6 +34,5 @@ func v3Handler(orm *gorm.DB) http.Handler {
 			"message": "NO Router",
 		})
 	})
-	//r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 	return r
 }

@@ -15,8 +15,9 @@ import (
 	"sb.im/gosd/mqttd"
 	"sb.im/gosd/rpc2mqtt"
 	"sb.im/gosd/state"
-	"sb.im/gosd/model"
 	"sb.im/gosd/storage"
+
+	appmodel "sb.im/gosd/app/model"
 
 	logger "github.com/sirupsen/logrus"
 
@@ -47,7 +48,8 @@ func StartDaemon(store *storage.Storage, opts *config.Options) {
 	//dsn := "host=localhost user=postgres password=password dbname=gosd port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 	dsn := opts.DatabaseURL()
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	db.AutoMigrate(&model.Schedule{})
+	db.AutoMigrate(&appmodel.Schedule{})
+	db.AutoMigrate(&appmodel.Task{})
 
 	//go showProcessStatistics()
 

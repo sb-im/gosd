@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"gorm.io/gorm"
+	v3 "sb.im/gosd/app/api/v3"
 	"sb.im/gosd/luavm"
 	"sb.im/gosd/state"
 	"sb.im/gosd/storage"
@@ -116,7 +117,7 @@ func Serve(router *mux.Router, orm *gorm.DB, cache *state.State, store *storage.
 	sr2.PathPrefix("/mqtt/").HandlerFunc(handler.mqttPut).Methods(http.MethodPost)
 
 	sr3 := router.PathPrefix(u.Path + "/api").Subrouter()
-	sr3.PathPrefix("/v3").Handler(v3Handler(orm)).Methods(
+	sr3.PathPrefix("/v3").Handler(v3.NewApi(orm, worker)).Methods(
 		http.MethodGet,
 		http.MethodPost,
 		http.MethodPut,
