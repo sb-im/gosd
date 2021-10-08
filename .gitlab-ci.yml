@@ -13,6 +13,7 @@ stages:
   stage: build
   before_script:
     - go version
+    - go get -u github.com/swaggo/swag/cmd/swag
   script:
     - make build
 
@@ -49,6 +50,8 @@ test database:
     REDIS_URL: "redis://redis:6379/1"
   before_script:
     - go version
+    - go get -u github.com/swaggo/swag/cmd/swag
+  script:
   script:
     - make
     - ./gosd database migrate

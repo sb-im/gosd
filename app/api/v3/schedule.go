@@ -8,12 +8,29 @@ import (
 	"sb.im/gosd/app/model"
 )
 
+// @Summary Schedule Index
+// @Schemes Schedule
+// @Description get all schedules index
+// @Tags schedule
+// @Accept json
+// @Produce json
+// @Success 200 {object} model.Schedule
+// @Router /schedules [get]
 func (h *Handler) scheduleIndex(c *gin.Context) {
 	var schedules []model.Schedule
 	h.orm.Find(&schedules)
 	c.JSON(http.StatusOK, schedules)
 }
 
+// @Summary Schedule Create
+// @Schemes Schedule
+// @Description create a new schedules
+// @Tags schedule
+// @Accept json, multipart/form-data
+// @Produce json
+// @Param data body model.Schedule true "Schedule"
+// @Success 200 {object} model.Schedule
+// @Router /schedules [post]
 func (h *Handler) scheduleCreate(c *gin.Context) {
 	schedule := &model.Schedule{}
 	if err := c.ShouldBind(schedule); err != nil {
@@ -24,6 +41,16 @@ func (h *Handler) scheduleCreate(c *gin.Context) {
 	c.JSON(http.StatusOK, schedule)
 }
 
+// @Summary Schedule Update
+// @Schemes Schedule
+// @Description update a new schedules
+// @Tags schedule
+// @Accept json
+// @Produce json
+// @Param id   path int            true "Schedule ID"
+// @Param data body model.Schedule true "Schedule"
+// @Success 200 {object} model.Schedule
+// @Router /schedules/{id} [patch]
 func (h *Handler) scheduleUpdate(c *gin.Context) {
 	schedule := &model.Schedule{}
 	h.orm.Find(schedule, c.Param("id"))
@@ -40,6 +67,15 @@ func (h *Handler) scheduleUpdate(c *gin.Context) {
 	c.JSON(http.StatusOK, schedule)
 }
 
+// @Summary Schedule Destroy
+// @Schemes Schedule
+// @Description destroy a new schedules
+// @Tags schedule
+// @Accept json
+// @Produce json
+// @Param   id     path    int     true        "Schedule ID"
+// @Success 200 {object} model.Schedule
+// @Router /schedules/{id} [delete]
 func (h *Handler) scheduleDestroy(c *gin.Context) {
 	h.orm.Delete(&model.Schedule{}, c.Param("id"))
 }
