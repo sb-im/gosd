@@ -5,14 +5,14 @@ import (
 	"net/http"
 
 	"gorm.io/gorm"
+	"sb.im/gosd/app/docs"
 	"sb.im/gosd/app/service"
 	"sb.im/gosd/luavm"
-	"sb.im/gosd/app/docs"
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 )
 
 func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {

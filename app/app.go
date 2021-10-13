@@ -13,5 +13,3 @@ package app
 // @scope.read Grants read access
 // @scope.write Grants write access
 // @scope.admin Grants read and write access to administrative information
-
-

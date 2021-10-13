@@ -4,17 +4,12 @@ import (
 	"fmt"
 
 	"sb.im/gosd/app/model"
-	"sb.im/gosd/luavm"
 )
 
-func (s *Service) PlanTask(planID string) {
-	task := &model.Task{}
-	//task := &model.Plan{}
-	s.orm.Find(task, planID)
-	//s.orm.Table("plans").Select("name", "extra").Where("id = ?", planID).Scan(&task)
+func (s *Service) TaskRun(task *model.Task) error {
 	fmt.Println(task)
-}
 
-func (s *Service) TaskRun(task *luavm.Task) {
-	s.worker.Queue <- task
+	// TODO: join this worker
+	//s.worker.Queue <- task
+	return nil
 }

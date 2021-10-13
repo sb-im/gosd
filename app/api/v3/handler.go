@@ -8,12 +8,12 @@ import (
 
 type Handler struct {
 	orm *gorm.DB
-	srv *service.Service
+	srv *service.JSONService
 }
 
 func NewHandler(orm *gorm.DB, srv *service.Service) *Handler {
 	return &Handler{
 		orm: orm,
-		srv: srv,
+		srv: service.NewJsonService(srv),
 	}
 }
