@@ -88,7 +88,7 @@ func (h *Handler) scheduleToggle(c *gin.Context) {
 	}
 	fmt.Println(schedule)
 	fmt.Println(c.Param("id"))
-	if err := h.srv.Call(schedule.Target, []byte(schedule.Params)); err != nil {
+	if err := h.srv.JSON.Call(schedule.Target, []byte(schedule.Params)); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 	//h.orm.Create(schedule)

@@ -8,6 +8,7 @@ import (
 )
 
 type Service struct {
+	JSON   *JSONService
 	orm    *gorm.DB
 	worker *luavm.Worker
 	// https://pkg.go.dev/github.com/robfig/cron/v3#Cron.Start
@@ -15,5 +16,7 @@ type Service struct {
 }
 
 func NewService(orm *gorm.DB, worker *luavm.Worker) *Service {
-	return &Service{orm, worker, cron.New()}
+	s := &Service{nil, orm, worker, cron.New()}
+	s.JSON = NewJsonService(s)
+	return s
 }

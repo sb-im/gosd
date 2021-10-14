@@ -9,6 +9,7 @@ import (
 
 func NewJsonService(s *Service) *JSONService {
 	j := &JSONService{s: s}
+	j.s.JSON = j
 	j.m = map[string]func([]byte) error{
 		"taskRun": j.TaskRun,
 	}
