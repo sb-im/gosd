@@ -17,6 +17,8 @@ import (
 )
 
 type ServeConfig struct {
+	ExpireToken int
+
 	BaseURL string
 	OauthID string
 	OauthSecret string
@@ -41,7 +43,7 @@ func Serve(router *mux.Router, cache *state.State, store *storage.Storage, worke
 
 	srv := server.NewDefaultServer(manager)
 
-	handler := &handler{cache, srv, store, worker, opt.BaseURL}
+	handler := &handler{cache, srv, store, worker, opt.BaseURL, opt.ExpireToken}
 	handler.oauthInit()
 	sr := router.PathPrefix(u.Path + "/api/v1").Subrouter()
 	//middleware := newMiddleware(store)

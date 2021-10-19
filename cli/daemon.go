@@ -72,6 +72,7 @@ func StartDaemon(store *storage.Storage, opts *config.Options) {
 			BaseURL: opts.BaseURL(),
 			OauthID: opts.OauthID(),
 			OauthSecret: opts.OauthSecret(),
+			ExpireToken: opts.ExpireToken(),
 		})
 
 		logger.Warn(opts.ListenAddr())

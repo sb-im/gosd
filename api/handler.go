@@ -14,4 +14,6 @@ type handler struct {
 	store   *storage.Storage
 	worker  *luavm.Worker
 	baseURL string
+
+	expireToken int
 }

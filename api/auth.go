@@ -105,11 +105,10 @@ func (h *handler) authHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	expire := 7200
 	token := &model.Token{
 		AccessToken: key,
 		TokenType:   "bearer",
-		ExpiresIn:   expire,
+		ExpiresIn:   h.expireToken,
 		CreatedAt:   time.Now().Unix(),
 	}
 
@@ -117,7 +116,7 @@ func (h *handler) authHandler(w http.ResponseWriter, r *http.Request) {
 
 	uniquekey := fmt.Sprintf("users/token/%s", key)
 	h.cache.Do("SET", uniquekey, user.ID)
-	h.cache.Do("EXPIRE", uniquekey, expire)
+	h.cache.Do("EXPIRE", uniquekey, h.expireToken)
 
 	json.OK(w, r, token)
 }
