@@ -19,6 +19,7 @@ const (
 	defaultLuaFile          = "default.lua"
 	defaultAdminUsername    = "demo"
 	defaultAdminPassword    = "demodemo"
+	defaultExpireToken      = 7200
 )
 
 // Options contains configuration options.
@@ -41,6 +42,7 @@ type Options struct {
 	luaFile          string
 	AdminUsername    string
 	AdminPassword    string
+	expireToken      int
 }
 
 // NewOptions returns Options with default values.
@@ -64,6 +66,7 @@ func NewOptions() *Options {
 		luaFile:          defaultLuaFile,
 		AdminUsername:    defaultAdminUsername,
 		AdminPassword:    defaultAdminPassword,
+		expireToken:      defaultExpireToken,
 	}
 }
 
@@ -125,4 +128,8 @@ func (o *Options) OauthSecret() string {
 
 func (o *Options) LuaFile() string {
 	return o.luaFile
+}
+
+func (o *Options) ExpireToken() int {
+	return o.expireToken
 }
