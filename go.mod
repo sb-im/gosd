@@ -13,6 +13,7 @@ require (
 	github.com/lib/pq v1.10.2
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/rs/xid v1.2.1
 	github.com/sb-im/jsonrpc-lite v0.2.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v1.1.3

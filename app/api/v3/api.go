@@ -31,6 +31,8 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 	sr.PATCH("schedules/:id", handler.scheduleUpdate)
 	sr.DELETE("schedules/:id", handler.scheduleDestroy)
 
+	sr.POST("blobs", handler.blobCreate)
+
 	sr.GET("tasks", handler.TaskIndex)
 	sr.POST("tasks", handler.TaskCreate)
 
