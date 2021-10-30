@@ -1,26 +1,5 @@
 version: "3"
 services:
-  gosd:
-    image: registry.gitlab.com/sbim/superdock/cloud/gosd/image:latest
-    container_name: gosd
-    command:
-      - --debug
-      - --noauth
-    ports:
-      - "8000:8000/tcp"
-    environment:
-      LISTEN_ADDR: '0.0.0.0:8000'
-      REDIS_URL: 'redis://redis:6379/0'
-      MQTT_URL: 'mqtt://admin:public@mqtt-broker:1883'
-      DATABASE_URL: 'postgres://postgres:password@postgres/gosd?sslmode=disable'
-    volumes:
-      - ./data:/var/lib/gosd/data:ro
-    depends_on:
-      - redis
-      - mosquitto
-      - postgres
-    restart: always
-
   redis:
     image: redis
     container_name: redis
