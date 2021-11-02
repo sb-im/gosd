@@ -13,13 +13,10 @@ all: build
 generate:
 	@ go generate
 
-docs:
-	@ swag init -g app/app.go -o app/docs
-
-build: generate docs
+build: generate
 	$(GOBUILD)
 
-run: generate docs
+run: generate
 	@ go run main.go --debug --noauth
 
 test: generate

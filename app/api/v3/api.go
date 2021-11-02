@@ -6,15 +6,11 @@ import (
 	"time"
 
 	"gorm.io/gorm"
-	"sb.im/gosd/app/docs"
 	"sb.im/gosd/app/service"
 	"sb.im/gosd/luavm"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
-
-	"github.com/swaggo/files"
-	"github.com/swaggo/gin-swagger"
 )
 
 func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
@@ -29,7 +25,6 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 		MaxAge:           12 * time.Hour,
   }))
 
-	docs.SwaggerInfo.BasePath = "/gosd/api/v3"
 	sr := r.Group("/gosd/api/v3")
 	sr.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -47,8 +42,6 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 
 	sr.GET("tasks", handler.TaskIndex)
 	sr.POST("tasks", handler.TaskCreate)
-
-	sr.GET("swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	r.NoRoute(func(c *gin.Context) {
 		fmt.Println(c.Request.URL)
