@@ -3,6 +3,7 @@ package v3
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"gorm.io/gorm"
 	"sb.im/gosd/app/docs"
@@ -10,6 +11,7 @@ import (
 	"sb.im/gosd/luavm"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
@@ -17,6 +19,16 @@ import (
 
 func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 	r := gin.Default()
+
+	// CORS Middleware
+	r.Use(cors.New(cors.Config{
+    AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type"},
+		AllowCredentials: false,
+		MaxAge:           12 * time.Hour,
+  }))
+
 	docs.SwaggerInfo.BasePath = "/gosd/api/v3"
 	sr := r.Group("/gosd/api/v3")
 	sr.GET("/ping", func(c *gin.Context) {

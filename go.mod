@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/eclipse/paho.golang v0.9.1-0.20210122134147-5617034fed14
+	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-oauth2/oauth2/v4 v4.3.0
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
