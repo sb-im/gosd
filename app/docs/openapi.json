@@ -1,0 +1,273 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Gosd RESTful API",
+    "description": "superdock web service restful api",
+    "termsOfService": "http://sb.im",
+    "contact": {
+      "email": "sb@sb.im"
+    },
+    "version": "3.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000/gosd/api/v3"
+    }
+  ],
+  "tags": [
+    {
+      "name": "blob",
+      "description": "file object"
+    }
+  ],
+  "paths": {
+    "/blobs": {
+      "post": {
+        "tags": [
+          "blob"
+        ],
+        "summary": "Create a blob",
+        "description": "create a new blobs",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Blob"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/schedules": {
+      "get": {
+        "tags": [
+          "schedule"
+        ],
+        "summary": "Schedule Index",
+        "description": "get all schedules index",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/model.Schedule"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "schedule"
+        ],
+        "summary": "Schedule Create",
+        "description": "create a new schedules",
+        "requestBody": {
+          "description": "Schedule",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/model.Schedule"
+              }
+            },
+            " multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/model.Schedule"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/model.Schedule"
+                }
+              }
+            }
+          }
+        },
+        "x-codegen-request-body-name": "data"
+      }
+    },
+    "/schedules/{id}": {
+      "delete": {
+        "tags": [
+          "schedule"
+        ],
+        "summary": "Schedule Destroy",
+        "description": "destroy a new schedules",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Schedule ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/model.Schedule"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "schedule"
+        ],
+        "summary": "Schedule Update",
+        "description": "update a new schedules",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Schedule ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Schedule",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/model.Schedule"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/model.Schedule"
+                }
+              }
+            }
+          }
+        },
+        "x-codegen-request-body-name": "data"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Blob": {
+        "required": [
+          "file"
+        ],
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "example": "c5ulol594812rq77apfg"
+          }
+        }
+      },
+      "model.Blob": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "uxid": {
+            "type": "string"
+          }
+        }
+      },
+      "model.Schedule": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "cron": {
+            "type": "string"
+          },
+          "enable": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string",
+            "example": "Test Schedule"
+          },
+          "params": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "OAuth2Password": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "tokenUrl": "/oauth/token",
+            "scopes": {
+              "admin": " Grants read and write access to administrative information",
+              "read": " Grants read access",
+              "write": " Grants write access"
+            }
+          }
+        }
+      }
+    }
+  }
+}
