@@ -1,6 +1,6 @@
 module sb.im/gosd
 
-go 1.14
+go 1.16
 
 require (
 	github.com/eclipse/paho.golang v0.9.1-0.20210122134147-5617034fed14

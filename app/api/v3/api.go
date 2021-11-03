@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+	"sb.im/gosd/app/docs"
 	"sb.im/gosd/app/service"
 	"sb.im/gosd/luavm"
 
@@ -32,6 +33,11 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 		})
 	})
 
+	sr.GET("docs", func(c *gin.Context) {
+		c.JSON(200, docs.Openapi)
+	})
+
+
 	handler := NewHandler(orm, service.NewService(orm, worker))
 	sr.GET("schedules", handler.scheduleIndex)
 	sr.POST("schedules", handler.scheduleCreate)
@@ -39,6 +45,9 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 	sr.DELETE("schedules/:id", handler.scheduleDestroy)
 
 	sr.POST("blobs", handler.blobCreate)
+	sr.PUT("blobs", handler.blobUpdate)
+	sr.PUT("blobs/:blobID", handler.blobUpdate)
+	sr.GET("blobs/:blobID", handler.blobShow)
 
 	sr.GET("tasks", handler.TaskIndex)
 	sr.POST("tasks", handler.TaskCreate)
