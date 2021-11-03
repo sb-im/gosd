@@ -57,6 +57,37 @@
         }
       }
     },
+    "/blobs/{blobID}": {
+      "get": {
+        "tags": [
+          "blob"
+        ],
+        "summary": "Download a file",
+        "parameters": [
+          {
+            "name": "blobID",
+            "in": "path",
+            "description": "Schedule ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Blob"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/schedules": {
       "get": {
         "tags": [

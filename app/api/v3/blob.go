@@ -111,3 +111,14 @@ func (h *Handler) blobIsExist(id string) bool {
 	}
 	return false
 }
+
+func (h *Handler) blobShow(c *gin.Context) {
+	blob := model.Blob{}
+	h.orm.Take(&blob, "uxid = ?", c.Param("blobID"))
+	if blob.ID != 0 {
+		c.FileAttachment(h.cfg.StoragePath + blob.UXID, blob.Name)
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "NotFound this blob"})
+		return
+	}
+}
