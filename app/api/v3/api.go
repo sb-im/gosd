@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"gorm.io/gorm"
-	"sb.im/gosd/app/docs"
 	"sb.im/gosd/app/service"
 	"sb.im/gosd/luavm"
 
@@ -32,11 +31,6 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 			"message": "pong",
 		})
 	})
-
-	sr.GET("docs", func(c *gin.Context) {
-		c.JSON(200, docs.Openapi)
-	})
-
 
 	handler := NewHandler(orm, service.NewService(orm, worker))
 	sr.GET("schedules", handler.scheduleIndex)

@@ -7,8 +7,6 @@ WORKDIR /src
 
 COPY . .
 
-RUN go get -u github.com/swaggo/swag/cmd/swag
-
 RUN make build
 
 # Bin

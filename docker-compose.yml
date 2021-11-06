@@ -31,6 +31,18 @@ services:
     volumes:
       - .db:/var/lib/postgresql/data
 
+  swagger:
+    image: swaggerapi/swagger-ui
+    container_name: swagger
+    hostname: swagger
+    ports:
+      - "8888:8080/tcp"
+    environment:
+      SWAGGER_JSON: "/app/openapi.json"
+      BASE_URL: ""
+    volumes:
+      - ./openapi.json:/app/openapi.json
+
 networks:
   default:
     name: gosd
