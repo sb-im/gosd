@@ -50,6 +50,8 @@ func StartDaemon(store *storage.Storage, opts *config.Options) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	db.AutoMigrate(&appmodel.Schedule{})
 	db.AutoMigrate(&appmodel.Task{})
+	db.AutoMigrate(&appmodel.Blob{})
+	db.AutoMigrate(&appmodel.Job{})
 
 	//go showProcessStatistics()
 
