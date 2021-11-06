@@ -16,11 +16,91 @@
   ],
   "tags": [
     {
+      "name": "team",
+      "description": "a Team, all resource belongs to team"
+    },
+    {
+      "name": "user",
+      "description": "user"
+    },
+    {
       "name": "blob",
       "description": "file object"
     }
   ],
   "paths": {
+    "/teams": {
+      "post": {
+        "tags": [
+          "team"
+        ],
+        "summary": "Create a team",
+        "requestBody": {
+          "description": "Schedule",
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "SBIM"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/team"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Create a user",
+        "requestBody": {
+          "description": "Schedule",
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "SBIM"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/user"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/blobs": {
       "post": {
         "tags": [
@@ -222,6 +302,42 @@
   },
   "components": {
     "schemas": {
+      "team": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "example": "SBIM"
+          }
+        }
+      },
+      "user": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "example": "SBIM"
+          }
+        }
+      },
       "Blob": {
         "required": [
           "file"

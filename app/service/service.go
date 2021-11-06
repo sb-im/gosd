@@ -3,8 +3,8 @@ package service
 import (
 	"sb.im/gosd/luavm"
 
-	"gorm.io/gorm"
 	"github.com/robfig/cron/v3"
+	"gorm.io/gorm"
 )
 
 type Service struct {
@@ -12,7 +12,7 @@ type Service struct {
 	orm    *gorm.DB
 	worker *luavm.Worker
 	// https://pkg.go.dev/github.com/robfig/cron/v3#Cron.Start
-	cron   *cron.Cron
+	cron *cron.Cron
 }
 
 func NewService(orm *gorm.DB, worker *luavm.Worker) *Service {

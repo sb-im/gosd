@@ -9,8 +9,8 @@ import (
 	"sb.im/gosd/app/service"
 	"sb.im/gosd/luavm"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
@@ -18,12 +18,12 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 
 	// CORS Middleware
 	r.Use(cors.New(cors.Config{
-    AllowOrigins:     []string{"*"},
+		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type"},
 		AllowCredentials: false,
 		MaxAge:           12 * time.Hour,
-  }))
+	}))
 
 	sr := r.Group("/gosd/api/v3")
 	sr.GET("/ping", func(c *gin.Context) {
@@ -45,6 +45,10 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 
 	sr.GET("tasks", handler.TaskIndex)
 	sr.POST("tasks", handler.TaskCreate)
+
+	sr.POST("teams", handler.TeamCreate)
+
+	sr.POST("users", handler.UserCreate)
 
 	r.NoRoute(func(c *gin.Context) {
 		fmt.Println(c.Request.URL)
