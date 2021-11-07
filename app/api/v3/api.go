@@ -56,5 +56,7 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 			"message": "NO Router",
 		})
 	})
+
+	handler.initAuth(sr)
 	return r
 }
