@@ -8,6 +8,14 @@ import (
 
 var (
 	DefaultConfig = &Config{
+		Auth: ConfigAuth{
+			SuperAdmin: map[int]bindUser{
+				1: {
+					Username: "superadmin",
+					Password: "superadmin",
+				},
+			},
+		},
 		StoragePath: "data/storage/",
 	}
 )
@@ -27,5 +35,11 @@ func NewHandler(orm *gorm.DB, srv *service.Service) *Handler {
 }
 
 type Config struct {
+	Auth        ConfigAuth
 	StoragePath string
+}
+
+type ConfigAuth struct {
+	SuperAdmin map[int]bindUser
+	JWTSecret  string
 }

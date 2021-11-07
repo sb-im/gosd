@@ -56,7 +56,6 @@ func (h *Handler) initAuth(r *gin.RouterGroup) {
 			}
 		},
 		Authenticator: func(c *gin.Context) (interface{}, error) {
-			log.Warnln("AAAAAAAAAAAA")
 			var loginVals login
 			if err := c.ShouldBind(&loginVals); err != nil {
 				return "", jwt.ErrMissingLoginValues
@@ -72,13 +71,9 @@ func (h *Handler) initAuth(r *gin.RouterGroup) {
 				}, nil
 			}
 
-			password, err := hashPassword(loginVals.Password)
-			if err != nil {
-				return nil, err
-			}
 			var user model.User
-			h.orm.Where("username = ? AND password >= ?", loginVals.Username, password).First(&user)
-			if user.ID != 0 {
+			h.orm.Where("username = ?", loginVals.Username).First(&user)
+			if err := user.VerifyPassword(loginVals.Password); err == nil {
 				return &user, nil
 			}
 
