@@ -11,7 +11,7 @@ type User struct {
 	TeamID int  `json:"team_id"`
 	Team   Team `json:"team"`
 
-	Username string `json:"username"`
+	Username string `json:"username" gorm:"uniqueIndex"`
 	Password string `json:"-"`
 	Language string `json:"language"`
 	Timezone string `json:"timezone"`
