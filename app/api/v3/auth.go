@@ -22,16 +22,9 @@ func helloHandler(c *gin.Context) {
 	user, _ := c.Get(identityKey)
 	c.JSON(200, gin.H{
 		"userID":   claims[identityKey],
-		"userName": user.(*User).UserName,
+		"userName": user.(*model.User).Username,
 		"text":     "Hello World.",
 	})
-}
-
-// User demo
-type User struct {
-	UserName  string
-	FirstName string
-	LastName  string
 }
 
 func (h *Handler) initAuth(r *gin.RouterGroup) {
@@ -42,17 +35,17 @@ func (h *Handler) initAuth(r *gin.RouterGroup) {
 		MaxRefresh:  time.Hour,
 		IdentityKey: identityKey,
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
-			if v, ok := data.(*User); ok {
+			if v, ok := data.(*model.User); ok {
 				return jwt.MapClaims{
-					identityKey: v.UserName,
+					identityKey: v.Username,
 				}
 			}
 			return jwt.MapClaims{}
 		},
 		IdentityHandler: func(c *gin.Context) interface{} {
 			claims := jwt.ExtractClaims(c)
-			return &User{
-				UserName: claims[identityKey].(string),
+			return &model.User{
+				Username: claims[identityKey].(string),
 			}
 		},
 		Authenticator: func(c *gin.Context) (interface{}, error) {
@@ -64,10 +57,8 @@ func (h *Handler) initAuth(r *gin.RouterGroup) {
 			password := loginVals.Password
 
 			if (userID == "admin" && password == "admin") || (userID == "test" && password == "test") {
-				return &User{
-					UserName:  userID,
-					LastName:  "Bo-Yi",
-					FirstName: "Wu",
+				return &model.User{
+					Username:  userID,
 				}, nil
 			}
 
@@ -80,7 +71,7 @@ func (h *Handler) initAuth(r *gin.RouterGroup) {
 			return nil, jwt.ErrFailedAuthentication
 		},
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			if v, ok := data.(*User); ok && v.UserName == "admin" {
+			if v, ok := data.(*model.User); ok && v.Username == "admin" {
 				return true
 			}
 
