@@ -58,5 +58,6 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 	})
 
 	handler.initAuth(sr)
+	handler.userOverride()
 	return r
 }

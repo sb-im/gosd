@@ -58,7 +58,7 @@ func (h *Handler) initAuth(r *gin.RouterGroup) {
 
 			if (userID == "admin" && password == "admin") || (userID == "test" && password == "test") {
 				return &model.User{
-					Username:  userID,
+					Username: userID,
 				}, nil
 			}
 

@@ -55,3 +55,10 @@ func (h *Handler) userConvert(u *bindUser) *model.User {
 		Timezone: u.Timezone,
 	}
 }
+
+func (h *Handler) userOverride() {
+	for id, user := range h.cfg.Auth.SuperAdmin {
+		user.ID = id
+		h.orm.Updates(user)
+	}
+}
