@@ -17,9 +17,9 @@ import (
 // @Schemes Blobs
 // @Description create a new blobs
 // @Tags blob
-// @Accept json, multipart/form-data
+// @Accept multipart/form-data
 // @Produce json
-// @Param file body model.Blob true "Blob"
+// @Param file formData file true "this is a file"
 // @Success 200 {object} model.Blob
 // @Router /blobs [post]
 func (h *Handler) blobCreate(c *gin.Context) {
@@ -55,6 +55,16 @@ func (h *Handler) blobCreate(c *gin.Context) {
 	c.JSON(http.StatusOK, bindBlob)
 }
 
+// @Summary Blobs Update
+// @Schemes Blobs
+// @Description create a new blobs
+// @Tags blob
+// @Accept multipart/form-data
+// @Produce json
+// @Param blobID path string true "blob ID"
+// @Param file formData file true "this is a file"
+// @Success 200 {object} model.Blob
+// @Router /blobs/{blobID} [PUT]
 func (h *Handler) blobUpdate(c *gin.Context) {
 	bindBlob := make(map[string]string)
 	if err := c.ShouldBind(&bindBlob); err != nil {
@@ -71,7 +81,7 @@ func (h *Handler) blobUpdate(c *gin.Context) {
 	// squash key / value
 	updateBlob := make(map[string]interface{})
 
-	blobID := c.Query("blobID")
+	blobID := c.Param("blobID")
 	for key, value := range form.File {
 		if !h.blobIsExist(key) {
 			if blobID != "" {
