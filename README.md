@@ -9,6 +9,10 @@ replace RSD-backend
 
 ```sh
 make
+
+# Docs swagger
+go get -u github.com/swaggo/swag/cmd/swag
+swag init -g app/app.go -o swag
 ```
 
 ## Dependencies

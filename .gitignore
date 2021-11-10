@@ -1,3 +1,5 @@
 luavm/lua.go
+data/storage/
+swag/
 gosd
 .db

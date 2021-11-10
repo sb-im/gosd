@@ -14,7 +14,6 @@ package app
 // @scope.write Grants write access
 // @scope.admin Grants read and write access to administrative information
 
-
 // @tag.name team
 // @tag.description a Team, all resource belongs to team
 // @tag.name user

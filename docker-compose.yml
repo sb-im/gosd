@@ -41,7 +41,7 @@ services:
       SWAGGER_JSON: "/app/openapi.json"
       BASE_URL: ""
     volumes:
-      - ./openapi.json:/app/openapi.json
+      - ./swag/swagger.json:/app/openapi.json
 
 networks:
   default:
