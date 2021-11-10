@@ -29,20 +29,19 @@ func (h *Handler) UserCreate(c *gin.Context) {
 }
 
 func (h *Handler) UserUpdate(c *gin.Context) {
-	binduser := &bindUser{}
-	if err := c.BindJSON(binduser); err != nil {
+	user := &model.User{}
+	if err := c.BindJSON(user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	user := h.userConvert(binduser)
-	h.orm.Updates(user)
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	user.ID = uint(id)
+	h.orm.Updates(user)
 	c.JSON(http.StatusOK, user)
 }
 
