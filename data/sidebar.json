@@ -1,28 +1,8 @@
 [
-  {
-    "icon": "summary",
-    "name": "概览",
-    "type": "path",
-    "args": "/#/panel/overview"
-  },
-  {
-    "icon": "plan",
-    "name": "任务",
-    "type": "plan",
-    "args": ""
-  },
-  {
-    "icon": "drone",
-    "name": "飞机",
-    "type": "node",
-    "args": "drone"
-  },
-  {
-    "icon": "depot",
-    "name": "机场",
-    "type": "node",
-    "args": "depot"
-  },
+  { "type": "overview" },
+  { "type": "plan" },
+  { "type": "node", "args": "drone" },
+  { "type": "node", "args": "depot" },
   {
     "icon": "log",
     "name": "日志",
