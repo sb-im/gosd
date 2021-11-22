@@ -18,3 +18,5 @@ package app
 // @tag.description a Team, all resource belongs to team
 // @tag.name user
 // @tag.description User
+// @tag.name task
+// @tag.description Task

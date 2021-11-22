@@ -5,6 +5,6 @@ type Task struct {
 
 	Name   string `json:"name"`
 	NodeID int64  `json:"node_id"`
-	Files  JSON   `json:"files"`
-	Extra  JSON   `json:"extra"`
+	Files  JSON   `json:"files" swaggertype:"string"`
+	Extra  JSON   `json:"extra" swaggertype:"string"`
 }
