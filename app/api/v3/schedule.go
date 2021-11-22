@@ -3,6 +3,7 @@ package v3
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"sb.im/gosd/app/model"
@@ -14,11 +15,15 @@ import (
 // @Tags schedule
 // @Accept json
 // @Produce json
+// @Param page query uint false "Schedule Page Num"
+// @Param size query uint false "Page Max Count"
 // @Success 200 {object} model.Schedule
 // @Router /schedules [get]
 func (h *Handler) scheduleIndex(c *gin.Context) {
 	var schedules []model.Schedule
-	h.orm.Find(&schedules)
+	page, _ := strconv.Atoi(c.Query("page"))
+	size, _ := strconv.Atoi(c.Query("size"))
+	h.orm.Offset((page - 1) * size).Limit(size).Find(&schedules)
 	c.JSON(http.StatusOK, schedules)
 }
 
