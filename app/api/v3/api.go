@@ -51,6 +51,8 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 	sr.POST("users", handler.UserCreate)
 	sr.PATCH("users/:id", handler.UserUpdate)
 
+	sr.GET("current", handler.current)
+
 	r.NoRoute(func(c *gin.Context) {
 		fmt.Println(c.Request.URL)
 		c.JSON(200, gin.H{

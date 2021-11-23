@@ -1,6 +1,7 @@
 package v3
 
 import (
+	"net/http"
 	"time"
 
 	"sb.im/gosd/app/model"
@@ -10,7 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type login struct {
+type bindLogin struct {
 	Username string `form:"username" json:"username" binding:"required"`
 	Password string `form:"password" json:"password" binding:"required"`
 }
@@ -48,28 +49,7 @@ func (h *Handler) initAuth(r *gin.RouterGroup) {
 				Username: claims[identityKey].(string),
 			}
 		},
-		Authenticator: func(c *gin.Context) (interface{}, error) {
-			var loginVals login
-			if err := c.ShouldBind(&loginVals); err != nil {
-				return "", jwt.ErrMissingLoginValues
-			}
-			userID := loginVals.Username
-			password := loginVals.Password
-
-			if (userID == "admin" && password == "admin") || (userID == "test" && password == "test") {
-				return &model.User{
-					Username: userID,
-				}, nil
-			}
-
-			var user model.User
-			h.orm.Where("username = ?", loginVals.Username).First(&user)
-			if err := user.VerifyPassword(loginVals.Password); err == nil {
-				return &user, nil
-			}
-
-			return nil, jwt.ErrFailedAuthentication
-		},
+		Authenticator: h.login,
 		Authorizator: func(data interface{}, c *gin.Context) bool {
 			if v, ok := data.(*model.User); ok && v.Username == "admin" {
 				return true
@@ -129,4 +109,42 @@ func (h *Handler) initAuth(r *gin.RouterGroup) {
 	{
 		auth.GET("/hello", helloHandler)
 	}
+}
+
+// @Summary User Login
+// @Schemes Auth
+// @Description user login
+// @Tags auth
+// @Accept multipart/form-data
+// @Produce json
+// @Param username formData string true "Username"
+// @Param password formData string true "Password"
+// @Success 200
+// @Router /login [POST]
+func (h Handler) login(c *gin.Context) (interface{}, error) {
+	var login bindLogin
+	if err := c.ShouldBind(&login); err != nil {
+		return "", jwt.ErrMissingLoginValues
+	}
+
+	var user model.User
+	h.orm.Where("username = ?", login.Username).First(&user)
+	if err := user.VerifyPassword(login.Password); err == nil {
+		return &user, nil
+	}
+
+	return nil, jwt.ErrFailedAuthentication
+}
+
+// @Summary Get Current User info
+// @Schemes Auth
+// @Description user login
+// @Tags auth
+// @Produce json
+// @Success 200
+// @Router /current [GET]
+func (h Handler) current(c *gin.Context) {
+	//claims := jwt.ExtractClaims(c)
+	// TODO
+	//c.JSON(http.StatusOK, claims[identityKey])
 }

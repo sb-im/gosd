@@ -9,8 +9,8 @@ var (
 		Auth: ConfigAuth{
 			SuperAdmin: map[uint]*model.User{
 				1: {
-					Username: "superadmin",
-					Password: "superadmin",
+					Username: "admin",
+					Password: "admin",
 				},
 			},
 		},
