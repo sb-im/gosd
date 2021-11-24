@@ -8,7 +8,7 @@ import (
 type User struct {
 	Model
 
-	TeamID int  `json:"team_id"`
+	TeamID uint `json:"team_id"`
 	Team   Team `json:"team"`
 
 	Username string `json:"username" gorm:"uniqueIndex"`

@@ -1,7 +1,7 @@
 package v3
 
 import (
-	//"net/http"
+	"fmt"
 	"time"
 
 	"sb.im/gosd/app/model"
@@ -11,21 +11,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var (
+	identityGinKey  = "jwt_current"
+	identityTeamKey = "tid"
+	identityUserKey = "uid"
+)
+
 type bindLogin struct {
 	Username string `form:"username" json:"username" binding:"required"`
 	Password string `form:"password" json:"password" binding:"required"`
-}
-
-var identityKey = "id"
-
-func helloHandler(c *gin.Context) {
-	claims := jwt.ExtractClaims(c)
-	user, _ := c.Get(identityKey)
-	c.JSON(200, gin.H{
-		"userID":   claims[identityKey],
-		"userName": user.(*model.User).Username,
-		"text":     "Hello World.",
-	})
 }
 
 func (h *Handler) initAuth(r *gin.RouterGroup) {
@@ -34,28 +28,27 @@ func (h *Handler) initAuth(r *gin.RouterGroup) {
 		Key:         []byte("secret key"),
 		Timeout:     time.Hour,
 		MaxRefresh:  time.Hour,
-		IdentityKey: identityKey,
+		IdentityKey: identityGinKey,
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
-			if v, ok := data.(*model.User); ok {
+			if v, ok := data.(*Current); ok {
 				return jwt.MapClaims{
-					identityKey: v.Username,
+					identityTeamKey: v.TeamID,
+					identityUserKey: v.UserID,
 				}
 			}
 			return jwt.MapClaims{}
 		},
 		IdentityHandler: func(c *gin.Context) interface{} {
 			claims := jwt.ExtractClaims(c)
-			return &model.User{
-				Username: claims[identityKey].(string),
+			return &Current{
+				TeamID: uint(claims[identityTeamKey].(float64)),
+				UserID: uint(claims[identityUserKey].(float64)),
 			}
 		},
 		Authenticator: h.login,
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			if v, ok := data.(*model.User); ok && v.Username == "admin" {
-				return true
-			}
-
-			return false
+			// TODO: other auth method
+			return true
 		},
 		Unauthorized: func(c *gin.Context, code int, message string) {
 			c.JSON(code, gin.H{
@@ -105,10 +98,9 @@ func (h *Handler) initAuth(r *gin.RouterGroup) {
 	auth := r.Group("/auth")
 	// Refresh time can be longer than token timeout
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
-	auth.Use(authMiddleware.MiddlewareFunc())
-	{
-		auth.GET("/hello", helloHandler)
-	}
+
+	// Set Middleware to Handler
+	r.Use(authMiddleware.MiddlewareFunc())
 }
 
 // @Summary User Login
@@ -124,27 +116,19 @@ func (h *Handler) initAuth(r *gin.RouterGroup) {
 func (h Handler) login(c *gin.Context) (interface{}, error) {
 	var login bindLogin
 	if err := c.ShouldBind(&login); err != nil {
-		return "", jwt.ErrMissingLoginValues
+		return nil, jwt.ErrMissingLoginValues
 	}
 
 	var user model.User
 	h.orm.Where("username = ?", login.Username).First(&user)
+	fmt.Println(user)
 	if err := user.VerifyPassword(login.Password); err == nil {
-		return &user, nil
+		current := Current{
+			TeamID: user.TeamID,
+			UserID: user.ID,
+		}
+		return &current, nil
 	}
 
 	return nil, jwt.ErrFailedAuthentication
-}
-
-// @Summary Get Current User info
-// @Schemes Auth
-// @Description user login
-// @Tags auth
-// @Produce json
-// @Success 200
-// @Router /current [GET]
-func (h Handler) current(c *gin.Context) {
-	//claims := jwt.ExtractClaims(c)
-	// TODO
-	//c.JSON(http.StatusOK, claims[identityKey])
 }

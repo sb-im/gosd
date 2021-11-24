@@ -23,7 +23,7 @@ import (
 // @Router /users [post]
 func (h *Handler) UserCreate(c *gin.Context) {
 	type bindUser struct {
-		TeamID   int    `json:"team_id" form:"team_id" binding:"required"`
+		TeamID   uint   `json:"team_id" form:"team_id" binding:"required"`
 		Username string `json:"username" form:"username" binding:"required"`
 		Password string `json:"password" form:"password" binding:"required"`
 		Language string `json:"language" form:"language"`
@@ -63,7 +63,7 @@ func (h *Handler) UserCreate(c *gin.Context) {
 // @Router /users/{id} [patch]
 func (h *Handler) UserUpdate(c *gin.Context) {
 	type bindUser struct {
-		TeamID   int    `json:"team_id" form:"team_id"`
+		TeamID   uint   `json:"team_id" form:"team_id"`
 		Username string `json:"username" form:"username"`
 		Password string `json:"password" form:"password"`
 		Language string `json:"language" form:"language"`

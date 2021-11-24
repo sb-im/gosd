@@ -33,6 +33,10 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 	})
 
 	handler := NewHandler(orm, service.NewService(orm, worker))
+
+	// Init Auth Middleware
+	handler.initAuth(sr)
+
 	sr.GET("schedules", handler.scheduleIndex)
 	sr.POST("schedules", handler.scheduleCreate)
 	sr.PATCH("schedules/:id", handler.scheduleUpdate)
@@ -60,7 +64,6 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 		})
 	})
 
-	handler.initAuth(sr)
 	handler.userOverride()
 	return r
 }
