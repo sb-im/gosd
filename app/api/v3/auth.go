@@ -100,7 +100,16 @@ func (h *Handler) initAuth(r *gin.RouterGroup) {
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
 
 	// Set Middleware to Handler
-	r.Use(authMiddleware.MiddlewareFunc())
+	//r.Use(authMiddleware.MiddlewareFunc())
+	authMid := authMiddleware.MiddlewareFunc()
+
+	r.Use(func(c *gin.Context) {
+		if h.singleUserMode() {
+			c.Next()
+		} else {
+			authMid(c)
+		}
+	})
 }
 
 // @Summary User Login

@@ -16,10 +16,22 @@ func (c Current) isUser() bool {
 	return c.UserID != 0
 }
 
+func (h Handler) singleUserMode() bool {
+	// TODO: Need environment
+	return true
+}
+
 func (h Handler) getCurrent(c *gin.Context) *Current {
 	current, ok := c.Get(identityGinKey)
 	if ok {
 		return current.(*Current)
+	}
+
+	if h.singleUserMode() {
+		return &Current{
+			TeamID: 1,
+			UserID: 1,
+		}
 	}
 	return nil
 }
