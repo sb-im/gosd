@@ -17,8 +17,7 @@ func (c Current) isUser() bool {
 }
 
 func (h Handler) singleUserMode() bool {
-	// TODO: Need environment
-	return true
+	return h.cfg.SingleUserMode
 }
 
 func (h Handler) getCurrent(c *gin.Context) *Current {

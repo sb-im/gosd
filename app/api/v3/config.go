@@ -7,6 +7,7 @@ import (
 var (
 	DefaultConfig = &Config{
 		Auth: ConfigAuth{
+			JWTSecret: "secret key",
 			SuperAdmin: map[uint]*model.User{
 				1: {
 					Username: "admin",
@@ -14,11 +15,14 @@ var (
 				},
 			},
 		},
-		StoragePath: "data/storage/",
+		SingleUserMode: true,
+		StoragePath:    "data/storage/",
 	}
 )
 
 type Config struct {
+	SingleUserMode bool
+
 	Auth        ConfigAuth
 	StoragePath string
 }
