@@ -8,8 +8,9 @@ import (
 type User struct {
 	Model
 
-	TeamID uint `json:"team_id"`
-	Team   Team `json:"team"`
+	TeamID uint   `json:"team_id"`
+	Team   Team   `json:"team"`
+	Teams  []Team `json:"teams,omitempty" gorm:"many2many:user_teams;"`
 
 	Username string `json:"username" gorm:"uniqueIndex"`
 	Password string `json:"-"`

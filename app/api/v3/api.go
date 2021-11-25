@@ -51,6 +51,7 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 	sr.POST("tasks", handler.TaskCreate)
 
 	sr.POST("teams", handler.TeamCreate)
+	sr.POST("teams/users", handler.TeamUserAdd)
 
 	sr.POST("users", handler.UserCreate)
 	sr.PATCH("users/:id", handler.UserUpdate)

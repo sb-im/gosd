@@ -1,6 +1,7 @@
 package v3
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -47,6 +48,8 @@ func (h Handler) current(c *gin.Context) {
 	if current.isUser() {
 		var user model.User
 		h.orm.First(&user, current.UserID)
+
+		fmt.Println(user.Teams)
 		c.JSON(http.StatusOK, user)
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Current User Error"})

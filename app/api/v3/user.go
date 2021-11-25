@@ -100,3 +100,12 @@ func (h *Handler) userOverride() {
 		h.orm.Updates(user)
 	}
 }
+
+func (h *Handler) userIsExist(id uint) bool {
+	var count int64
+	h.orm.Find(&model.User{}, id).Count(&count)
+	if count > 0 {
+		return true
+	}
+	return false
+}
