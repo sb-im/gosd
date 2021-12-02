@@ -88,6 +88,7 @@ func (t *Rpc2mqtt) Resend(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		default:
+			t.mutex.Lock()
 			for id, pending := range t.pending {
 				if now := time.Since(pending.Time).Seconds(); now > math.Ldexp(1, pending.Count) && now <= timeout {
 					select {
@@ -103,12 +104,11 @@ func (t *Rpc2mqtt) Resend(ctx context.Context) {
 				} else if now > timeout {
 					rpc := jsonrpc.NewError(id, 1, "timeout", nil)
 					data, _ := rpc.ToJSON()
-					t.mutex.Lock()
 					delete(t.pending, *rpc.ID)
-					t.mutex.Unlock()
 					pending.Reply <- data
 				}
 			}
+			t.mutex.Unlock()
 			time.Sleep(1 * time.Second)
 		}
 	}

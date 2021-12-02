@@ -75,6 +75,10 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.oauthSecret = parseString(value, defaultOauthSecret)
 		case "LUA_FILE":
 			p.opts.luaFile = parseString(value, defaultLuaFile)
+		case "GOSD_AUTH__USER__1__USERNAME":
+			p.opts.AdminUsername = parseString(value, defaultAdminUsername)
+		case "GOSD_AUTH__USER__1__PASSWORD":
+			p.opts.AdminPassword = parseString(value, defaultAdminPassword)
 		case "EXPIRE_TOKEN":
 			p.opts.expireToken = parseInt(value, defaultExpireToken)
 		}

@@ -158,7 +158,7 @@ build-binary:
 
 variables:
   CONTAINER_CANARY_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-  CONTAINER_BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  CONTAINER_BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_BRANCH
   CONTAINER_STABLE_IMAGE: $CI_REGISTRY_IMAGE:latest
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
 
@@ -203,22 +203,18 @@ release-image:
   only:
      - tags
 
-deploy_staging:
+deploy:develop:
   stage: deploy
   only:
     refs:
-      - master
+      - dev
   before_script:
-    - apt-get update -y && apt-get install xz-utils
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval "$(ssh-agent -s)"
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - cp "$SSH_KNOWN_HOSTS" ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
+    - ssh-keyscan ${HOST_CLOUD_DEVELOP} > ~/.ssh/known_hosts
   script:
-    - make
-    - tar -cJf file.tar.xz gosd data/
-    - cat file.tar.xz | ssh ${USER_CLOUD_STAGING}@${HOST_CLOUD_STAGING} 'cd gosd/ && tar -xJf -'
+    - ssh ${USER_CLOUD_DEVELOP}@${HOST_CLOUD_DEVELOP} 'cd deployment && bin/develop-sitl pull && bin/develop-sitl up -d'
 
