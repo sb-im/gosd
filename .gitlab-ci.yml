@@ -7,6 +7,7 @@ stages:
   - simulation
   - artifact
   - release
+  - publish
   - deploy
 
 .gobuild:
@@ -157,49 +158,86 @@ build-binary:
     expire_in: 1 week
 
 variables:
-  CONTAINER_CANARY_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-  CONTAINER_BRANCH_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_BRANCH
-  CONTAINER_STABLE_IMAGE: $CI_REGISTRY_IMAGE:latest
-  CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  CONTAINER_CANARY_IMAGE: ${CI_REGISTRY_IMAGE}/canary:$CI_COMMIT_SHORT_SHA
 
-build-docker:
+build image:
   image: docker:20.10.5
   stage: artifact
   services:
     - docker:20.10.5-dind
   before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
   script:
-    - docker pull $CI_REGISTRY_IMAGE:latest || true
-    - docker build --cache-from $CONTAINER_STABLE_IMAGE --tag $CONTAINER_BRANCH_IMAGE --tag $CONTAINER_CANARY_IMAGE .
-    - docker push $CONTAINER_BRANCH_IMAGE
+    - docker build --tag $CONTAINER_CANARY_IMAGE .
     - docker push $CONTAINER_CANARY_IMAGE
 
-master-image:
+image branch:
   image: docker:20.10.5
   stage: release
   services:
     - docker:20.10.5-dind
   before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  variables:
+    CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}/${CI_COMMIT_REF_NAME}:latest
   script:
     - docker pull $CONTAINER_CANARY_IMAGE
-    - docker tag $CONTAINER_CANARY_IMAGE $CONTAINER_STABLE_IMAGE
-    - docker push $CONTAINER_STABLE_IMAGE
+    - docker tag $CONTAINER_CANARY_IMAGE $CONTAINER_IMAGE
+    - docker push $CONTAINER_IMAGE
+
+image latest:
+  image: docker:20.10.5
+  stage: release
+  services:
+    - docker:20.10.5-dind
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  variables:
+    CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}/image:latest
+  script:
+    - docker pull $CONTAINER_CANARY_IMAGE
+    - docker tag $CONTAINER_CANARY_IMAGE $CONTAINER_IMAGE
+    - docker push $CONTAINER_IMAGE
   only:
     - master
 
-release-image:
+image release:
   image: docker:20.10.5
   stage: release
   services:
     - docker:20.10.5-dind
   before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+  variables:
+    CONTAINER_IMAGE: ${CI_REGISTRY_IMAGE}/${CI_COMMIT_TAG}:latest
   script:
     - docker pull $CONTAINER_CANARY_IMAGE
-    - docker tag $CONTAINER_CANARY_IMAGE $CONTAINER_RELEASE_IMAGE
-    - docker push $CONTAINER_RELEASE_IMAGE
+    - docker tag $CONTAINER_CANARY_IMAGE $CONTAINER_IMAGE
+    - docker push $CONTAINER_IMAGE
+  only:
+     - tags
+
+publish ghcr:
+  image: docker:20.10.5
+  stage: publish
+  services:
+    - docker:20.10.5-dind
+  before_script:
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    - docker login -u ${GHCR_REGISTRY_USER} -p ${GHCR_REGISTRY_PASSWORD} ghcr.io
+  variables:
+    CONTAINER_RELEASE_IMAGE: ${CI_REGISTRY_IMAGE}/${CI_COMMIT_TAG}:latest
+  script:
+    - docker pull $CONTAINER_RELEASE_IMAGE
+    # hash
+    - docker tag  $CONTAINER_RELEASE_IMAGE ghcr.io/sb-im/gosd:${CI_COMMIT_SHORT_SHA}
+    - docker push ghcr.io/sb-im/gosd:${CI_COMMIT_SHORT_SHA}
+    # version lstrip('v')
+    - docker tag  $CONTAINER_RELEASE_IMAGE ghcr.io/sb-im/gosd:${CI_COMMIT_TAG#v}
+    - docker push ghcr.io/sb-im/gosd:${CI_COMMIT_TAG#v}
+    # latest
+    - docker tag  $CONTAINER_RELEASE_IMAGE ghcr.io/sb-im/gosd:latest
+    - docker push ghcr.io/sb-im/gosd:latest
   only:
      - tags
 
