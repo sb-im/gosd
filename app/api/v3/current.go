@@ -11,6 +11,7 @@ import (
 type Current struct {
 	TeamID uint
 	UserID uint
+	SessID uint
 }
 
 func (c Current) isUser() bool {
@@ -31,6 +32,7 @@ func (h Handler) getCurrent(c *gin.Context) *Current {
 		return &Current{
 			TeamID: 1,
 			UserID: 1,
+			SessID: 1,
 		}
 	}
 	return nil

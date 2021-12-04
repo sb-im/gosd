@@ -15,6 +15,7 @@ var (
 	identityGinKey  = "jwt_current"
 	identityTeamKey = "tid"
 	identityUserKey = "uid"
+	identitySessKey = "sid"
 )
 
 type bindLogin struct {
@@ -34,6 +35,7 @@ func (h *Handler) initAuth(r *gin.RouterGroup) {
 				return jwt.MapClaims{
 					identityTeamKey: v.TeamID,
 					identityUserKey: v.UserID,
+					identitySessKey: v.SessID,
 				}
 			}
 			return jwt.MapClaims{}
@@ -43,6 +45,7 @@ func (h *Handler) initAuth(r *gin.RouterGroup) {
 			return &Current{
 				TeamID: uint(claims[identityTeamKey].(float64)),
 				UserID: uint(claims[identityUserKey].(float64)),
+				SessID: uint(claims[identitySessKey].(float64)),
 			}
 		},
 		Authenticator: h.login,
@@ -132,9 +135,19 @@ func (h Handler) login(c *gin.Context) (interface{}, error) {
 	h.orm.Where("username = ?", login.Username).First(&user)
 	fmt.Println(user)
 	if err := user.VerifyPassword(login.Password); err == nil {
+
+		// Create Session
+		session := &model.Session{
+			TeamID: user.TeamID,
+			UserID: user.ID,
+			IP:     c.ClientIP(),
+		}
+		h.orm.Save(session)
+
 		current := Current{
 			TeamID: user.TeamID,
 			UserID: user.ID,
+			SessID: session.ID,
 		}
 		return &current, nil
 	}
