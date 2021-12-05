@@ -66,6 +66,7 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 		})
 	})
 
+	handler.InitSeed()
 	handler.UserOverride()
 	return r
 }

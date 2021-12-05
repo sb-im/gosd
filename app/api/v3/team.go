@@ -70,3 +70,12 @@ func (h Handler) TeamUserAdd(c *gin.Context) {
 
 	c.JSON(http.StatusOK, user)
 }
+
+func (h Handler) teamIsExist(id uint) bool {
+	var count int64
+	h.orm.Find(&model.Team{}, id).Count(&count)
+	if count > 0 {
+		return true
+	}
+	return false
+}
