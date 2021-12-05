@@ -7,16 +7,40 @@ services:
     ports:
       - "6379:6379/tcp"
 
-  mosquitto:
-    image: eclipse-mosquitto:2.0.8
-    container_name: mosquitto
+#  mosquitto:
+#    image: eclipse-mosquitto:2.0.8
+#    container_name: mosquitto
+#    hostname: mqtt-broker
+#    command:
+#      - mosquitto
+#      - -c
+#      - /mosquitto-no-auth.conf
+#    ports:
+#      - "1883:1883/tcp"
+
+  emqx:
+    # https://docs.emqx.io/en/broker/v4.3/getting-started/install.html#create-a-simple-static-cluster-by-docker-compose
+    image: emqx/emqx:latest
+    container_name: emqx
     hostname: mqtt-broker
-    command:
-      - mosquitto
-      - -c
-      - /mosquitto-no-auth.conf
+    environment:
+      - EMQX_LOADED_PLUGINS="emqx_recon,emqx_retainer,emqx_management,emqx_auth_mnesia,emqx_auth_jwt"
+      - EMQX_ALLOW_ANONYMOUS=false
+      - EMQX_AUTH__USER__1__USERNAME=${MQTT_USERNAME:-admin}
+      - EMQX_AUTH__USER__1__PASSWORD=${MQTT_PASSWORD:-public}
+      - EMQX_AUTH__JWT__SECRET=secretkey
+      - EMQX_AUTH__JWT__FROM=password
+# Must Claims value is type string
+#      - EMQX_AUTH__JWT__VERIFY_CLAIMS=off
+#      - EMQX_AUTH__JWT__VERIFY_CLAIMS__SID=%u
+
     ports:
       - "1883:1883/tcp"
+    healthcheck:
+      test: ["CMD", "/opt/emqx/bin/emqx_ctl", "status"]
+      interval: 5s
+      timeout: 25s
+      retries: 5
 
   postgres:
     image: postgres

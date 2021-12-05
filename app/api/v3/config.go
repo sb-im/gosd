@@ -7,7 +7,7 @@ import (
 var (
 	DefaultConfig = &Config{
 		Auth: ConfigAuth{
-			JWTSecret: "secret key",
+			JWTSecret: "secretkey",
 			SuperAdmin: map[uint]*model.User{
 				1: {
 					Username: "admin",
