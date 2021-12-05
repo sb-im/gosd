@@ -19,7 +19,7 @@ import (
 // @Param size query uint false "Page Max Count"
 // @Success 200 {object} model.Schedule
 // @Router /schedules [get]
-func (h *Handler) scheduleIndex(c *gin.Context) {
+func (h Handler) ScheduleIndex(c *gin.Context) {
 	var schedules []model.Schedule
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
@@ -36,7 +36,7 @@ func (h *Handler) scheduleIndex(c *gin.Context) {
 // @Param data body model.Schedule true "Schedule"
 // @Success 200 {object} model.Schedule
 // @Router /schedules [post]
-func (h *Handler) scheduleCreate(c *gin.Context) {
+func (h Handler) ScheduleCreate(c *gin.Context) {
 	schedule := &model.Schedule{}
 	if err := c.ShouldBind(schedule); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -56,7 +56,7 @@ func (h *Handler) scheduleCreate(c *gin.Context) {
 // @Param data body model.Schedule true "Schedule"
 // @Success 200 {object} model.Schedule
 // @Router /schedules/{id} [patch]
-func (h *Handler) scheduleUpdate(c *gin.Context) {
+func (h Handler) ScheduleUpdate(c *gin.Context) {
 	schedule := &model.Schedule{}
 	h.orm.Find(schedule, c.Param("id"))
 	if err := c.ShouldBind(schedule); err != nil {
@@ -81,11 +81,11 @@ func (h *Handler) scheduleUpdate(c *gin.Context) {
 // @Param   id     path    int     true        "Schedule ID"
 // @Success 200 {object} model.Schedule
 // @Router /schedules/{id} [delete]
-func (h *Handler) scheduleDestroy(c *gin.Context) {
+func (h Handler) ScheduleDestroy(c *gin.Context) {
 	h.orm.Delete(&model.Schedule{}, c.Param("id"))
 }
 
-func (h *Handler) scheduleToggle(c *gin.Context) {
+func (h Handler) ScheduleToggle(c *gin.Context) {
 	schedule := &model.Schedule{}
 	if err := c.ShouldBind(schedule); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+	"sb.im/gosd/app/api/v3"
 	"sb.im/gosd/app/service"
 	"sb.im/gosd/luavm"
 
@@ -32,20 +33,20 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 		})
 	})
 
-	handler := NewHandler(orm, service.NewService(orm, worker))
+	handler := v3.NewHandler(orm, service.NewService(orm, worker))
 
 	// Init Auth Middleware
-	handler.initAuth(sr)
+	handler.InitAuth(sr)
 
-	sr.GET("schedules", handler.scheduleIndex)
-	sr.POST("schedules", handler.scheduleCreate)
-	sr.PATCH("schedules/:id", handler.scheduleUpdate)
-	sr.DELETE("schedules/:id", handler.scheduleDestroy)
+	sr.GET("schedules", handler.ScheduleIndex)
+	sr.POST("schedules", handler.ScheduleCreate)
+	sr.PATCH("schedules/:id", handler.ScheduleUpdate)
+	sr.DELETE("schedules/:id", handler.ScheduleDestroy)
 
-	sr.POST("blobs", handler.blobCreate)
-	sr.PUT("blobs", handler.blobUpdate)
-	sr.PUT("blobs/:blobID", handler.blobUpdate)
-	sr.GET("blobs/:blobID", handler.blobShow)
+	sr.POST("blobs", handler.BlobCreate)
+	sr.PUT("blobs", handler.BlobUpdate)
+	sr.PUT("blobs/:blobID", handler.BlobUpdate)
+	sr.GET("blobs/:blobID", handler.BlobShow)
 
 	sr.GET("tasks", handler.TaskIndex)
 	sr.POST("tasks", handler.TaskCreate)
@@ -56,7 +57,7 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 	sr.POST("users", handler.UserCreate)
 	sr.PATCH("users/:id", handler.UserUpdate)
 
-	sr.GET("current", handler.current)
+	sr.GET("current", handler.Current)
 
 	r.NoRoute(func(c *gin.Context) {
 		fmt.Println(c.Request.URL)
@@ -65,6 +66,6 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 		})
 	})
 
-	handler.userOverride()
+	handler.UserOverride()
 	return r
 }

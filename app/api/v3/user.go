@@ -94,7 +94,7 @@ func (h *Handler) UserUpdate(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-func (h *Handler) userOverride() {
+func (h *Handler) UserOverride() {
 	for id, user := range h.cfg.Auth.SuperAdmin {
 		user.ID = id
 		h.orm.Updates(user)

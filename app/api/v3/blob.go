@@ -22,7 +22,7 @@ import (
 // @Param file formData file true "this is a file"
 // @Success 200 {object} model.Blob
 // @Router /blobs [post]
-func (h *Handler) blobCreate(c *gin.Context) {
+func (h Handler) BlobCreate(c *gin.Context) {
 	bindBlob := make(map[string]string)
 	if err := c.ShouldBind(&bindBlob); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -65,7 +65,7 @@ func (h *Handler) blobCreate(c *gin.Context) {
 // @Param file formData file true "this is a file"
 // @Success 200 {object} model.Blob
 // @Router /blobs/{blobID} [PUT]
-func (h *Handler) blobUpdate(c *gin.Context) {
+func (h Handler) BlobUpdate(c *gin.Context) {
 	bindBlob := make(map[string]string)
 	if err := c.ShouldBind(&bindBlob); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -113,7 +113,7 @@ func (h *Handler) blobUpdate(c *gin.Context) {
 	c.JSON(http.StatusOK, bindBlob)
 }
 
-func (h *Handler) blobIsExist(id string) bool {
+func (h Handler) blobIsExist(id string) bool {
 	var count int64
 	h.orm.Model(&model.Blob{}).Where("uxid = ?", id).Count(&count)
 	if count > 0 {
@@ -122,7 +122,7 @@ func (h *Handler) blobIsExist(id string) bool {
 	return false
 }
 
-func (h *Handler) blobShow(c *gin.Context) {
+func (h Handler) BlobShow(c *gin.Context) {
 	blob := model.Blob{}
 	h.orm.Take(&blob, "uxid = ?", c.Param("blobID"))
 	if blob.ID != 0 {

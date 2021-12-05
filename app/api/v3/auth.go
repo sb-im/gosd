@@ -23,7 +23,7 @@ type bindLogin struct {
 	Password string `form:"password" json:"password" binding:"required"`
 }
 
-func (h *Handler) initAuth(r *gin.RouterGroup) {
+func (h Handler) InitAuth(r *gin.RouterGroup) {
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "test zone",
 		Key:         []byte(h.cfg.Auth.JWTSecret),

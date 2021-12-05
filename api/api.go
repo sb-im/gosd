@@ -5,7 +5,7 @@ import (
 	"net/url"
 
 	"gorm.io/gorm"
-	v3 "sb.im/gosd/app/api/v3"
+	v3 "sb.im/gosd/app/api"
 	"sb.im/gosd/luavm"
 	"sb.im/gosd/state"
 	"sb.im/gosd/storage"

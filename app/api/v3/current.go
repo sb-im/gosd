@@ -45,7 +45,7 @@ func (h Handler) getCurrent(c *gin.Context) *Current {
 // @Produce json
 // @Success 200 {object} model.Schedule
 // @Router /current [GET]
-func (h Handler) current(c *gin.Context) {
+func (h Handler) Current(c *gin.Context) {
 	current := h.getCurrent(c)
 	if current.isUser() {
 		var user model.User
