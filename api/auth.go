@@ -88,6 +88,7 @@ func (h *handler) authHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Lock User: ", user.ID)
 	}
 	if count > maxRetry {
+		json.ServerError(w, r, errors.New("user already locked"))
 		return
 	}
 
