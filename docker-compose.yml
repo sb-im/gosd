@@ -26,8 +26,11 @@ services:
     container_name: emqx
     hostname: mqtt-broker
     environment:
-      - EMQX_LOADED_PLUGINS="emqx_recon,emqx_retainer,emqx_management,emqx_auth_mnesia,emqx_auth_jwt"
+      - EMQX_LOADED_PLUGINS="emqx_recon,emqx_retainer,emqx_management,emqx_auth_mnesia,emqx_auth_jwt,emqx_auth_redis"
       - EMQX_ALLOW_ANONYMOUS=false
+      - EMQX_AUTH__REDIS__SERVER=redis:6379
+      - EMQX_AUTH__REDIS__POOL=8
+      - EMQX_AUTH__REDIS__DATABASE=0
       - EMQX_AUTH__USER__1__USERNAME=${MQTT_USERNAME:-admin}
       - EMQX_AUTH__USER__1__PASSWORD=${MQTT_PASSWORD:-public}
       - EMQX_AUTH__JWT__SECRET=secretkey
