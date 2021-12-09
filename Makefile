@@ -10,6 +10,18 @@ GOBUILD=CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) \
 
 all: build
 
+cli-redis:
+	docker run -it --network=host dbcliorg/iredis
+
+cli-pg:
+	docker run -it --network=host \
+		-e PGHOST=localhost \
+		-e PGPORT=5432 \
+		-e PGUSER=postgres \
+		-e PGPASSWORD=password \
+		-e PGDATABASE=gosd \
+		dbcliorg/pgcli
+
 generate:
 	@ go generate
 
