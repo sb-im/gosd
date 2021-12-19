@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 )
 
 func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
@@ -33,7 +34,11 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 		})
 	})
 
-	handler := v3.NewHandler(orm, service.NewService(orm, worker))
+	handler := v3.NewHandler(orm, service.NewService(orm, redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       1,
+	}), worker))
 
 	// Init Auth Middleware
 	handler.InitAuth(sr)
@@ -56,6 +61,8 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 
 	sr.POST("users", handler.UserCreate)
 	sr.PATCH("users/:id", handler.UserUpdate)
+
+	sr.POST("test", handler.MqttUserCreate)
 
 	sr.GET("current", handler.Current)
 

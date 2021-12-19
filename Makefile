@@ -11,7 +11,9 @@ GOBUILD=CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) \
 all: build
 
 cli-redis:
-	docker run -it --network=host dbcliorg/iredis
+	docker run -it --network=host \
+		-e IREDIS_URL=redis://localhost:6379/1 \
+		dbcliorg/iredis
 
 cli-pg:
 	docker run -it --network=host \
