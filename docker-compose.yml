@@ -35,9 +35,12 @@ services:
     command:
       - mosquitto
       - -c
-      - /mosquitto-no-auth.conf
+      - /mosquitto.conf
     ports:
       - "1883:1883/tcp"
+      - "8083:8083/tcp"
+    volumes:
+      - ./mosquitto.conf:/mosquitto.conf
 
   postgres:
     image: postgres
