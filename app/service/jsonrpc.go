@@ -11,6 +11,7 @@ func NewJsonService(s *Service) *JSONService {
 	j := &JSONService{s: s}
 	j.s.JSON = j
 	j.m = map[string]func([]byte) error{
+		"cowSay":  j.CowSay,
 		"taskRun": j.TaskRun,
 	}
 	return j
@@ -34,4 +35,8 @@ func (s *JSONService) TaskRun(raw []byte) error {
 		return err
 	}
 	return s.s.TaskRun(params)
+}
+
+func (s *JSONService) CowSay(raw []byte) error {
+	return s.s.CowSay(string(raw))
 }

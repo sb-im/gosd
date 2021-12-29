@@ -3,9 +3,9 @@ package model
 type Schedule struct {
 	Model
 
-	Name   string `json:"name" example:"Test Schedule"`
-	Cron   string `json:"cron"`
-	Enable bool   `json:"enable" gorm:"not null;default:false"`
-	Target string `json:"target"`
-	Params string `json:"params"`
+	Name   string `json:"name" form:"name"`
+	Cron   string `json:"cron" form:"cron"`
+	Enable bool   `json:"enable" gorm:"not null;default:false" form:"enable"`
+	Method string `json:"method" form:"method"`
+	Params string `json:"params" form:"params"`
 }
