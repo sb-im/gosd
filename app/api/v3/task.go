@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"errors"
 
+	"gorm.io/gorm"
 	"github.com/gin-gonic/gin"
 	"sb.im/gosd/app/model"
 )
@@ -48,4 +50,44 @@ func (h *Handler) TaskCreate(c *gin.Context) {
 	}
 	h.orm.Create(task)
 	c.JSON(http.StatusOK, task)
+}
+
+// @Summary Task Show
+// @Schemes Task
+// @Description show a tasks detail
+// @Tags task
+// @Accept json
+// @Produce json
+// @Param id path uint true "Task ID"
+// @Param page query uint false "Task Page Num"
+// @Param size query uint false "Page Max Count"
+// @Success 200 {object} model.Task
+// @failure 404
+// @Router /tasks/{id} [get]
+func (h Handler) TaskShow(c *gin.Context) {
+	var task model.Task
+	if err := h.orm.First(&task, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	// TODO:
+	//page, _ := strconv.Atoi(c.Query("page"))
+	//size, _ := strconv.Atoi(c.Query("size"))
+	//h.orm.Offset((page - 1) * size).Limit(size).Find(&task, "team_id = ?", h.getCurrent(c).TeamID)
+	c.JSON(http.StatusOK, task)
+}
+
+// @Summary Task Destroy
+// @Schemes Task
+// @Description Destroy a task
+// @Tags task
+// @Accept json
+// @Produce json
+// @Param id path uint true "Task ID"
+// @Success 204
+// @Router /tasks/{id} [delete]
+func (h Handler) TaskDestroy(c *gin.Context) {
+	h.orm.Delete(&model.Task{}, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID)
+	c.JSON(http.StatusNoContent, nil)
 }
