@@ -1,13 +1,13 @@
 package v3
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
-	"errors"
 
-	"gorm.io/gorm"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"sb.im/gosd/app/model"
 )
 
@@ -25,7 +25,7 @@ func (h *Handler) TaskIndex(c *gin.Context) {
 	var tasks []model.Task
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
-	h.orm.Offset((page - 1) * size).Limit(size).Find(&tasks, "team_id = ?", h.getCurrent(c).TeamID)
+	h.orm.Offset((page-1)*size).Limit(size).Find(&tasks, "team_id = ?", h.getCurrent(c).TeamID)
 	c.JSON(http.StatusOK, tasks)
 }
 
@@ -75,6 +75,27 @@ func (h Handler) TaskShow(c *gin.Context) {
 	//page, _ := strconv.Atoi(c.Query("page"))
 	//size, _ := strconv.Atoi(c.Query("size"))
 	//h.orm.Offset((page - 1) * size).Limit(size).Find(&task, "team_id = ?", h.getCurrent(c).TeamID)
+	c.JSON(http.StatusOK, task)
+}
+
+// @Summary Task Update
+// @Schemes Task
+// @Description update a task
+// @Tags task
+// @Accept json
+// @Produce json
+// @Param id   path int true "Task ID"
+// @Param data body model.Task true "Task"
+// @Success 200 {object} model.Task
+// @Router /tasks/{id} [put]
+func (h Handler) TaskUpdate(c *gin.Context) {
+	task := model.Task{}
+	if err := c.ShouldBind(&task); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	h.orm.Where("id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Updates(&task).Scan(&task)
 	c.JSON(http.StatusOK, task)
 }
 
