@@ -14,7 +14,7 @@ import (
 // @Accept multipart/form-data
 // @Produce json
 // @Param   name formData string true "Team Name"
-// @Success 200 {object} model.Team
+// @Success 201 {object} model.Team
 // @Router /teams [post]
 func (h *Handler) TeamCreate(c *gin.Context) {
 	team := &model.Team{}
@@ -23,7 +23,7 @@ func (h *Handler) TeamCreate(c *gin.Context) {
 		return
 	}
 	h.orm.Create(team)
-	c.JSON(http.StatusOK, team)
+	c.JSON(http.StatusCreated, team)
 }
 
 // @Summary Team Add user

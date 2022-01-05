@@ -39,7 +39,7 @@ func (h Handler) ScheduleIndex(c *gin.Context) {
 // @Param enable formData bool true "Enable" default(false)
 // @Param method formData string true "Method" default(cowSay)
 // @Param params formData string false "Params" default(Hello, world!)
-// @Success 200 {object} model.Schedule
+// @Success 201 {object} model.Schedule
 // @Router /schedules [post]
 func (h Handler) ScheduleCreate(c *gin.Context) {
 	schedule := &model.Schedule{}
@@ -49,7 +49,7 @@ func (h Handler) ScheduleCreate(c *gin.Context) {
 		return
 	}
 	h.orm.Create(schedule)
-	c.JSON(http.StatusOK, schedule)
+	c.JSON(http.StatusCreated, schedule)
 }
 
 // @Summary Schedule Update
@@ -85,10 +85,11 @@ func (h Handler) ScheduleUpdate(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param   id     path    int     true        "Schedule ID"
-// @Success 200 {object} model.Schedule
+// @Success 204 {object} model.Schedule
 // @Router /schedules/{id} [delete]
 func (h Handler) ScheduleDestroy(c *gin.Context) {
 	h.orm.Delete(&model.Schedule{}, c.Param("id"))
+	c.JSON(http.StatusNoContent, nil)
 }
 
 // @Summary Schedule Toggle

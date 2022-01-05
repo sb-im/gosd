@@ -19,7 +19,7 @@ import (
 // @Param password formData string true "Password"
 // @Param language formData string false "Language"
 // @Param timezone formData string false "Timezone"
-// @Success 200 {object} model.User
+// @Success 201 {object} model.User
 // @Router /users [post]
 func (h *Handler) UserCreate(c *gin.Context) {
 	type bindUser struct {
@@ -44,7 +44,7 @@ func (h *Handler) UserCreate(c *gin.Context) {
 		Timezone: u.Timezone,
 	}
 	h.orm.Create(user)
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusCreated, user)
 }
 
 // @Summary Update a user

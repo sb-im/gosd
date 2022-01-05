@@ -37,7 +37,7 @@ func (h *Handler) TaskIndex(c *gin.Context) {
 // @Produce json
 // @Param name    formData string true "Task Name"
 // @Param node_id formData uint true "Node ID"
-// @Success 200 {object} model.Task
+// @Success 201 {object} model.Task
 // @Router /tasks [post]
 func (h *Handler) TaskCreate(c *gin.Context) {
 	task := &model.Task{
@@ -49,7 +49,7 @@ func (h *Handler) TaskCreate(c *gin.Context) {
 		return
 	}
 	h.orm.Create(task)
-	c.JSON(http.StatusOK, task)
+	c.JSON(http.StatusCreated, task)
 }
 
 // @Summary Task Show
