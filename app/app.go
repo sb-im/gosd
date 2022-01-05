@@ -18,6 +18,8 @@ package app
 // @scope.write Grants write access
 // @scope.admin Grants read and write access to administrative information
 
+// @tag.name status
+// @tag.description Server Time, Running Status
 // @tag.name auth
 // @tag.description auth, login, logout, token
 // @tag.name team

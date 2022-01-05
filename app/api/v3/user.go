@@ -17,8 +17,8 @@ import (
 // @Param team_id  formData uint true "Team ID"
 // @Param username formData string true "Username"
 // @Param password formData string true "Password"
-// @Param language formData string false "Language"
-// @Param timezone formData string false "Timezone"
+// @Param language formData string false "Language Codes, such as 'zh_CN'" default(en_US)
+// @Param timezone formData string false "IANA Time Zone database, such as 'America/New_York'" default(Asia/Shanghai)
 // @Success 201 {object} model.User
 // @Router /users [post]
 func (h *Handler) UserCreate(c *gin.Context) {

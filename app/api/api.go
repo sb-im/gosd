@@ -43,6 +43,8 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 	// Init Auth Middleware
 	handler.InitAuth(sr)
 
+	sr.GET("status", handler.Status)
+
 	sr.GET("schedules", handler.ScheduleIndex)
 	sr.POST("schedules", handler.ScheduleCreate)
 	sr.PATCH("schedules/:id", handler.ScheduleUpdate)
@@ -72,7 +74,7 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 
 	r.NoRoute(func(c *gin.Context) {
 		fmt.Println(c.Request.URL)
-		c.JSON(200, gin.H{
+		c.JSON(http.StatusNotFound, gin.H{
 			"message": "NO Router",
 		})
 	})

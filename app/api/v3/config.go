@@ -16,12 +16,16 @@ var (
 			},
 		},
 		SingleUserMode: true,
-		StoragePath:    "data/storage/",
+		DefaultLanguage: "en_US",
+		DefaultTimezone: "Asia/Shanghai",
+		StoragePath:     "data/storage/",
 	}
 )
 
 type Config struct {
-	SingleUserMode bool
+	SingleUserMode  bool
+	DefaultLanguage string
+	DefaultTimezone string
 
 	Auth        ConfigAuth
 	StoragePath string
