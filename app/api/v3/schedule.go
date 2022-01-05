@@ -35,7 +35,7 @@ func (h Handler) ScheduleIndex(c *gin.Context) {
 // @Accept multipart/form-data
 // @Produce json
 // @Param name formData string true "Name" default(Test Schedule)
-// @Param cron formData string true "cron expression https://pkg.go.dev/github.com/robfig/cron#hdr-CRON_Expression_Format" default(@hourly)
+// @Param cron formData string true "cron expression https://pkg.go.dev/github.com/robfig/cron/v3#hdr-Usage" default(@every 1h30m)
 // @Param enable formData bool true "Enable" default(false)
 // @Param method formData string true "Method" default(cowSay)
 // @Param params formData string false "Params" default(Hello, world!)
