@@ -42,13 +42,18 @@ func (h Handler) ScheduleIndex(c *gin.Context) {
 // @Success 201 {object} model.Schedule
 // @Router /schedules [post]
 func (h Handler) ScheduleCreate(c *gin.Context) {
-	schedule := &model.Schedule{}
-	if err := c.ShouldBind(schedule); err != nil {
+	schedule := model.Schedule{}
+	if err := c.ShouldBind(&schedule); err != nil {
 		log.Error(schedule, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	h.orm.Create(schedule)
+	if err := h.orm.Create(&schedule).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		h.srv.ScheduleAdd(schedule)
+	}
+
 	c.JSON(http.StatusCreated, schedule)
 }
 
@@ -56,16 +61,21 @@ func (h Handler) ScheduleCreate(c *gin.Context) {
 // @Schemes Schedule
 // @Description update a new schedules
 // @Tags schedule
-// @Accept json
+// @Accept multipart/form-data
 // @Produce json
 // @Param id   path int            true "Schedule ID"
-// @Param data body model.Schedule true "Schedule"
+// @Param name formData string false "Name" default(Test Schedule)
+// @Param cron formData string false "cron expression https://pkg.go.dev/github.com/robfig/cron/v3#hdr-Usage" default(@every 1h30m)
+// @Param enable formData bool   false "Enable" default(false)
+// @Param method formData string false "Method" default(cowSay)
+// @Param params formData string false "Params" default(Hello, world!)
 // @Success 200 {object} model.Schedule
 // @Router /schedules/{id} [patch]
 func (h Handler) ScheduleUpdate(c *gin.Context) {
-	schedule := &model.Schedule{}
-	h.orm.Find(schedule, c.Param("id"))
-	if err := c.ShouldBind(schedule); err != nil {
+	schedule := model.Schedule{}
+	h.orm.First(&schedule, c.Param("id"))
+	if err := c.ShouldBind(&schedule); err != nil {
+		log.Error(schedule, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -74,7 +84,8 @@ func (h Handler) ScheduleUpdate(c *gin.Context) {
 	// No way to judge whether to change
 	// Field 'enable' will Force Updated
 	// If not 'enable' key, status default to false
-	h.orm.Updates(schedule).Select("enable").Updates(schedule)
+	h.orm.Updates(&schedule).Select("enable").Updates(&schedule)
+	h.srv.ScheduleUpdate(schedule)
 	c.JSON(http.StatusOK, schedule)
 }
 
@@ -84,11 +95,17 @@ func (h Handler) ScheduleUpdate(c *gin.Context) {
 // @Tags schedule
 // @Accept json
 // @Produce json
-// @Param   id     path    int     true        "Schedule ID"
+// @Param id path int true "Schedule ID"
 // @Success 204 {object} model.Schedule
 // @Router /schedules/{id} [delete]
 func (h Handler) ScheduleDestroy(c *gin.Context) {
-	h.orm.Delete(&model.Schedule{}, c.Param("id"))
+	schedule := model.Schedule{}
+	h.orm.First(&schedule, c.Param("id"))
+
+	// Need Destroy cron
+	// h.orm.Delete(&model.Schedule{}, c.Param("id"))
+	h.orm.Delete(&schedule)
+	h.srv.ScheduleDel(schedule)
 	c.JSON(http.StatusNoContent, nil)
 }
 
@@ -98,7 +115,7 @@ func (h Handler) ScheduleDestroy(c *gin.Context) {
 // @Tags schedule
 // @Accept json
 // @Produce json
-// @Param   id     path    int     true        "Schedule ID"
+// @Param id path int true "Schedule ID"
 // @Success 200 {object} model.Schedule
 // @Router /schedules/{id}/toggle [POST]
 func (h Handler) ScheduleToggle(c *gin.Context) {

@@ -32,12 +32,14 @@ func (s Service) scheduleEntryDel(id uint) {
 }
 
 func (s Service) ScheduleAdd(schedule model.Schedule) {
-	if entryID, err := s.cron.AddFunc(schedule.Cron, func() {
-		s.JSON.Call(schedule.Method, []byte(schedule.Params))
-	}); err != nil {
-		fmt.Println(err)
-	} else {
-		s.scheduleEntrySet(schedule.ID, int(entryID))
+	if schedule.Enable {
+		if entryID, err := s.cron.AddFunc(schedule.Cron, func() {
+			s.JSON.Call(schedule.Method, []byte(schedule.Params))
+		}); err != nil {
+			fmt.Println(err)
+		} else {
+			s.scheduleEntrySet(schedule.ID, int(entryID))
+		}
 	}
 }
 
@@ -52,15 +54,5 @@ func (s Service) ScheduleDel(schedule model.Schedule) {
 
 func (s Service) ScheduleUpdate(schedule model.Schedule) {
 	s.ScheduleDel(schedule)
-	if schedule.Enable {
-		s.ScheduleAdd(schedule)
-	}
-}
-
-func (s *Service) AddSchedule(task *model.Schedule) error {
-	_, err := s.cron.AddFunc(task.Cron, func() {
-		fmt.Println("Cron running:", task.Name)
-		s.JSON.Call(task.Method, []byte(task.Params))
-	})
-	return err
+	s.ScheduleAdd(schedule)
 }
