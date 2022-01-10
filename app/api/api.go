@@ -34,7 +34,6 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 		})
 	})
 
-
 	srv := service.NewService(orm, redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",

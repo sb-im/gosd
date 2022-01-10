@@ -15,7 +15,7 @@ var (
 				},
 			},
 		},
-		SingleUserMode: true,
+		SingleUserMode:  true,
 		DefaultLanguage: "en_US",
 		DefaultTimezone: "Asia/Shanghai",
 		StoragePath:     "data/storage/",

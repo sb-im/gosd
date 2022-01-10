@@ -1,8 +1,8 @@
 package v3
 
 import (
-	"time"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,9 +17,9 @@ import (
 // @Router /status [get]
 func (h Handler) Status(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"time": time.Now().String(),
+		"time":     time.Now().String(),
 		"language": h.cfg.DefaultLanguage,
 		"timezone": h.cfg.DefaultTimezone,
-		"version": "Unknown",
+		"version":  "Unknown",
 	})
 }
