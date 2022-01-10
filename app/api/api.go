@@ -34,11 +34,16 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 		})
 	})
 
-	handler := v3.NewHandler(orm, service.NewService(orm, redis.NewClient(&redis.Options{
+
+	srv := service.NewService(orm, redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       1,
-	}), worker))
+	}), worker)
+
+	srv.StartSchedule()
+
+	handler := v3.NewHandler(orm, srv)
 
 	// Init Auth Middleware
 	handler.InitAuth(sr)
