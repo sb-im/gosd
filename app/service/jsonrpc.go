@@ -1,7 +1,7 @@
 package service
 
 import (
-	"encoding/json"
+	//"encoding/json"
 	"errors"
 
 	"sb.im/gosd/app/model"
@@ -31,9 +31,10 @@ func (s *JSONService) Call(method string, params []byte) error {
 
 func (s *JSONService) TaskRun(raw []byte) error {
 	params := &model.Task{}
-	if err := json.Unmarshal(raw, params); err != nil {
-		return err
-	}
+	//if err := json.Unmarshal(raw, params); err != nil {
+	//	return err
+	//}
+	s.s.orm.First(params, string(raw))
 	return s.s.TaskRun(params)
 }
 
