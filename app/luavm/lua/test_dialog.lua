@@ -1,5 +1,5 @@
 function main(plan)
-  print("=== START Lua ===")
+  print("=== RUN Dialog RUN ===")
   plan:CleanDialog()
   sleep("1s")
 
@@ -65,5 +65,5 @@ function main(plan)
     print(json.encode(err))
   end
 
-  print("=== END Lua END ===")
+  print("=== END Dialog END ===")
 end
