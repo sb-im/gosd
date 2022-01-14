@@ -36,6 +36,9 @@ run: generate
 test: generate
 	go test ${GO_TEST} -cover -v
 
+test-luavm:
+	go clean -testcache && go test ./app/luavm -v
+
 test-broker: generate
 	go test ./mqttd -cover -v
 
