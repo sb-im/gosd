@@ -1,6 +1,7 @@
 package luavm
 
 import (
+	"context"
 	"strconv"
 
 	lualib "sb.im/gosd/app/luavm/lua"
@@ -49,6 +50,9 @@ func NewWorker(orm *gorm.DB, rdb *redis.Client, script []byte) *Worker {
 			script = data
 		}
 	}
+
+	// Enable Redis Events
+	rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$K")
 
 	return &Worker{
 		orm:    orm,
