@@ -1,7 +1,6 @@
 package luavm
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -33,5 +32,5 @@ func (s Service) ToggleDialog(dialog *Dialog) error {
 	if err != nil {
 		return err
 	}
-	return s.rdb.Set(context.Background(), fmt.Sprintf(topic_dialog, s.Task.ID), data, 0).Err()
+	return s.rdb.Set(s.ctx, fmt.Sprintf(topic_dialog, s.Task.ID), data, 0).Err()
 }
