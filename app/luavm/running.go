@@ -9,19 +9,19 @@ import (
 )
 
 const (
-	topic_running = "plans/%d/running"
+	topic_running = "tasks/%d/running"
 )
 
-func (w *Worker) SetRunning(planID uint, status interface{}) error {
+func (w Worker) SetRunning(id uint, status interface{}) error {
 	data, err := json.Marshal(status)
 	if err != nil {
 		return err
 	}
-	return w.rdb.Set(context.Background(), fmt.Sprintf(topic_running, planID), data, 0).Err()
+	return w.rdb.Set(context.Background(), fmt.Sprintf(topic_running, id), data, 0).Err()
 }
 
-func (w *Worker) GetRunning(planID uint) (*model.Task, error) {
-	data, err := w.rdb.Get(context.Background(), fmt.Sprintf(topic_running, planID)).Bytes()
+func (w Worker) GetRunning(id uint) (*model.Task, error) {
+	data, err := w.rdb.Get(context.Background(), fmt.Sprintf(topic_running, id)).Bytes()
 	if err != nil {
 		return nil, err
 	}
