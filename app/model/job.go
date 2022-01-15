@@ -3,8 +3,8 @@ package model
 type Job struct {
 	Model
 
-	TaskID uint `json:"task_id"`
-	Task   Task `json:"team"`
+	TaskID uint `json:"-"`
+	Task   Task `json:"-"`
 	Files  JSON `json:"files"`
 	Extra  JSON `json:"extra"`
 }
