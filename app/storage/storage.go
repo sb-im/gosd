@@ -15,13 +15,13 @@ func NewStorage(path string) *Storage {
 	return &Storage{path: path}
 }
 
-func (s Storage) Set(key string, name string, content []byte) error {
-	return ioutil.WriteFile(path.Join(s.path, key), content, 0644)
+func (s Storage) Set(key string, data []byte) error {
+	return ioutil.WriteFile(path.Join(s.path, key), data, 0644)
 }
 
-func (s Storage) Get(key string) (string, []byte, error) {
+func (s Storage) Get(key string) ([]byte, error) {
 	data, err := ioutil.ReadFile(path.Join(s.path, key))
-	return "", data, err
+	return data, err
 }
 
 func (s Storage) Del(key string) error {
