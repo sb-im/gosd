@@ -31,6 +31,33 @@ func newWorker(t *testing.T) *Worker {
 	}), storage.NewStorage("/tmp"), []byte{})
 }
 
+func newTestTask(t *testing.T) *model.Task {
+	parse := config.NewParser()
+	opts, err := parse.ParseEnvironmentVariables()
+	if err != nil {
+		panic(err)
+	}
+
+	if orm, err := gorm.Open(postgres.Open(opts.DatabaseURL()), &gorm.Config{}); err != nil {
+		t.Error(err)
+		return nil
+	} else {
+		task := model.Task{
+			Name:   "Unit Test",
+			TeamID: 1,
+			NodeID: 1,
+		}
+		orm.Create(&task)
+
+		job := model.Job{
+			Task: task,
+		}
+		orm.Create(&job)
+		task.Job = &job
+		return &task
+	}
+}
+
 func TestNewWorker(t *testing.T) {
 	if newWorker(t) == nil {
 		t.Error("No New Worker")

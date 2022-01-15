@@ -44,7 +44,7 @@ function NewPlan(nodeID)
       end
     end,
     GetExtra = function(self)
-      return self.GetAttach(self).extra
+      return self.GetAttach(self).extra or {}
     end,
     SetExtra = function(self, extra)
       local data = self.GetAttach(self)
@@ -52,7 +52,7 @@ function NewPlan(nodeID)
       self.SetAttach(self, data)
     end,
     GetJobExtra = function(self)
-      return self.GetAttach(self).job.extra
+      return self.GetAttach(self).job.extra or {}
     end,
     SetJobExtra = function(self, extra)
       local data = self.GetAttach(self)
