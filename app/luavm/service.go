@@ -5,9 +5,10 @@ import (
 
 	"sb.im/gosd/rpc2mqtt"
 	"sb.im/gosd/state"
-	"sb.im/gosd/storage"
+	//"sb.im/gosd/storage"
 
 	"sb.im/gosd/app/model"
+	"sb.im/gosd/app/storage"
 
 	jsonrpc "github.com/sb-im/jsonrpc-lite"
 
@@ -18,6 +19,7 @@ import (
 type Service struct {
 	orm *gorm.DB
 	rdb *redis.Client
+	ofs *storage.Storage
 
 	ctx    context.Context
 	cancel context.CancelFunc

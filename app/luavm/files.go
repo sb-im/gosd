@@ -1,13 +1,11 @@
 package luavm
 
 import (
-	"bytes"
 	"crypto/rand"
 	"fmt"
-	"io/ioutil"
 	"os"
 
-	"sb.im/gosd/model"
+	"sb.im/gosd/app/model"
 )
 
 const (
@@ -15,25 +13,38 @@ const (
 )
 
 // Reader
-func (s *Service) BlobReader(id int64) (string, string) {
-	blob, _ := s.Store.BlobByID(id)
-	content, _ := ioutil.ReadAll(blob.Reader)
-	return blob.FileName, string(content)
+func (s Service) BlobReader(id int64) (string, string) {
+	blob := model.Blob{}
+	if err := s.orm.First(&blob, "uxid = ?", id); err != nil {
+		return "", ""
+	}
+	data, _ := s.ofs.Get(blob.UXID)
+	return blob.Name, string(data)
 }
 
 // Update
-func (s *Service) BlobUpdate(id int64, filename, content string) {
-	blob, _ := s.Store.BlobByID(id)
-	blob.FileName = filename
-	blob.Reader = bytes.NewReader([]byte(content))
-	s.Store.UpdateBlob(blob)
+func (s Service) BlobUpdate(id int64, filename, content string) {
+	blob := model.Blob{}
+	if err := s.orm.First(&blob, "uxid = ?", id); err != nil {
+		return
+	}
+
+	if blob.Name != filename {
+		s.orm.Updates(&blob)
+	}
+
+	s.ofs.Set(blob.UXID, []byte(content))
 }
 
 // Create
-func (s *Service) BlobCreate(filename, content string) int64 {
-	blob := model.NewBlob(filename, bytes.NewReader([]byte(content)))
-	s.Store.CreateBlob(blob)
-	return blob.ID
+func (s Service) BlobCreate(filename, content string) int64 {
+	blob := model.Blob{
+		Name: filename,
+	}
+	s.orm.Save(&blob)
+
+	s.ofs.Set(blob.UXID, []byte(content))
+	return int64(blob.ID)
 }
 
 // Delete

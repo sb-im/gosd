@@ -5,6 +5,7 @@ import (
 
 	lualib "sb.im/gosd/app/luavm/lua"
 	"sb.im/gosd/app/model"
+	"sb.im/gosd/app/storage"
 
 	"sb.im/gosd/config"
 
@@ -27,7 +28,7 @@ func newWorker(t *testing.T) *Worker {
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       1,
-	}), []byte{})
+	}), storage.NewStorage("/tmp"), []byte{})
 }
 
 func TestNewWorker(t *testing.T) {

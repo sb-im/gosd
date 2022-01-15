@@ -6,6 +6,7 @@ import (
 
 	lualib "sb.im/gosd/app/luavm/lua"
 	"sb.im/gosd/app/model"
+	"sb.im/gosd/app/storage"
 
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
@@ -35,13 +36,14 @@ var (
 type Worker struct {
 	orm    *gorm.DB
 	rdb    *redis.Client
+	ofs    *storage.Storage
 	script []byte
 
 	Queue   chan *model.Task
 	Running map[string]*Service
 }
 
-func NewWorker(orm *gorm.DB, rdb *redis.Client, script []byte) *Worker {
+func NewWorker(orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage, script []byte) *Worker {
 	// default LuaFile: input > default
 	if len(script) == 0 {
 		if data, err := lualib.LuaFile.ReadFile(defaultLuaFile); err != nil {
@@ -57,6 +59,7 @@ func NewWorker(orm *gorm.DB, rdb *redis.Client, script []byte) *Worker {
 	return &Worker{
 		orm:    orm,
 		rdb:    rdb,
+		ofs:    ofs,
 		script: script,
 
 		Queue:   make(chan *model.Task, 1024),
@@ -103,6 +106,7 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 	service := NewService(task)
 	service.orm = w.orm
 	service.rdb = w.rdb
+	service.ofs = w.ofs
 	w.Running[strconv.Itoa(int(task.ID))] = service
 	defer delete(w.Running, strconv.Itoa(int(task.ID)))
 	defer log.Warn("==> luavm END")
