@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
+	"time"
 
 	lualib "sb.im/gosd/app/luavm/lua"
 	"sb.im/gosd/app/model"
@@ -35,10 +36,14 @@ var (
 )
 
 type Worker struct {
+	ctx    context.Context
 	orm    *gorm.DB
 	rdb    *redis.Client
 	ofs    *storage.Storage
 	script []byte
+
+	instance string
+	timeout  time.Duration
 
 	Queue   chan *model.Task
 	Running map[string]*Service
@@ -58,10 +63,14 @@ func NewWorker(orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage, script []b
 	rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$K")
 
 	return &Worker{
+		ctx:    context.TODO(),
 		orm:    orm,
 		rdb:    rdb,
 		ofs:    ofs,
 		script: script,
+
+		instance: "gosd.0",
+		timeout:  time.Hour,
 
 		Queue:   make(chan *model.Task, 1024),
 		Running: make(map[string]*Service),
