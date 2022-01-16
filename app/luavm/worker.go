@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
+	"sync"
 	"time"
 
 	lualib "sb.im/gosd/app/luavm/lua"
@@ -41,6 +42,7 @@ type Worker struct {
 	rdb    *redis.Client
 	ofs    *storage.Storage
 	script []byte
+	mutex  *sync.Mutex
 
 	instance string
 	timeout  time.Duration
@@ -68,6 +70,7 @@ func NewWorker(orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage, script []b
 		rdb:    rdb,
 		ofs:    ofs,
 		script: script,
+		mutex:  &sync.Mutex{},
 
 		instance: "gosd.0",
 		timeout:  time.Hour,
@@ -77,25 +80,53 @@ func NewWorker(orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage, script []b
 	}
 }
 
+func (w Worker) RunTask(task *model.Task) error {
+	if err := w.preTaskCheck(task); err != nil {
+		return err
+	}
+
+	taskID := strconv.Itoa(int(task.ID))
+	nodeID := strconv.Itoa(int(task.NodeID))
+
+	// Lock
+	w.lockTaskSet(taskID)
+	w.lockNodeSet(nodeID)
+
+	go func() {
+		if err := w.doRun(task, w.getScript(task)); err != nil {
+			log.Error(err)
+		}
+
+		// Unlock
+		w.lockTaskDel(taskID)
+		w.lockNodeDel(nodeID)
+	}()
+
+	return nil
+}
+
+func (w Worker) getScript(task *model.Task) (script []byte) {
+	files := make(map[string]string)
+	if err := json.Unmarshal(task.Files, &files); err == nil {
+		if key, ok := files[defaultLuaTask]; ok {
+			if data, err := w.ofs.Get(key); err == nil {
+				script = data
+			}
+		}
+	}
+
+	// if nil, use system default
+	if len(script) == 0 {
+		script = w.script
+	}
+
+	return
+}
+
 func (w Worker) Run() {
 	for task := range w.Queue {
 		// Task Lua Script
-		script := []byte{}
-		files := make(map[string]string)
-		if err := json.Unmarshal(task.Files, &files); err == nil {
-			if key, ok := files[defaultLuaTask]; ok {
-				if data, err := w.ofs.Get(key); err == nil {
-					script = data
-				}
-			}
-		}
-
-		// if nil, use system default
-		if len(script) == 0 {
-			script = w.script
-		}
-
-		if err := w.doRun(task, script); err != nil {
+		if err := w.doRun(task, w.getScript(task)); err != nil {
 			log.Error(err)
 		}
 	}
@@ -118,9 +149,18 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 	service.orm = w.orm
 	service.rdb = w.rdb
 	service.ofs = w.ofs
+
+	w.mutex.Lock()
 	w.Running[strconv.Itoa(int(task.ID))] = service
-	defer delete(w.Running, strconv.Itoa(int(task.ID)))
-	defer log.Warn("==> luavm END")
+	w.mutex.Unlock()
+
+	defer func() {
+		w.mutex.Lock()
+		delete(w.Running, strconv.Itoa(int(task.ID)))
+		w.mutex.Unlock()
+		log.Warn("==> luavm END")
+	}()
+
 	service.onStart()
 	defer service.onClose()
 	l.SetGlobal("SD", luar.New(l, service))

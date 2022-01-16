@@ -2,6 +2,7 @@ package luavm
 
 import (
 	"testing"
+	"time"
 
 	lualib "sb.im/gosd/app/luavm/lua"
 	"sb.im/gosd/app/model"
@@ -15,6 +16,10 @@ import (
 )
 
 func newWorker(t *testing.T) *Worker {
+	return helpTestNewWorker(t, []byte{})
+}
+
+func helpTestNewWorker(t *testing.T, script []byte) *Worker {
 	parse := config.NewParser()
 	opts, err := parse.ParseEnvironmentVariables()
 	if err != nil {
@@ -28,7 +33,7 @@ func newWorker(t *testing.T) *Worker {
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       1,
-	}), storage.NewStorage("/tmp"), []byte{})
+	}), storage.NewStorage("/tmp"), script)
 }
 
 func newTestTask(t *testing.T) *model.Task {
@@ -86,4 +91,49 @@ func luaScript(t *testing.T, name string) {
 	}
 
 	w.Close()
+}
+
+func TestMultipleTask(t *testing.T) {
+	script := []byte(`
+function main(task)
+  print("### RUN Multiple RUN ###")
+
+  sleep("1s")
+
+  print("### END Multiple END ###")
+end
+`)
+
+	w := helpTestNewWorker(t, script)
+
+	task := newTestTask(t)
+	task2 := newTestTask(t)
+	task3 := newTestTask(t)
+	task3.NodeID = 3
+
+	if err := w.RunTask(task); err != nil {
+		t.Error(err)
+	}
+
+	if err := w.RunTask(task); err == nil {
+		t.Error("duplicate task")
+	}
+
+	if err := w.RunTask(task2); err == nil {
+		t.Error("duplicate node, should error")
+	}
+
+	if err := w.RunTask(task2); err == nil {
+		t.Error("duplicate task2")
+	}
+
+	if err := w.RunTask(task3); err != nil {
+		t.Error(err)
+	}
+
+	if err := w.RunTask(task3); err == nil {
+		t.Error("duplicate task")
+	}
+
+	time.Sleep(2 * time.Second)
 }
