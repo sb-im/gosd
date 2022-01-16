@@ -11,11 +11,11 @@ const (
 )
 
 func (s Service) GetSys(id, msg string) (string, error) {
-	return s.rdb.Get(context.Background(), fmt.Sprintf(topicNodeSys, id, msg)).String(), nil
+	return s.rdb.Get(context.Background(), fmt.Sprintf(topicNodeSys, id, msg)).Result()
 }
 
 func (s Service) GetMsg(id, msg string) (string, error) {
-	return s.rdb.Get(context.Background(), fmt.Sprintf(topicNodeMsg, id, msg)).String(), nil
+	return s.rdb.Get(context.Background(), fmt.Sprintf(topicNodeMsg, id, msg)).Result()
 }
 
 // TODO: Deprecated

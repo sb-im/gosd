@@ -140,7 +140,7 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 		Fn:      l.GetGlobal("SD_main"),
 		NRet:    1,
 		Protect: true,
-	}, lua.LString("task.StringNodeID()")); err != nil {
+	}, lua.LString(strconv.Itoa(int(task.NodeID)))); err != nil {
 		return err
 	}
 
