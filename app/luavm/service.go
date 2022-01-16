@@ -2,6 +2,7 @@ package luavm
 
 import (
 	"context"
+	"time"
 
 	"sb.im/gosd/rpc2mqtt"
 
@@ -19,6 +20,8 @@ type Service struct {
 	rdb *redis.Client
 	ofs *storage.Storage
 
+	timeout time.Duration
+
 	ctx    context.Context
 	cancel context.CancelFunc
 	Rpc    *Rpc
@@ -29,6 +32,8 @@ type Service struct {
 func NewService(task *model.Task) *Service {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &Service{
+		timeout: time.Hour,
+
 		ctx:    ctx,
 		cancel: cancel,
 		Task:   task,

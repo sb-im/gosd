@@ -20,5 +20,5 @@ func (s Service) Notification(notification *Notification) error {
 	if err != nil {
 		return err
 	}
-	return s.rdb.Set(s.ctx, fmt.Sprintf(topic_notification, s.Task.ID), data, 0).Err()
+	return s.rdb.Set(s.ctx, fmt.Sprintf(topic_notification, s.Task.ID), data, s.timeout).Err()
 }

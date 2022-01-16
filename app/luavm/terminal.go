@@ -25,5 +25,5 @@ func (s Service) IOGets() (string, error) {
 }
 
 func (s Service) IOPuts(str string) error {
-	return s.rdb.Set(context.Background(), fmt.Sprintf(topic_terminal, s.Task.ID), str, 0).Err()
+	return s.rdb.Set(context.Background(), fmt.Sprintf(topic_terminal, s.Task.ID), str, s.timeout).Err()
 }

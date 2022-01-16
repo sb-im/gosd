@@ -27,5 +27,5 @@ func (s Service) SetAttach(raw string) error {
 	if err := s.orm.Model(&s.Task.Job).Select("files", "extra").Updates(&s.Task.Job).Error; err != nil {
 		return err
 	}
-	return s.rdb.Set(s.ctx, fmt.Sprintf(topic_running, s.Task.ID), raw, 0).Err()
+	return s.rdb.Set(s.ctx, fmt.Sprintf(topic_running, s.Task.ID), raw, s.timeout).Err()
 }

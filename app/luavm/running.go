@@ -14,5 +14,5 @@ func (s Service) running(status interface{}) error {
 	if err != nil {
 		return err
 	}
-	return s.rdb.Set(s.ctx, fmt.Sprintf(topic_running, s.Task.ID), data, 0).Err()
+	return s.rdb.Set(s.ctx, fmt.Sprintf(topic_running, s.Task.ID), data, s.timeout).Err()
 }
