@@ -45,14 +45,14 @@ function NewNode(nodeID)
       return json.decode(raw)
     end,
     GetStatus = function(self)
-      local raw, err = SD:GetStatus(self.id)
+      local raw, err = SD:GetSys(self.id, "status")
       if err ~= nil then
         error(err)
       end
       return json.decode(raw)
     end,
     GetNetwork = function(self)
-      local raw, err = SD:GetNetwork(self.id)
+      local raw, err = SD:GetSys(self.id, "network")
       if err ~= nil then
         error(err)
       end

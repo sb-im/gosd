@@ -1,7 +1,6 @@
 package luavm
 
 import (
-	"context"
 	"fmt"
 )
 
@@ -11,19 +10,9 @@ const (
 )
 
 func (s Service) GetSys(id, msg string) (string, error) {
-	return s.rdb.Get(context.Background(), fmt.Sprintf(topicNodeSys, id, msg)).Result()
+	return s.rdb.Get(s.ctx, fmt.Sprintf(topicNodeSys, id, msg)).Result()
 }
 
 func (s Service) GetMsg(id, msg string) (string, error) {
-	return s.rdb.Get(context.Background(), fmt.Sprintf(topicNodeMsg, id, msg)).Result()
-}
-
-// TODO: Deprecated
-func (s Service) GetStatus(id string) (string, error) {
-	return s.GetSys(id, "status")
-}
-
-// TODO: Deprecated
-func (s Service) GetNetwork(id string) (string, error) {
-	return s.GetSys(id, "network")
+	return s.rdb.Get(s.ctx, fmt.Sprintf(topicNodeMsg, id, msg)).Result()
 }
