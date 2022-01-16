@@ -87,18 +87,14 @@ func (w Worker) Run() {
 }
 
 func (w Worker) doRun(task *model.Task, script []byte) error {
-	w.SetRunning(task.ID, task)
-	var err error
-
 	l := lua.NewState()
 	defer func() {
 		l.Close()
 
 		if r := recover(); r != nil {
-			log.Errorf("Emergency stop planID: %d\n", task.ID)
-			log.Errorf("Error：%s\n", r)
+			log.Errorf("Emergency stop taskID: %d", task.ID)
+			log.Error(r)
 		}
-		w.SetRunning(task.ID, &struct{}{})
 	}()
 
 	luajson.Preload(l)
@@ -110,10 +106,9 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 	w.Running[strconv.Itoa(int(task.ID))] = service
 	defer delete(w.Running, strconv.Itoa(int(task.ID)))
 	defer log.Warn("==> luavm END")
+	service.onStart()
+	defer service.onClose()
 	l.SetGlobal("SD", luar.New(l, service))
-
-	// Clean up the "Dialog" when exiting
-	defer service.CleanDialog()
 
 	// Load Lib
 	for _, lib := range libs {
@@ -131,8 +126,7 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 	}
 
 	// Core: Load Script
-	err = l.DoString(string(script))
-	if err != nil {
+	if err := l.DoString(string(script)); err != nil {
 		return err
 	}
 

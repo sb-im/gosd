@@ -36,6 +36,10 @@ func NewService(task *model.Task) *Service {
 	}
 }
 
+func (s Service) onStart() error {
+	return s.running(s.Task)
+}
+
 func (s *Service) Close() error {
 	s.cancel()
 
@@ -53,5 +57,13 @@ func (s *Service) Close() error {
 	// Maybe multiple click Kill button
 	// IOGets: need to sleep some time
 	s.ctx, s.cancel = context.WithCancel(context.Background())
-	return nil
+
+	return s.onClose()
+}
+
+func (s *Service) onClose() error {
+	// Clean up the "Dialog" when exiting
+	s.CleanDialog()
+
+	return s.running(&struct{}{})
 }
