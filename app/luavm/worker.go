@@ -2,6 +2,7 @@ package luavm
 
 import (
 	"context"
+	"encoding/json"
 	"strconv"
 
 	lualib "sb.im/gosd/app/luavm/lua"
@@ -69,16 +70,21 @@ func NewWorker(orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage, script []b
 
 func (w Worker) Run() {
 	for task := range w.Queue {
-		// files := make(map[string]string)
-		// json.Unmarshal(task.Files, &files)
-		// key := files[defaultLuaTask]
-		// TODO:
-		// script := ???
+		// Task Lua Script
 		script := []byte{}
+		files := make(map[string]string)
+		if err := json.Unmarshal(task.Files, &files); err == nil {
+			if key, ok := files[defaultLuaTask]; ok {
+				if data, err := w.ofs.Get(key); err == nil {
+					script = data
+				}
+			}
+		}
 
-		//if len(script) == 0 {
-		//  script = w.defaultLua
-		//}
+		// if nil, use system default
+		if len(script) == 0 {
+			script = w.script
+		}
 
 		if err := w.doRun(task, script); err != nil {
 			log.Error(err)
