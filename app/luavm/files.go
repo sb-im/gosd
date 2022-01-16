@@ -52,9 +52,9 @@ func (s Service) BlobCreate(filename, content string) int64 {
 
 // TODO: test token
 // api/v1/plans/{planID}?token={token}
-func (s *Service) BlobUrl(blobID string) string {
+func (s Service) BlobUrl(blobID string) string {
 	token, _ := genToken(16)
-	s.State.Record(fmt.Sprintf("token/%s", token), nil)
+	s.rdb.Set(s.ctx, fmt.Sprintf("token/%s", token), nil, 0)
 	return fmt.Sprintf(os.Getenv("BASE_URL")+blob_url, blobID)
 }
 

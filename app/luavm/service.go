@@ -4,8 +4,6 @@ import (
 	"context"
 
 	"sb.im/gosd/rpc2mqtt"
-	"sb.im/gosd/state"
-	//"sb.im/gosd/storage"
 
 	"sb.im/gosd/app/model"
 	"sb.im/gosd/app/storage"
@@ -25,9 +23,7 @@ type Service struct {
 	cancel context.CancelFunc
 	Rpc    *Rpc
 	Task   *model.Task
-	State  *state.State
 	Server *rpc2mqtt.Rpc2mqtt
-	Store  *storage.Storage
 }
 
 func NewService(task *model.Task) *Service {
