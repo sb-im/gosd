@@ -1,7 +1,7 @@
 package service
 
 import (
-	"sb.im/gosd/luavm"
+	"sb.im/gosd/app/luavm"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/robfig/cron/v3"

@@ -8,14 +8,12 @@ import (
 	"gorm.io/gorm"
 	"sb.im/gosd/app/api/v3"
 	"sb.im/gosd/app/service"
-	"sb.im/gosd/luavm"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
 )
 
-func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
+func NewApi(orm *gorm.DB, srv *service.Service) http.Handler {
 	r := gin.Default()
 
 	// CORS Middleware
@@ -33,14 +31,6 @@ func NewApi(orm *gorm.DB, worker *luavm.Worker) http.Handler {
 			"message": "pong",
 		})
 	})
-
-	srv := service.NewService(orm, redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       1,
-	}), worker)
-
-	srv.StartSchedule()
 
 	handler := v3.NewHandler(orm, srv)
 
