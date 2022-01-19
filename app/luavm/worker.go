@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"sb.im/gosd/rpc2mqtt"
+
 	lualib "sb.im/gosd/app/luavm/lua"
 	"sb.im/gosd/app/model"
 	"sb.im/gosd/app/storage"
@@ -47,11 +49,12 @@ type Worker struct {
 	instance string
 	timeout  time.Duration
 
+	rpc     *rpc2mqtt.Rpc2mqtt
 	Queue   chan *model.Task
 	Running map[string]*Service
 }
 
-func NewWorker(orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage, script []byte) *Worker {
+func NewWorker(orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage, rpc *rpc2mqtt.Rpc2mqtt, script []byte) *Worker {
 	// default LuaFile: input > default
 	if len(script) == 0 {
 		if data, err := lualib.LuaFile.ReadFile(defaultLuaFile); err != nil {
@@ -75,6 +78,7 @@ func NewWorker(orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage, script []b
 		instance: "gosd.0",
 		timeout:  time.Hour,
 
+		rpc:     rpc,
 		Queue:   make(chan *model.Task, 1024),
 		Running: make(map[string]*Service),
 	}
@@ -149,6 +153,7 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 	service.orm = w.orm
 	service.rdb = w.rdb
 	service.ofs = w.ofs
+	service.Server = w.rpc
 
 	w.mutex.Lock()
 	w.Running[strconv.Itoa(int(task.ID))] = service

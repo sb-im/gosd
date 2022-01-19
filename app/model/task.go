@@ -7,6 +7,6 @@ type Task struct {
 	TeamID uint   `json:"-"`
 	NodeID int64  `json:"node_id" form:"node_id"`
 	Job    *Job   `json:"job,omitempty"`
-	Files  JSON   `json:"files" swaggertype:"string"`
-	Extra  JSON   `json:"extra" swaggertype:"string"`
+	Files  JSON   `json:"files"`
+	Extra  JSON   `json:"extra"`
 }

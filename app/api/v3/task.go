@@ -19,7 +19,7 @@ import (
 // @Produce json
 // @Param page query uint false "Task Page Num"
 // @Param size query uint false "Page Max Count"
-// @Success 200 {object} model.Task
+// @Success 200
 // @Router /tasks [get]
 func (h *Handler) TaskIndex(c *gin.Context) {
 	var tasks []model.Task
@@ -37,7 +37,7 @@ func (h *Handler) TaskIndex(c *gin.Context) {
 // @Produce json
 // @Param name    formData string true "Task Name"
 // @Param node_id formData uint true "Node ID"
-// @Success 201 {object} model.Task
+// @Success 201
 // @Router /tasks [post]
 func (h *Handler) TaskCreate(c *gin.Context) {
 	task := &model.Task{
@@ -61,7 +61,7 @@ func (h *Handler) TaskCreate(c *gin.Context) {
 // @Param id path uint true "Task ID"
 // @Param page query uint false "Task Page Num"
 // @Param size query uint false "Page Max Count"
-// @Success 200 {object} model.Task
+// @Success 200
 // @failure 404
 // @Router /tasks/{id} [get]
 func (h Handler) TaskShow(c *gin.Context) {
@@ -85,8 +85,7 @@ func (h Handler) TaskShow(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id   path int true "Task ID"
-// @Param data body model.Task true "Task"
-// @Success 200 {object} model.Task
+// @Success 200
 // @Router /tasks/{id} [put]
 func (h Handler) TaskUpdate(c *gin.Context) {
 	task := model.Task{}

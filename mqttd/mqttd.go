@@ -69,7 +69,7 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 				// nodes/%s/rpc/recv
 				// nodes/%s/msg/%s
 
-				// plans/%s/term
+				// tasks/%s/term
 
 				switch strings.Split(p.Topic, "/")[2] {
 				case "rpc":
@@ -205,9 +205,10 @@ func (t *Mqtt) Run(ctx context.Context) {
 	}
 
 	go func() {
-		keyspace := "__keyspace@0__:%s"
+		//keyspace := "__keyspace@0__:%s"
+		keyspace := "__keyspace@1__:%s"
 		psc := redis.PubSubConn{Conn: t.State.Pool.Get()}
-		psc.PSubscribe(fmt.Sprintf(keyspace, "nodes/*"), fmt.Sprintf(keyspace, "plans/*"))
+		psc.PSubscribe(fmt.Sprintf(keyspace, "nodes/*"), fmt.Sprintf(keyspace, "tasks/*"))
 		for {
 			switch v := psc.Receive().(type) {
 			case redis.Message:
@@ -246,7 +247,7 @@ func (t *Mqtt) Run(ctx context.Context) {
 							log.Error(err)
 						}
 					}
-				case "plans":
+				case "tasks":
 					res, err := t.Client.Publish(ctx, &paho.Publish{
 						Payload: raw,
 						Topic:   topic,

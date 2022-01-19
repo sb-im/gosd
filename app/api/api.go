@@ -57,6 +57,7 @@ func NewApi(orm *gorm.DB, srv *service.Service) http.Handler {
 	sr.DELETE("tasks/:id", handler.TaskDestroy)
 
 	sr.GET("tasks/:id/jobs", handler.JobIndex)
+	sr.POST("tasks/:id/jobs", handler.JobCreate)
 
 	sr.POST("teams", handler.TeamCreate)
 	sr.POST("teams/users", handler.TeamUserAdd)
