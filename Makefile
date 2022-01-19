@@ -33,11 +33,15 @@ build: generate
 run: generate
 	@ go run main.go --debug --noauth
 
+swagger:
+	# go get -u github.com/swaggo/swag/cmd/swag
+	swag init -g app/app.go -o swag
+
 test: generate
 	go test ${GO_TEST} -cover -v
 
 test-luavm:
-	go clean -testcache && go test ./app/luavm -v
+	go clean -testcache && go test ./app/luavm -cover -v
 
 test-broker: generate
 	go test ./mqttd -cover -v
