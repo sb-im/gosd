@@ -33,7 +33,7 @@ func helpTestNewWorker(t *testing.T, script []byte) *Worker {
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       1,
-	}), storage.NewStorage("/tmp"), script)
+	}), storage.NewStorage("/tmp"), nil, script)
 }
 
 func newTestTask(t *testing.T) *model.Task {
