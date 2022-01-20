@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/appleboy/gin-jwt/v2 v2.7.0
+	github.com/caarlos0/env/v6 v6.9.1
 	github.com/eclipse/paho.golang v0.9.1-0.20210122134147-5617034fed14
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.7.4

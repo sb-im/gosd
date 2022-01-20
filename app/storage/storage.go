@@ -2,6 +2,7 @@ package storage
 
 import (
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path"
 )
@@ -10,7 +11,12 @@ type Storage struct {
 	path string
 }
 
-func NewStorage(path string) *Storage {
+func NewStorage(storageURL string) *Storage {
+	path := "data/storage"
+	u, err := url.Parse(storageURL)
+	if err == nil {
+		path = u.Path
+	}
 	os.MkdirAll(path, 0755)
 	return &Storage{path: path}
 }

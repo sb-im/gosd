@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"sb.im/gosd/app/api"
+	"sb.im/gosd/app/config"
 	"sb.im/gosd/app/luavm"
 	"sb.im/gosd/app/model"
 	"sb.im/gosd/app/service"
@@ -16,6 +17,7 @@ import (
 	"sb.im/gosd/mqttd"
 	"sb.im/gosd/state"
 
+	"github.com/caarlos0/env/v6"
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
@@ -25,8 +27,12 @@ import (
 func Execute() {
 	log.Warn("Launch gosd V3")
 
-	dsn := "host=localhost user=postgres password=password dbname=gosd port=5432 sslmode=disable TimeZone=Asia/Shanghai"
-	orm, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	cfg := config.DefaultConfig()
+	if err := env.Parse(&cfg); err != nil {
+		log.Errorf("%+v\n", err)
+	}
+
+	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
@@ -40,16 +46,13 @@ func Execute() {
 	orm.AutoMigrate(&model.Blob{})
 	orm.AutoMigrate(&model.Job{})
 
-	redisURL := "redis://localhost:6379/1"
-	redisOpt, err := redis.ParseURL(redisURL)
+	redisOpt, err := redis.ParseURL(cfg.RedisURL)
 	if err != nil {
 		panic(err)
 	}
 	rdb := redis.NewClient(redisOpt)
 
-	store := state.NewState(redisURL)
-
-	mqttURL := "mqtt://admin:public@localhost:1883"
+	store := state.NewState(cfg.RedisURL)
 
 	chI := make(chan mqttd.MqttRpc, 128)
 	chO := make(chan mqttd.MqttRpc, 128)
@@ -57,13 +60,13 @@ func Execute() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	mqtt := mqttd.NewMqttd(mqttURL, store, chI, chO)
+	mqtt := mqttd.NewMqttd(cfg.MqttURL, store, chI, chO)
 	go mqtt.Run(ctx)
 
 	rpcServer := rpc2mqtt.NewRpc2Mqtt(chI, chO)
 	go rpcServer.Run(ctx)
 
-	ofs := storage.NewStorage("data")
+	ofs := storage.NewStorage(cfg.StorageURL)
 	worker := luavm.NewWorker(orm, rdb, ofs, rpcServer, []byte{})
 	go worker.Run()
 
