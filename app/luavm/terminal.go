@@ -15,7 +15,7 @@ func (s Service) IOGets() (string, error) {
 	log.Debug("IOGets")
 	topic := fmt.Sprintf(topic_terminal, s.Task.ID)
 
-	keyspace := "__keyspace@1__:%s"
+	keyspace := "__keyspace@*__:%s"
 	pubsub := s.rdb.Subscribe(s.ctx, fmt.Sprintf(keyspace, topic))
 	ch2 := pubsub.Channel()
 	m := <-ch2

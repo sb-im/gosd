@@ -28,7 +28,7 @@ func Execute() {
 	log.Warn("Launch gosd V3")
 
 	cfg := config.DefaultConfig()
-	if err := env.Parse(&cfg); err != nil {
+	if err := env.Parse(cfg); err != nil {
 		log.Errorf("%+v\n", err)
 	}
 

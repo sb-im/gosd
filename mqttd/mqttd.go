@@ -206,7 +206,7 @@ func (t *Mqtt) Run(ctx context.Context) {
 
 	go func() {
 		//keyspace := "__keyspace@0__:%s"
-		keyspace := "__keyspace@1__:%s"
+		keyspace := "__keyspace@*__:%s"
 		psc := redis.PubSubConn{Conn: t.State.Pool.Get()}
 		psc.PSubscribe(fmt.Sprintf(keyspace, "nodes/*"), fmt.Sprintf(keyspace, "tasks/*"))
 		for {
@@ -225,7 +225,7 @@ func (t *Mqtt) Run(ctx context.Context) {
 				}
 
 				// prefix:
-				// plans
+				// tasks
 				// nodes
 				prefix := strings.Split(topic, "/")[0]
 
@@ -332,7 +332,7 @@ func (t *Mqtt) doRun(parent context.Context) {
 			fmt.Sprintf(t.Config.Gtran.Prefix, "+", "+"): {
 				QoS: 1,
 			},
-			fmt.Sprintf("plans/%s/term", "+"): {
+			fmt.Sprintf("tasks/%s/term", "+"): {
 				QoS:     1,
 				NoLocal: true,
 			},
