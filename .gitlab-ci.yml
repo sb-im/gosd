@@ -39,10 +39,23 @@ test database:
   before_script:
     - go version
   script:
-  script:
-    - make
-    - ./gosd database migrate
     - make cover
+
+test luavm:
+  stage: test
+  services:
+    - postgres:13
+    - redis:6-alpine
+  variables:
+    POSTGRES_DB: gosd
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: password
+    DATABASE_URL: "postgres://postgres:password@postgres/gosd?sslmode=disable"
+    REDIS_URL: "redis://redis:6379/5"
+  before_script:
+    - go version
+  script:
+    - make test-luavm
 
 .test-broker:
   script:
