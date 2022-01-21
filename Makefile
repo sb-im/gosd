@@ -33,9 +33,12 @@ build: generate
 run: generate
 	@ go run main.go --debug
 
+.PHONY: swagger
 swagger:
 	# go get -u github.com/swaggo/swag/cmd/swag
 	swag init -g app/app.go -o swag
+	@ rm swag/docs.go
+	@ rm swag/swagger.yaml
 
 test: generate
 	go test ${GO_TEST} -cover -v
