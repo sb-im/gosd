@@ -1,80 +1,51 @@
 package cmd
 
-// TODO: Current tmp Launcher
-
 import (
-	"context"
-	"net/http"
+	"os"
 
-	"sb.im/gosd/app/api"
-	"sb.im/gosd/app/config"
-	"sb.im/gosd/app/luavm"
-	"sb.im/gosd/app/model"
-	"sb.im/gosd/app/service"
-	"sb.im/gosd/app/storage"
-	"sb.im/gosd/rpc2mqtt"
+	"sb.im/gosd/version"
 
-	"sb.im/gosd/mqttd"
-	"sb.im/gosd/state"
+	"github.com/urfave/cli/v2"
 
-	"github.com/caarlos0/env/v6"
-	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+)
+
+var (
+	app = &cli.App{
+		Name:    "gosd",
+		Version: version.Version + " " + version.Date,
+		Usage:   "SuperDock Cloud Service",
+		Flags: []cli.Flag{
+			//&cli.StringFlag{
+			//	Name:    "config",
+			//	Aliases: []string{"c"},
+			//	Value:   "gosd.toml",
+			//	Usage:   "Load configuration from `FILE`",
+			//},
+			&cli.BoolFlag{
+				Name:  "debug",
+				Value: false,
+				Usage: "Enabled Debug mode",
+			},
+		},
+		Before: func(c *cli.Context) error {
+			if c.Bool("debug") {
+				log.SetReportCaller(true)
+				log.SetLevel(log.DebugLevel)
+			}
+			//log.Debugln(c.Path("config"))
+			return nil
+		},
+		Action: func(c *cli.Context) error {
+			Daemon()
+			return nil
+		},
+	}
 )
 
 func Execute() {
-	log.Warn("Launch gosd V3")
-
-	cfg := config.DefaultConfig()
-	if err := env.Parse(cfg); err != nil {
-		log.Errorf("%+v\n", err)
-	}
-
-	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
+	err := app.Run(os.Args)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	orm.AutoMigrate(&model.Team{})
-	orm.AutoMigrate(&model.User{})
-	orm.AutoMigrate(&model.Session{})
-	orm.AutoMigrate(&model.UserTeam{})
-
-	orm.AutoMigrate(&model.Schedule{})
-	orm.AutoMigrate(&model.Task{})
-	orm.AutoMigrate(&model.Blob{})
-	orm.AutoMigrate(&model.Job{})
-
-	redisOpt, err := redis.ParseURL(cfg.RedisURL)
-	if err != nil {
-		panic(err)
-	}
-	rdb := redis.NewClient(redisOpt)
-
-	store := state.NewState(cfg.RedisURL)
-
-	chI := make(chan mqttd.MqttRpc, 128)
-	chO := make(chan mqttd.MqttRpc, 128)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	mqtt := mqttd.NewMqttd(cfg.MqttURL, store, chI, chO)
-	go mqtt.Run(ctx)
-
-	rpcServer := rpc2mqtt.NewRpc2Mqtt(chI, chO)
-	go rpcServer.Run(ctx)
-
-	ofs := storage.NewStorage(cfg.StorageURL)
-	worker := luavm.NewWorker(orm, rdb, ofs, rpcServer, []byte{})
-	go worker.Run()
-
-	srv := service.NewService(orm, rdb, worker)
-	srv.StartSchedule()
-	log.Warn("=== RUN ===")
-
-	api := v3.NewApi(orm, srv)
-	http.Handle("/gosd/api/v3/", api)
-	http.ListenAndServe(":8000", nil)
 }

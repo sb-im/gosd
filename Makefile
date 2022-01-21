@@ -4,7 +4,7 @@ PROFIX=
 GO_TEST=./state
 VERSION=$(shell git describe --tags || git rev-parse --short HEAD || echo "unknown version")
 BUILD_DATE=$(shell date +%FT%T%z)
-LD_FLAGS='-X "miniflux.app/version.Version=$(VERSION)" -X "miniflux.app/version.BuildDate=$(BUILD_DATE)"'
+LD_FLAGS='-X "sb.im/gosd/version.Version=$(VERSION)" -X "sb.im/gosd/version.Date=$(BUILD_DATE)"'
 GOBUILD=CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) \
 				go build -ldflags $(LD_FLAGS)
 
@@ -31,7 +31,7 @@ build: generate
 	$(GOBUILD)
 
 run: generate
-	@ go run main.go --debug --noauth
+	@ go run main.go --debug
 
 swagger:
 	# go get -u github.com/swaggo/swag/cmd/swag
