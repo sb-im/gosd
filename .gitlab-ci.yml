@@ -55,6 +55,7 @@ test luavm:
   before_script:
     - go version
   script:
+    - go run main.go database migrate
     - make test-luavm
 
 .test-broker:
