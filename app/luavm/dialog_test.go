@@ -64,8 +64,8 @@ end
 	}()
 
 	topic := fmt.Sprintf(topic_dialog, task.ID)
-	keyspace := "__keyspace@1__:%s"
-	pubsub := w.rdb.Subscribe(ctx, fmt.Sprintf(keyspace, topic))
+	keyspace := "__keyspace@*__:%s"
+	pubsub := w.rdb.PSubscribe(ctx, fmt.Sprintf(keyspace, topic))
 	ev := pubsub.Channel()
 
 	// CleanDialog

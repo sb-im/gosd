@@ -4,12 +4,12 @@ import (
 	"testing"
 	"time"
 
+	"sb.im/gosd/app/config"
 	lualib "sb.im/gosd/app/luavm/lua"
 	"sb.im/gosd/app/model"
 	"sb.im/gosd/app/storage"
 
-	"sb.im/gosd/config"
-
+	"github.com/caarlos0/env/v6"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -20,30 +20,31 @@ func newWorker(t *testing.T) *Worker {
 }
 
 func helpTestNewWorker(t *testing.T, script []byte) *Worker {
-	parse := config.NewParser()
-	opts, err := parse.ParseEnvironmentVariables()
+	cfg := config.DefaultConfig()
+	if err := env.Parse(cfg); err != nil {
+		t.Errorf("%+v\n", err)
+	}
+
+	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
 
-	dsn := opts.DatabaseURL()
-	orm, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	redisOpt, err := redis.ParseURL(cfg.RedisURL)
+	if err != nil {
+		panic(err)
+	}
 
-	return NewWorker(orm, redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       1,
-	}), storage.NewStorage("/tmp"), nil, script)
+	return NewWorker(orm, redis.NewClient(redisOpt), storage.NewStorage(cfg.StorageURL), nil, script)
 }
 
 func newTestTask(t *testing.T) *model.Task {
-	parse := config.NewParser()
-	opts, err := parse.ParseEnvironmentVariables()
-	if err != nil {
-		panic(err)
+	cfg := config.DefaultConfig()
+	if err := env.Parse(cfg); err != nil {
+		t.Errorf("%+v\n", err)
 	}
 
-	if orm, err := gorm.Open(postgres.Open(opts.DatabaseURL()), &gorm.Config{}); err != nil {
+	if orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{}); err != nil {
 		t.Error(err)
 		return nil
 	} else {
