@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/caarlos0/env/v6"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"gorm.io/driver/postgres"
@@ -22,10 +21,7 @@ func init() {
 }
 
 func databaseMigrate() {
-	cfg := config.DefaultConfig()
-	if err := env.Parse(cfg); err != nil {
-		log.Errorf("%+v\n", err)
-	}
+	cfg := config.Parse()
 
 	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
 	if err != nil {

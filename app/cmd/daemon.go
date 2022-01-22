@@ -14,7 +14,6 @@ import (
 	"sb.im/gosd/mqttd"
 	"sb.im/gosd/state"
 
-	"github.com/caarlos0/env/v6"
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
@@ -22,10 +21,7 @@ import (
 )
 
 func NewHandler(ctx context.Context) http.Handler {
-	cfg := config.DefaultConfig()
-	if err := env.Parse(cfg); err != nil {
-		log.Errorf("%+v\n", err)
-	}
+	cfg := config.Parse()
 
 	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
 	if err != nil {

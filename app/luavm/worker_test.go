@@ -9,7 +9,6 @@ import (
 	"sb.im/gosd/app/model"
 	"sb.im/gosd/app/storage"
 
-	"github.com/caarlos0/env/v6"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -20,10 +19,7 @@ func newWorker(t *testing.T) *Worker {
 }
 
 func helpTestNewWorker(t *testing.T, script []byte) *Worker {
-	cfg := config.DefaultConfig()
-	if err := env.Parse(cfg); err != nil {
-		t.Errorf("%+v\n", err)
-	}
+	cfg := config.Parse()
 
 	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
 	if err != nil {
@@ -39,10 +35,7 @@ func helpTestNewWorker(t *testing.T, script []byte) *Worker {
 }
 
 func newTestTask(t *testing.T) *model.Task {
-	cfg := config.DefaultConfig()
-	if err := env.Parse(cfg); err != nil {
-		t.Errorf("%+v\n", err)
-	}
+	cfg := config.Parse()
 
 	if orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{}); err != nil {
 		t.Error(err)
