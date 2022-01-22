@@ -21,9 +21,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func Daemon() {
-	log.Warn("Launch gosd V3")
-
+func NewHandler(ctx context.Context) http.Handler {
 	cfg := config.DefaultConfig()
 	if err := env.Parse(cfg); err != nil {
 		log.Errorf("%+v\n", err)
@@ -45,9 +43,6 @@ func Daemon() {
 	chI := make(chan mqttd.MqttRpc, 128)
 	chO := make(chan mqttd.MqttRpc, 128)
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
 	mqtt := mqttd.NewMqttd(cfg.MqttURL, store, chI, chO)
 	go mqtt.Run(ctx)
 
@@ -60,9 +55,15 @@ func Daemon() {
 
 	srv := service.NewService(orm, rdb, worker)
 	srv.StartSchedule()
-	log.Warn("=== RUN ===")
 
-	api := v3.NewApi(orm, srv)
-	http.Handle("/gosd/api/v3/", api)
-	http.ListenAndServe(":8000", nil)
+	return api.NewApi(orm, srv)
+}
+
+func Daemon() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	log.Warn("Launch gosd V3")
+	handler := NewHandler(ctx)
+	log.Warn("=== RUN ===")
+	http.ListenAndServe(":8000", handler)
 }
