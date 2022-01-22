@@ -52,6 +52,12 @@ func (h Handler) JobCreate(c *gin.Context) {
 		return
 	}
 
+	job := model.Job{
+		TaskID: task.ID,
+	}
+	h.orm.Create(&job)
+	task.Job = &job
+
 	if err := h.srv.TaskRun(&task); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}

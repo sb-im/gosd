@@ -2,7 +2,6 @@ package v3
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -44,7 +43,6 @@ func (h *Handler) TaskCreate(c *gin.Context) {
 		TeamID: h.getCurrent(c).TeamID,
 	}
 	if err := c.Bind(task); err != nil {
-		fmt.Println(string(task.Extra))
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

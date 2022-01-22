@@ -16,8 +16,8 @@ func (s Service) TaskRun(task *model.Task) error {
 	json.Unmarshal(task.Files, &files)
 	json.Unmarshal(task.Extra, &extra)
 
-	fmt.Println(files)
-	fmt.Println(extra)
+	fmt.Println("files: ", files)
+	fmt.Println("extra: ", extra)
 
 	// TODO: join this worker
 	s.worker.RunTask(task)
