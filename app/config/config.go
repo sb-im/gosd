@@ -11,6 +11,7 @@ type Config struct {
 	RedisURL    string `env:"REDIS_URL"`
 	DatabaseURL string `env:"DATABASE_URL"`
 	StorageURL  string `env:"STORAGE_URL"`
+	LuaFilePath string `env:"LUA_FILE"`
 }
 
 var opts = DefaultConfig()
@@ -22,6 +23,7 @@ func DefaultConfig() *Config {
 		RedisURL:    "redis://localhost:6379/1",
 		DatabaseURL: "host=localhost user=postgres password=password dbname=gosd port=5432 sslmode=disable TimeZone=Asia/Shanghai",
 		StorageURL:  "file://data/storage",
+		LuaFilePath: "default.lua",
 	}
 }
 

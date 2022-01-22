@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"io/ioutil"
 	"net/http"
 
 	"sb.im/gosd/app/api"
@@ -46,7 +47,12 @@ func NewHandler(ctx context.Context) http.Handler {
 	go rpcServer.Run(ctx)
 
 	ofs := storage.NewStorage(cfg.StorageURL)
-	worker := luavm.NewWorker(orm, rdb, ofs, rpcServer, []byte{})
+
+	luaFile, err := ioutil.ReadFile(cfg.LuaFilePath)
+	if err == nil {
+		log.Warn("Use Lua File Path:", cfg.LuaFilePath)
+	}
+	worker := luavm.NewWorker(orm, rdb, ofs, rpcServer, luaFile)
 	go worker.Run()
 
 	srv := service.NewService(orm, rdb, worker)
