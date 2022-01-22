@@ -8,6 +8,7 @@ import (
 )
 
 func TestApi(t *testing.T) {
+	t.Setenv("LUA_FILE", "app/luavm/lua/test_rpc.lua")
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Api Suite")
 }
