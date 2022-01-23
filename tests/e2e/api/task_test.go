@@ -13,7 +13,7 @@ import (
 	"sb.im/gosd/app/config"
 	"sb.im/gosd/app/model"
 
-	"sb.im/gosd/e2e/help"
+	"sb.im/gosd/tests/help"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
