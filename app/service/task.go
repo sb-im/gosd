@@ -20,6 +20,6 @@ func (s Service) TaskRun(task *model.Task) error {
 	fmt.Println("extra: ", extra)
 
 	// TODO: join this worker
-	s.worker.RunTask(task)
+	s.worker.AddTask(task)
 	return nil
 }

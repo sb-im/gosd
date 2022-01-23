@@ -66,7 +66,7 @@ var _ = Describe("LuaVM Rpc", func() {
 		log.Warn("Use Lua File Path:", cfg.LuaFilePath)
 	}
 	worker := luavm.NewWorker(orm, rdb, ofs, rpcServer, luaFile)
-	go worker.Run()
+	go worker.Run(ctx)
 
 	go help.StartNcp(ctx, config.Parse().MqttURL, strconv.Itoa(int(task.NodeID)))
 
@@ -86,7 +86,7 @@ var _ = Describe("LuaVM Rpc", func() {
 			luaFile, err := lualib.LuaFile.ReadFile("test_rpc.lua")
 			Expect(err).NotTo(HaveOccurred())
 
-			worker.DoRun(&task, luaFile)
+			worker.RunTask(&task, luaFile)
 			Expect(err).NotTo(HaveOccurred())
 		})
 	})

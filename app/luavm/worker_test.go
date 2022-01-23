@@ -105,27 +105,27 @@ end
 	task3 := newTestTask(t)
 	task3.NodeID = 3
 
-	if err := w.RunTask(task); err != nil {
+	if err := w.AddTask(task); err != nil {
 		t.Error(err)
 	}
 
-	if err := w.RunTask(task); err == nil {
+	if err := w.AddTask(task); err == nil {
 		t.Error("duplicate task")
 	}
 
-	if err := w.RunTask(task2); err == nil {
+	if err := w.AddTask(task2); err == nil {
 		t.Error("duplicate node, should error")
 	}
 
-	if err := w.RunTask(task2); err == nil {
+	if err := w.AddTask(task2); err == nil {
 		t.Error("duplicate task2")
 	}
 
-	if err := w.RunTask(task3); err != nil {
+	if err := w.AddTask(task3); err != nil {
 		t.Error(err)
 	}
 
-	if err := w.RunTask(task3); err == nil {
+	if err := w.AddTask(task3); err == nil {
 		t.Error("duplicate task")
 	}
 

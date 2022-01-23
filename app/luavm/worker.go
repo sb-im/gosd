@@ -50,7 +50,6 @@ type Worker struct {
 	timeout  time.Duration
 
 	rpc     *rpc2mqtt.Rpc2mqtt
-	Queue   chan *model.Task
 	Running map[string]*Service
 }
 
@@ -79,12 +78,11 @@ func NewWorker(orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage, rpc *rpc2m
 		timeout:  time.Hour,
 
 		rpc:     rpc,
-		Queue:   make(chan *model.Task, 1024),
 		Running: make(map[string]*Service),
 	}
 }
 
-func (w Worker) RunTask(task *model.Task) error {
+func (w Worker) AddTask(task *model.Task) error {
 	if err := w.preTaskCheck(task); err != nil {
 		return err
 	}
@@ -127,16 +125,11 @@ func (w Worker) getScript(task *model.Task) (script []byte) {
 	return
 }
 
-func (w Worker) Run() {
-	for task := range w.Queue {
-		// Task Lua Script
-		if err := w.doRun(task, w.getScript(task)); err != nil {
-			log.Error(err)
-		}
-	}
+func (w Worker) Run(ctx context.Context) {
+	<-ctx.Done()
 }
 
-func (w Worker) DoRun(task *model.Task, script []byte) error {
+func (w Worker) RunTask(task *model.Task, script []byte) error {
 	return w.doRun(task, script)
 }
 
@@ -214,9 +207,6 @@ func (w Worker) Kill(planID string) {
 }
 
 func (w Worker) Close() {
-	// Stop Create running
-	close(w.Queue)
-
 	for _, service := range w.Running {
 		service.Close()
 	}
