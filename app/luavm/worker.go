@@ -136,6 +136,10 @@ func (w Worker) Run() {
 	}
 }
 
+func (w Worker) DoRun(task *model.Task, script []byte) error {
+	return w.doRun(task, script)
+}
+
 func (w Worker) doRun(task *model.Task, script []byte) error {
 	l := lua.NewState()
 	defer func() {
