@@ -49,8 +49,8 @@ test-luavm:
 test-broker: generate
 	go test ./mqttd -cover -v
 
-test-simulation: generate
-	go test ./luavm ./integration -cover -v
+test-simulation:
+	go test ./tests/e2e/... -cover -v
 
 # \(statements\)(?:\s+)?(\d+(?:\.\d+)?%)
 # https://stackoverflow.com/questions/61246686/go-coverage-over-multiple-package-and-gitlab-coverage-badge
