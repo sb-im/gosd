@@ -4,7 +4,7 @@ replace RSD-backend
 
 ## Build
 
-* golang >= 1.12.x
+* golang >= 1.17.x
 * make
 
 ```sh
