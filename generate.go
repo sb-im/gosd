@@ -105,5 +105,4 @@ func generateBundle(bundleFile, pkg, mapName string, srcFiles []string) {
 
 func main() {
 	generateBundle("database/sql.go", "database", "SqlMap", glob("database/sql/*.sql"))
-	generateBundle("luavm/lua.go", "luavm", "LuaMap", glob("app/luavm/lua/*.lua"))
 }
