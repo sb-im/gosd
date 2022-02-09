@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
-	//"sb.im/gosd/app/model"
+	"strconv"
+
+	"sb.im/gosd/app/model"
 )
 
 const (
@@ -11,24 +14,31 @@ const (
 	mqttAuthACLPrefix  = "mqtt_acl:"
 )
 
+func genToken(n int) (string, error) {
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", b), nil
+}
+
 func (s *Service) MqttAuthUser(user string) string {
-	// TODO: need random generate password
-	password := "xxx"
-	fmt.Println(user, password)
+	password, _ := genToken(8)
 	s.rdb.HSet(context.Background(), mqttAuthUserPrefix+user, map[string]interface{}{
 		"password": password,
 	})
-	return ""
+	return password
 }
 
-func (s *Service) MqttAuthACL(user string) string {
-	fmt.Println(user)
-	// TODO:
-	s.rdb.HSet(context.Background(), mqttAuthACLPrefix+user, map[string]interface{}{
-		"nodes":   true,
-		"nodes/1": true,
-		"nodes/#": true,
-	})
+func (s *Service) MqttAuthACL(teamID uint, user string) string {
+	var nodes []model.Node
+	s.orm.Find(&nodes, "team_id = ?", teamID)
 
+	acl := make(map[string]interface{})
+	for _, node := range nodes {
+		acl["nodes/"+strconv.Itoa(int(node.ID))+"/#"] = true
+	}
+
+	s.rdb.HSet(context.Background(), mqttAuthACLPrefix+user, acl)
 	return ""
 }

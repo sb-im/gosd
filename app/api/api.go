@@ -71,7 +71,7 @@ func NewApi(orm *gorm.DB, srv *service.Service) http.Handler {
 	sr.POST("users", handler.UserCreate)
 	sr.PATCH("users/:id", handler.UserUpdate)
 
-	sr.POST("test", handler.MqttUserCreate)
+	sr.POST("mqtt/url", handler.MqttUserCreate)
 
 	sr.GET("current", handler.Current)
 

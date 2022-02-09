@@ -14,11 +14,11 @@ import (
 // @Tags mqtt
 // @Accept multipart/form-data
 // @Produce json
-// @Router /test [post]
-func (h *Handler) MqttUserCreate(c *gin.Context) {
+// @Router /mqtt/url [POST]
+func (h Handler) MqttUserCreate(c *gin.Context) {
 
 	// TODO: this need config file
-	mqttURLFmt := "mqtt://%s:%s@localhost:1883"
+	mqttURLFmt := "mqtt://%d:%s@localhost:1883"
 
 	u := h.getCurrent(c)
 
@@ -26,6 +26,6 @@ func (h *Handler) MqttUserCreate(c *gin.Context) {
 	fmt.Println(u)
 
 	passwd := h.srv.MqttAuthUser(strconv.Itoa(int(u.SessID)))
-	h.srv.MqttAuthACL(strconv.Itoa(int(u.SessID)))
+	h.srv.MqttAuthACL(u.TeamID, strconv.Itoa(int(u.SessID)))
 	c.JSON(http.StatusOK, fmt.Sprintf(mqttURLFmt, u.SessID, passwd))
 }
