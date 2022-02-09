@@ -24,13 +24,11 @@ cli-pg:
 		-e PGDATABASE=gosd \
 		dbcliorg/pgcli
 
-generate:
-	@ go generate
-
-build: generate
+build:
 	$(GOBUILD)
 
-run: generate
+.PHONY: run
+run:
 	@ go run main.go --debug
 
 .PHONY: swagger
@@ -40,13 +38,13 @@ swagger:
 	@ rm swag/docs.go
 	@ rm swag/swagger.yaml
 
-test: generate
+test:
 	go test ${GO_TEST} -cover -v
 
 test-luavm:
 	go clean -testcache && go test ./app/luavm -cover -v
 
-test-broker: generate
+test-broker:
 	go test ./mqttd -cover -v
 
 test-simulation:
@@ -54,7 +52,7 @@ test-simulation:
 
 # \(statements\)(?:\s+)?(\d+(?:\.\d+)?%)
 # https://stackoverflow.com/questions/61246686/go-coverage-over-multiple-package-and-gitlab-coverage-badge
-cover: generate
+cover:
 	go test ${GO_TEST} -coverprofile profile.cov
 	go tool cover -func profile.cov
 	@rm profile.cov
