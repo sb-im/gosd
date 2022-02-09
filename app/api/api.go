@@ -50,6 +50,12 @@ func NewApi(orm *gorm.DB, srv *service.Service) http.Handler {
 	sr.PUT("blobs/:blobID", handler.BlobUpdate)
 	sr.GET("blobs/:blobID", handler.BlobShow)
 
+	sr.POST("nodes", handler.NodeCreate)
+	sr.GET("nodes", handler.NodeIndex)
+	sr.GET("nodes/:id", handler.NodeShow)
+	sr.PUT("nodes/:id", handler.NodeUpdate)
+	sr.DELETE("nodes/:id", handler.NodeDestroy)
+
 	sr.POST("tasks", handler.TaskCreate)
 	sr.GET("tasks", handler.TaskIndex)
 	sr.GET("tasks/:id", handler.TaskShow)

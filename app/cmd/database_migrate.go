@@ -34,6 +34,7 @@ func databaseMigrate() {
 	orm.AutoMigrate(&model.UserTeam{})
 
 	orm.AutoMigrate(&model.Schedule{})
+	orm.AutoMigrate(&model.Node{})
 	orm.AutoMigrate(&model.Task{})
 	orm.AutoMigrate(&model.Blob{})
 	orm.AutoMigrate(&model.Job{})
