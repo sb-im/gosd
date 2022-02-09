@@ -23,7 +23,7 @@ var _ = Describe("Task", func() {
 	var s *httptest.Server
 	var c *client.Client
 
-	nodeID := int64(1)
+	nodeID := uint(1)
 
 	task := model.Task{
 		Name:   "E2E Test",
