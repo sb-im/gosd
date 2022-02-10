@@ -24,6 +24,8 @@ import (
 func NewHandler(ctx context.Context) http.Handler {
 	cfg := config.Parse()
 
+	log.Debugf("%+v\n", cfg)
+
 	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
 	if err != nil {
 		panic(err)
