@@ -1,6 +1,6 @@
 # gosd
 
-replace RSD-backend
+SuperDock Cloud Server
 
 ## Build
 

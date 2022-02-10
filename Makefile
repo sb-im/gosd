@@ -63,4 +63,5 @@ install:
 
 clean:
 	go clean
+	@ rm -r swag
 
