@@ -231,22 +231,22 @@ publish ghcr:
   script:
     - docker pull $CONTAINER_RELEASE_IMAGE
     # hash
-    - docker tag  $CONTAINER_RELEASE_IMAGE ghcr.io/sb-im/gosd:${CI_COMMIT_SHORT_SHA}
-    - docker push ghcr.io/sb-im/gosd:${CI_COMMIT_SHORT_SHA}
+    - docker tag  $CONTAINER_RELEASE_IMAGE ghcr.io/sb-im/developer/gosd:${CI_COMMIT_SHORT_SHA}
+    - docker push ghcr.io/sb-im/developer/gosd:${CI_COMMIT_SHORT_SHA}
     # version lstrip('v')
-    - docker tag  $CONTAINER_RELEASE_IMAGE ghcr.io/sb-im/gosd:${CI_COMMIT_TAG#v}
-    - docker push ghcr.io/sb-im/gosd:${CI_COMMIT_TAG#v}
+    - docker tag  $CONTAINER_RELEASE_IMAGE ghcr.io/sb-im/developer/gosd:${CI_COMMIT_TAG#v}
+    - docker push ghcr.io/sb-im/developer/gosd:${CI_COMMIT_TAG#v}
     # latest
-    - docker tag  $CONTAINER_RELEASE_IMAGE ghcr.io/sb-im/gosd:latest
-    - docker push ghcr.io/sb-im/gosd:latest
+    - docker tag  $CONTAINER_RELEASE_IMAGE ghcr.io/sb-im/developer/gosd:latest
+    - docker push ghcr.io/sb-im/developer/gosd:latest
   only:
      - tags
 
-deploy:develop:
+deploy develop:
   stage: deploy
   only:
     refs:
-      - dev
+      - v3
   before_script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval "$(ssh-agent -s)"
@@ -255,5 +255,8 @@ deploy:develop:
     - chmod 700 ~/.ssh
     - ssh-keyscan ${HOST_CLOUD_DEVELOP} > ~/.ssh/known_hosts
   script:
-    - ssh ${USER_CLOUD_DEVELOP}@${HOST_CLOUD_DEVELOP} 'cd deployment && bin/develop-sitl pull && bin/develop-sitl up -d'
+    - go get -u github.com/swaggo/swag/cmd/swag
+    - make swagger
+    - 'scp swag/swagger.json ${USER_CLOUD_DEVELOP}@${HOST_CLOUD_DEVELOP}:swagger.json'
+    - ssh ${USER_CLOUD_DEVELOP}@${HOST_CLOUD_DEVELOP} 'docker-compose up -d'
 
