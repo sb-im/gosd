@@ -4,13 +4,20 @@ import (
 	"context"
 	"errors"
 	"math"
-	"sync"
 	"time"
 
 	"sb.im/gosd/mqttd"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/sb-im/jsonrpc-lite"
+	log "github.com/sirupsen/logrus"
+)
+
+var (
+	// Every 0.1s Detect Send && Resend
+	loopWait = 100 * time.Millisecond
+
+	// Max Resend interval 1h
+	timeout = float64(3600)
 )
 
 type Pending struct {
@@ -23,7 +30,7 @@ type Pending struct {
 
 type Rpc2mqtt struct {
 	pending map[jsonrpc.ID]*Pending
-	mutex   sync.Mutex
+	cache   chan Pending
 	i       chan<- mqttd.MqttRpc
 	o       <-chan mqttd.MqttRpc
 }
@@ -32,38 +39,29 @@ func NewRpc2Mqtt(i chan<- mqttd.MqttRpc, o <-chan mqttd.MqttRpc) *Rpc2mqtt {
 	return &Rpc2mqtt{
 		i:       i,
 		o:       o,
+		cache:   make(chan Pending, 1024),
 		pending: make(map[jsonrpc.ID]*Pending),
 	}
 }
 
-func (t *Rpc2mqtt) AsyncRpc(id string, req []byte, ch_res chan []byte) error {
-	select {
-	case t.i <- mqttd.MqttRpc{
-		ID:      id,
-		Payload: req,
-	}:
-		t.mutex.Lock()
-		t.pending[*jsonrpc.ParseObject(req).ID] = &Pending{
-			Time:  time.Now(),
-			Dst:   id,
-			Msg:   req,
-			Count: 1,
-			Reply: ch_res,
-		}
-		t.mutex.Unlock()
-	default:
-		return errors.New("Buffer full")
-	}
-	return nil
-}
-
 func (t *Rpc2mqtt) Run(ctx context.Context) {
-	go t.Resend(ctx)
+	ticker := time.NewTicker(loopWait)
+	defer ticker.Stop()
 	for {
 		select {
-		case <-ctx.Done():
-			return
+		case p := <-t.cache:
+			// Send
+			select {
+			case t.i <- mqttd.MqttRpc{
+				ID:      p.Dst,
+				Payload: p.Msg,
+			}:
+				t.pending[*jsonrpc.ParseObject(p.Msg).ID] = &p
+			default:
+				log.Error("Buffer full")
+			}
 		case raw := <-t.o:
+			// Recv
 			log.Tracef("RECV: %s", raw.Payload)
 			rpc := jsonrpc.ParseObject(raw.Payload)
 			if rpc.Type == jsonrpc.TypeInvalid {
@@ -71,24 +69,11 @@ func (t *Rpc2mqtt) Run(ctx context.Context) {
 			}
 			if pending, ok := t.pending[*rpc.ID]; ok && (rpc.Type == jsonrpc.TypeSuccess || rpc.Type == jsonrpc.TypeErrors) {
 				log.Debugf("res: %s", raw.Payload)
-				t.mutex.Lock()
 				delete(t.pending, *rpc.ID)
-				t.mutex.Unlock()
 				pending.Reply <- raw.Payload
 			}
-		}
-	}
-}
-
-func (t *Rpc2mqtt) Resend(ctx context.Context) {
-	// Max Resend interval 1h
-	timeout := float64(3600)
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			t.mutex.Lock()
+		case <-ticker.C:
+			// Resend
 			for id, pending := range t.pending {
 				if now := time.Since(pending.Time).Seconds(); now > math.Ldexp(1, pending.Count) && now <= timeout {
 					select {
@@ -97,6 +82,7 @@ func (t *Rpc2mqtt) Resend(ctx context.Context) {
 						Payload: pending.Msg,
 					}:
 						pending.Count++
+						log.Tracef("SEND: %s", pending.Msg)
 
 					default:
 						log.Error("Buffer full")
@@ -108,8 +94,23 @@ func (t *Rpc2mqtt) Resend(ctx context.Context) {
 					pending.Reply <- data
 				}
 			}
-			t.mutex.Unlock()
-			time.Sleep(1 * time.Second)
+		case <-ctx.Done():
+			return
 		}
 	}
+}
+
+func (t *Rpc2mqtt) AsyncRpc(id string, req []byte, ch_res chan []byte) error {
+	select {
+	case t.cache <- Pending{
+		Time:  time.Now(),
+		Dst:   id,
+		Msg:   req,
+		Count: 1,
+		Reply: ch_res,
+	}:
+	default:
+		return errors.New("Send cache buffer full")
+	}
+	return nil
 }

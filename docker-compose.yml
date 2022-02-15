@@ -38,9 +38,9 @@ services:
 # Must Claims value is type string
 #      - EMQX_AUTH__JWT__VERIFY_CLAIMS=off
 #      - EMQX_AUTH__JWT__VERIFY_CLAIMS__SID=%u
-
     ports:
       - "1883:1883/tcp"
+      - "8083:8083/tcp"
     healthcheck:
       test: ["CMD", "/opt/emqx/bin/emqx_ctl", "status"]
       interval: 5s
