@@ -81,7 +81,9 @@ func luaScript(t *testing.T, name string) {
 	if script, err := lualib.LuaFile.ReadFile(name); err != nil {
 		t.Error(err)
 	} else {
-		w.doRun(&model.Task{}, script)
+		if err := w.doRun(&model.Task{}, script); err != nil {
+			t.Error(err)
+		}
 	}
 
 	w.Close()
