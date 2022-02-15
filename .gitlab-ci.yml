@@ -168,8 +168,10 @@ build image:
   before_script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
   script:
-    - docker build --tag $CONTAINER_CANARY_IMAGE .
-    - docker push $CONTAINER_CANARY_IMAGE
+    - docker buildx create --name builderx
+    - docker buildx use builderx
+    - docker buildx inspect --bootstrap
+    - docker buildx build --platform linux/amd64,linux/arm64 --tag $CONTAINER_CANARY_IMAGE --push .
 
 image branch:
   image: docker:20.10.5
