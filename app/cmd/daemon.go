@@ -22,7 +22,7 @@ import (
 )
 
 func NewHandler(ctx context.Context) http.Handler {
-	cfg := config.Parse()
+	cfg := config.Opts()
 
 	log.Debugf("%+v\n", cfg)
 
@@ -60,7 +60,7 @@ func NewHandler(ctx context.Context) http.Handler {
 	srv := service.NewService(orm, rdb, worker)
 	srv.StartSchedule()
 
-	return api.NewApi(orm, srv)
+	return api.NewApi(cfg.APIConfig, orm, srv)
 }
 
 func Daemon() {

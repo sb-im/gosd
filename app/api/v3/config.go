@@ -23,7 +23,7 @@ var (
 )
 
 type Config struct {
-	SingleUserMode  bool
+	SingleUserMode  bool `yaml:"SingleUserMode"`
 	DefaultLanguage string
 	DefaultTimezone string
 

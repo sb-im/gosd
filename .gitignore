@@ -2,4 +2,5 @@ luavm/lua.go
 data/storage/
 swag/
 gosd
+config.yml
 .data

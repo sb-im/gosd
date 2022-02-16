@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func NewApi(orm *gorm.DB, srv *service.Service) http.Handler {
+func NewApi(cfg *v3.Config, orm *gorm.DB, srv *service.Service) http.Handler {
 	r := gin.Default()
 
 	// CORS Middleware
@@ -32,7 +32,7 @@ func NewApi(orm *gorm.DB, srv *service.Service) http.Handler {
 		})
 	})
 
-	handler := v3.NewHandler(orm, srv)
+	handler := v3.NewHandler(cfg, orm, srv)
 
 	// Init Auth Middleware
 	handler.InitAuth(sr)

@@ -12,10 +12,10 @@ type Handler struct {
 	cfg *Config
 }
 
-func NewHandler(orm *gorm.DB, srv *service.Service) *Handler {
+func NewHandler(cfg *Config, orm *gorm.DB, srv *service.Service) *Handler {
 	return &Handler{
+		cfg: cfg,
 		orm: orm,
 		srv: srv,
-		cfg: DefaultConfig,
 	}
 }

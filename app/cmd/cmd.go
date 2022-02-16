@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	"sb.im/gosd/app/config"
 	"sb.im/gosd/version"
 
 	"github.com/urfave/cli/v2"
@@ -16,12 +17,12 @@ var (
 		Version: version.Version + " " + version.Date,
 		Usage:   "SuperDock Cloud Service",
 		Flags: []cli.Flag{
-			//&cli.StringFlag{
-			//	Name:    "config",
-			//	Aliases: []string{"c"},
-			//	Value:   "gosd.toml",
-			//	Usage:   "Load configuration from `FILE`",
-			//},
+			&cli.StringFlag{
+				Name:    "config",
+				Aliases: []string{"c"},
+				Value:   "config.yml",
+				Usage:   "Load configuration from `FILE`",
+			},
 			&cli.BoolFlag{
 				Name:  "debug",
 				Value: false,
@@ -33,7 +34,8 @@ var (
 				log.SetReportCaller(true)
 				log.SetLevel(log.DebugLevel)
 			}
-			//log.Debugln(c.Path("config"))
+			log.Debugln(c.Path("config"))
+			config.Parse(c.Path("config"))
 			return nil
 		},
 		Action: func(c *cli.Context) error {
