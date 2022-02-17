@@ -95,10 +95,11 @@ func (h *Handler) UserUpdate(c *gin.Context) {
 }
 
 func (h *Handler) UserOverride() {
-	for id, user := range h.cfg.Auth.SuperAdmin {
-		user.ID = id
-		h.orm.Updates(user)
-	}
+	// TODO:
+	//for id, user := range h.cfg.SuperAdmin {
+	//	user.ID = id
+	//	h.orm.Updates(user)
+	//}
 }
 
 func (h *Handler) userIsExist(id uint) bool {

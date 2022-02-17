@@ -26,7 +26,7 @@ type bindLogin struct {
 func (h Handler) InitAuth(r *gin.RouterGroup) {
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "test zone",
-		Key:         []byte(h.cfg.Auth.JWTSecret),
+		Key:         []byte(h.cfg.JWTSecret),
 		Timeout:     time.Hour,
 		MaxRefresh:  time.Hour,
 		IdentityKey: identityGinKey,

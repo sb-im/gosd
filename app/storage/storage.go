@@ -11,6 +11,10 @@ type Storage struct {
 	path string
 }
 
+func (s *Storage) Path() string {
+	return s.path
+}
+
 func NewStorage(storageURL string) *Storage {
 	path := "data/storage"
 	u, err := url.Parse(storageURL)

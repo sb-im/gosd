@@ -19,7 +19,7 @@ func (c Current) isUser() bool {
 }
 
 func (h Handler) singleUserMode() bool {
-	return h.cfg.SingleUserMode
+	return h.cfg.SingleUser
 }
 
 func (h Handler) getCurrent(c *gin.Context) *Current {

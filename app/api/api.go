@@ -7,13 +7,14 @@ import (
 
 	"gorm.io/gorm"
 	"sb.im/gosd/app/api/v3"
+	"sb.im/gosd/app/config"
 	"sb.im/gosd/app/service"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func NewApi(cfg *v3.Config, orm *gorm.DB, srv *service.Service) http.Handler {
+func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service) http.Handler {
 	r := gin.Default()
 
 	// CORS Middleware

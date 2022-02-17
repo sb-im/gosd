@@ -18,8 +18,8 @@ import (
 func (h Handler) Status(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"time":     time.Now().String(),
-		"language": h.cfg.DefaultLanguage,
-		"timezone": h.cfg.DefaultTimezone,
+		"language": h.cfg.Language,
+		"timezone": h.cfg.Timezone,
 		"version":  "Unknown",
 	})
 }

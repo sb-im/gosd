@@ -1,3 +1,5 @@
-config:
-  SingleUserMode: true
+single_user: true
+language: "en_US"
+timezone: "Asia/Shanghai"
+jwt_secret: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
