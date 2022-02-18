@@ -1,5 +1,6 @@
 single_user: true
 language: "en_US"
 timezone: "Asia/Shanghai"
-jwt_secret: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+base_url: "http://localhost:8000/gosd/api/v3"
+secret: "15ce4017-4116-4caf-9302-04d0a1554daa"
 

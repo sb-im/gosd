@@ -14,6 +14,7 @@ func init() {
 
 type Config struct {
 	Instance    string `env:"INSTANCE"`
+	BaseURL     string `env:"BASE_URL"`
 	MqttURL     string `env:"MQTT_URL"`
 	RedisURL    string `env:"REDIS_URL"`
 	DatabaseURL string `env:"DATABASE_URL"`
@@ -23,7 +24,7 @@ type Config struct {
 	SingleUser  bool   `yaml:"single_user"`
 	Language    string `yaml:"language"`
 	Timezone    string `yaml:"timezone"`
-	JWTSecret   string `yaml:"jwt_secret"`
+	Secret      string `yaml:"secret"`
 }
 
 var opts = DefaultConfig()
@@ -31,6 +32,7 @@ var opts = DefaultConfig()
 func DefaultConfig() *Config {
 	return &Config{
 		Instance:    "gosd.0",
+		BaseURL:     "http://localhost:8000/gosd/api/v3",
 		MqttURL:     "mqtt://admin:public@localhost:1883",
 		RedisURL:    "redis://localhost:6379/1",
 		DatabaseURL: "host=localhost user=postgres password=password dbname=gosd port=5432 sslmode=disable TimeZone=Asia/Shanghai",

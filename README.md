@@ -54,7 +54,7 @@ Variable Name  | Description                                              | Defa
 `DATABASE_URL` | Postgresql connection parameters                         | `postgres://postgres:password@localhost/gosd?sslmode=disable`
 `LISTEN_ADDR`  | Address to listen on (use absolute path for Unix socket) | `127.0.0.1:8000`
 `PORT`         | Override `LISTEN_ADDR` to `0.0.0.0:$PORT` (PaaS)         | None
-`BASE_URL`     | Base URL to generate API links and base path             | `http://localhost/`
+`BASE_URL`     | Base URL to generate API links and base path             | `http://localhost:8000/gosd/api/v3`
 `MQTT_URL`     | MQTT broker Server address                               | `mqtt://admin:public@localhost:1883`
 `REDIS_URL`    | Redis Server URL                                         | `redis://localhost:6379/0`
 `LOG_FILE`     | Log File                                                 | `STDOUT`
