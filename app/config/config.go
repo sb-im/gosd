@@ -8,6 +8,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func init() {
+	loadEnvConfig()
+}
+
 type Config struct {
 	Instance    string `env:"INSTANCE"`
 	MqttURL     string `env:"MQTT_URL"`
