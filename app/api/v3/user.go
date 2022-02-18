@@ -8,6 +8,24 @@ import (
 	"sb.im/gosd/app/model"
 )
 
+// @Summary Index all users
+// @Schemes User
+// @Description get all users index
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param page query uint false "Task Page Num"
+// @Param size query uint false "Page Max Count"
+// @Success 200
+// @Router /users [GET]
+func (h *Handler) UserIndex(c *gin.Context) {
+	var users []model.User
+	page, _ := strconv.Atoi(c.Query("page"))
+	size, _ := strconv.Atoi(c.Query("size"))
+	h.orm.Offset((page - 1) * size).Limit(size).Find(&users)
+	c.JSON(http.StatusOK, users)
+}
+
 // @Summary Create a user
 // @Schemes User
 // @Description create a new user

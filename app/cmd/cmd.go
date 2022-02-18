@@ -13,6 +13,8 @@ import (
 
 var (
 	app = &cli.App{
+		EnableBashCompletion: true,
+
 		Name:    "gosd",
 		Version: version.Version + " " + version.Date,
 		Usage:   "SuperDock Cloud Service",
