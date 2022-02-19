@@ -66,6 +66,7 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service) http.Handler
 	sr.GET("tasks/:id/jobs", handler.JobIndex)
 	sr.POST("tasks/:id/jobs", handler.JobCreate)
 
+	sr.GET("/teams", handler.TeamIndex)
 	sr.POST("teams", handler.TeamCreate)
 	sr.POST("teams/users", handler.TeamUserAdd)
 

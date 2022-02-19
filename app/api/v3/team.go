@@ -2,10 +2,29 @@ package v3
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"sb.im/gosd/app/model"
 )
+
+// @Summary Index all teams
+// @Schemes Team
+// @Description get all teams index
+// @Tags team
+// @Accept json
+// @Produce json
+// @Param page query uint false "Task Page Num"
+// @Param size query uint false "Page Max Count"
+// @Success 200
+// @Router /teams [GET]
+func (h *Handler) TeamIndex(c *gin.Context) {
+	var teams []model.Team
+	page, _ := strconv.Atoi(c.Query("page"))
+	size, _ := strconv.Atoi(c.Query("size"))
+	h.orm.Offset((page - 1) * size).Limit(size).Find(&teams)
+	c.JSON(http.StatusOK, teams)
+}
 
 // @Summary Create a team
 // @Schemes Team
