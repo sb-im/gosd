@@ -35,3 +35,25 @@ func (c *Client) UserCreate(user interface{}) error {
 		return errors.New("Create Failed")
 	}
 }
+
+func (c *Client) UserUpdate(id string, user interface{}) error {
+	buf := new(bytes.Buffer)
+	if err := json.NewEncoder(buf).Encode(user); err != nil {
+		return err
+	}
+	req, err := http.NewRequest("PATCH", c.endpoint+"/users/"+id, buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	res, err := (&http.Client{}).Do(req)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode == http.StatusOK {
+		return json.NewDecoder(res.Body).Decode(user)
+	} else {
+		return errors.New("Update Failed")
+	}
+}
