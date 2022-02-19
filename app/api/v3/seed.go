@@ -27,7 +27,7 @@ func (h Handler) InitSeed() {
 
 	user := &model.User{
 		Username: "demo",
-		Team:     *team,
+		Team:     team,
 		Teams:    []model.Team{*team},
 	}
 	if h.userIsExist(uid) {

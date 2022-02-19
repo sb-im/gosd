@@ -22,7 +22,7 @@ func (h *Handler) UserIndex(c *gin.Context) {
 	var users []model.User
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
-	h.orm.Offset((page - 1) * size).Limit(size).Find(&users)
+	h.orm.Preload("Teams").Offset((page - 1) * size).Limit(size).Find(&users)
 	c.JSON(http.StatusOK, users)
 }
 

@@ -49,7 +49,7 @@ func (h Handler) Current(c *gin.Context) {
 	current := h.getCurrent(c)
 	if current.isUser() {
 		var user model.User
-		h.orm.First(&user, current.UserID)
+		h.orm.Preload("Teams").First(&user, current.UserID)
 
 		fmt.Println(user.Teams)
 		c.JSON(http.StatusOK, user)
