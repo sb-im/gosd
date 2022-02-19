@@ -15,16 +15,16 @@ var userAddCmd = &cli.Command{
 	Name:  "add",
 	Usage: "Create a new user",
 	Flags: []cli.Flag{
+		&cli.UintFlag{Name: "team"},
 		&cli.StringFlag{Name: "username", Aliases: []string{"u"}},
 		&cli.StringFlag{Name: "password", Aliases: []string{"p"}},
-		&cli.StringFlag{Name: "language", Aliases: []string{"l"}},
-		&cli.StringFlag{Name: "timezone", Aliases: []string{"t"}},
+		&cli.StringFlag{Name: "language"},
+		&cli.StringFlag{Name: "timezone"},
 	},
 	Action: func(c *cli.Context) error {
 		cc := client.NewClient(config.Opts().BaseURL)
 		user := &map[string]interface{}{
-			//TODO: team
-			"team_id":  1,
+			"team_id":  c.Uint("team"),
 			"username": c.String("username"),
 			"password": c.String("password"),
 			"language": c.String("language"),

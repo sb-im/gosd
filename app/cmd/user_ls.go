@@ -22,12 +22,15 @@ var userLsCmd = &cli.Command{
 		cc := client.NewClient(config.Opts().BaseURL)
 		users, _ := cc.UserIndex()
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "ID\tUsername\tLanguage\tTimezone")
+		fmt.Fprintln(w, "ID\tUsername\tDefaultTeam\tTeams\tLanguage\tTimezone")
 
 		for _, u := range users {
-			fmt.Fprintf(w, "%d\t%s\t%s\t%s\t\n",
+			fmt.Fprintf(w, "%d\t%s\t%d\t%v\t%s\t%s\t\n",
 				u.ID,
 				u.Username,
+				u.TeamID,
+				// TODO: teams data
+				u.Teams,
 				u.Language,
 				u.Timezone,
 			)

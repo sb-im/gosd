@@ -15,15 +15,19 @@ var userSetCmd = &cli.Command{
 	Name:  "set",
 	Usage: "Update a user information",
 	Flags: []cli.Flag{
+		&cli.UintFlag{Name: "team"},
 		&cli.StringFlag{Name: "username", Aliases: []string{"u"}},
 		&cli.StringFlag{Name: "password", Aliases: []string{"p"}},
-		&cli.StringFlag{Name: "language", Aliases: []string{"l"}},
-		&cli.StringFlag{Name: "timezone", Aliases: []string{"t"}},
+		&cli.StringFlag{Name: "language"},
+		&cli.StringFlag{Name: "timezone"},
 	},
 	ArgsUsage: "<id>",
 	Action: func(c *cli.Context) error {
 		cc := client.NewClient(config.Opts().BaseURL)
 		user := make(map[string]interface{})
+		if k := c.Uint("team"); k != 0 {
+			user["team"] = k
+		}
 		if k := c.String("username"); k != "" {
 			user["username"] = k
 		}
