@@ -61,7 +61,10 @@ func (h *Handler) UserCreate(c *gin.Context) {
 		Language: u.Language,
 		Timezone: u.Timezone,
 	}
-	h.orm.Create(user)
+	if err := h.orm.Create(user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusCreated, user)
 }
 

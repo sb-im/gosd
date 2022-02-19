@@ -3,7 +3,6 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"sb.im/gosd/app/model"
@@ -15,8 +14,16 @@ func (c *Client) UserIndex() (users []model.User, err error) {
 		return users, err
 	}
 
-	err = json.NewDecoder(res.Body).Decode(&users)
-	return
+	if res.StatusCode == http.StatusOK {
+		err = json.NewDecoder(res.Body).Decode(&users)
+		return
+	} else {
+		err = &errMsg{
+			status: res.Status,
+		}
+		json.NewDecoder(res.Body).Decode(err)
+		return
+	}
 }
 
 func (c *Client) UserCreate(user interface{}) error {
@@ -32,7 +39,11 @@ func (c *Client) UserCreate(user interface{}) error {
 	if res.StatusCode == http.StatusCreated {
 		return json.NewDecoder(res.Body).Decode(user)
 	} else {
-		return errors.New("Create Failed")
+		err := &errMsg{
+			status: res.Status,
+		}
+		json.NewDecoder(res.Body).Decode(err)
+		return err
 	}
 }
 
@@ -54,6 +65,10 @@ func (c *Client) UserUpdate(id string, user interface{}) error {
 	if res.StatusCode == http.StatusOK {
 		return json.NewDecoder(res.Body).Decode(user)
 	} else {
-		return errors.New("Update Failed")
+		err := &errMsg{
+			status: res.Status,
+		}
+		json.NewDecoder(res.Body).Decode(err)
+		return err
 	}
 }
