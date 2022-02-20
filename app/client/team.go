@@ -38,3 +38,29 @@ func (c *Client) TeamCreate(team interface{}) error {
 		return err
 	}
 }
+
+func (c *Client) TeamUpdate(id string, team interface{}) error {
+	buf := new(bytes.Buffer)
+	if err := json.NewEncoder(buf).Encode(team); err != nil {
+		return err
+	}
+	req, err := http.NewRequest("PATCH", c.endpoint+"/teams/"+id, buf)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	res, err := (&http.Client{}).Do(req)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode == http.StatusOK {
+		return json.NewDecoder(res.Body).Decode(team)
+	} else {
+		err := &errMsg{
+			status: res.Status,
+		}
+		json.NewDecoder(res.Body).Decode(err)
+		return err
+	}
+}

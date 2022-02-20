@@ -34,7 +34,7 @@ func (h *Handler) TeamIndex(c *gin.Context) {
 // @Produce json
 // @Param   name formData string true "Team Name"
 // @Success 201 {object} model.Team
-// @Router /teams [post]
+// @Router /teams [POST]
 func (h *Handler) TeamCreate(c *gin.Context) {
 	team := &model.Team{}
 	if err := c.Bind(team); err != nil {
@@ -43,6 +43,38 @@ func (h *Handler) TeamCreate(c *gin.Context) {
 	}
 	h.orm.Create(team)
 	c.JSON(http.StatusCreated, team)
+}
+
+// @Summary Update a team
+// @Schemes Team
+// @Description update a new team
+// @Tags team
+// @Accept multipart/form-data
+// @Produce json
+// @Param id path uint true "Team ID"
+// @Param name formData string false "Name"
+// @Success 200 {object} model.Team
+// @Router /teams/{id} [PATCH]
+func (h *Handler) TeamUpdate(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	team := model.Team{}
+	team.ID = uint(id)
+	if err := c.Bind(&team); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.orm.Updates(&team).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, team)
 }
 
 // @Summary Team Add user
