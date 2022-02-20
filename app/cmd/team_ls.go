@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	teamCmd.Subcommands = append(userCmd.Subcommands, teamLsCmd)
+	teamCmd.Subcommands = append(teamCmd.Subcommands, teamLsCmd)
 }
 
 var teamLsCmd = &cli.Command{
