@@ -38,7 +38,7 @@ func (h *Handler) UserIndex(c *gin.Context) {
 // @Param language formData string false "Language Codes, such as 'zh_CN'" default(en_US)
 // @Param timezone formData string false "IANA Time Zone database, such as 'America/New_York'" default(Asia/Shanghai)
 // @Success 201 {object} model.User
-// @Router /users [post]
+// @Router /users [POST]
 func (h *Handler) UserCreate(c *gin.Context) {
 	type bindUser struct {
 		TeamID   uint   `json:"team_id" form:"team_id" binding:"required"`
@@ -54,15 +54,22 @@ func (h *Handler) UserCreate(c *gin.Context) {
 		return
 	}
 
+	team := model.Team{}
+	if err := h.orm.Take(&team, u.TeamID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
 	user := &model.User{
 		TeamID:   u.TeamID,
+		Teams:    []model.Team{team},
 		Username: u.Username,
 		Password: u.Password,
 		Language: u.Language,
 		Timezone: u.Timezone,
 	}
 	if err := h.orm.Create(user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusCreated, user)
