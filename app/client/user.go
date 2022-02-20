@@ -72,3 +72,20 @@ func (c *Client) UserUpdate(id string, user interface{}) error {
 		return err
 	}
 }
+
+func (c *Client) UserAddTeam(userId, teamId string) error {
+	res, err := http.Post(c.endpoint+"/users/"+userId+"/teams/"+teamId, "application/json", nil)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode == http.StatusCreated {
+		return nil
+	} else {
+		err := &errMsg{
+			status: res.Status,
+		}
+		json.NewDecoder(res.Body).Decode(err)
+		return err
+	}
+}

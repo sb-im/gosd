@@ -1,6 +1,7 @@
 package v3
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -120,6 +121,35 @@ func (h *Handler) UserUpdate(c *gin.Context) {
 	user.ID = uint(id)
 	h.orm.Updates(user)
 	c.JSON(http.StatusOK, user)
+}
+
+// @Summary Team Add user
+// @Schemes User
+// @Description add a existing user to the team, id > username
+// @Tags team
+// @Accept multipart/form-data
+// @Produce json
+// @Param user_id path int true "User ID"
+// @Param team_id path int true "Team ID"
+// @Success 201 {object} model.UserTeam
+// @Router /users/{user_id}/teams/{team_id} [POST]
+func (h *Handler) UserAddTeam(c *gin.Context) {
+	string2Uint := func(value string) uint {
+		num, _ := strconv.Atoi(value)
+		return uint(num)
+	}
+	userTeam := &model.UserTeam{
+		UserID: string2Uint(c.Param("user_id")),
+		TeamID: string2Uint(c.Param("team_id")),
+	}
+
+	fmt.Println(userTeam)
+	if err := h.orm.Create(userTeam).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, userTeam)
 }
 
 func (h *Handler) UserOverride() {

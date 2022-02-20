@@ -73,6 +73,7 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service) http.Handler
 
 	sr.GET("/users", handler.UserIndex)
 	sr.POST("users", handler.UserCreate)
+	sr.POST("/users/:user_id/teams/:team_id", handler.UserAddTeam)
 	sr.PATCH("users/:id", handler.UserUpdate)
 
 	sr.POST("mqtt/url", handler.MqttUserCreate)
