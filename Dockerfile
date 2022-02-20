@@ -10,10 +10,15 @@ COPY . .
 RUN make build
 
 # Bin
-FROM scratch AS bin
+# FROM scratch AS bin
+# COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+FROM alpine AS bin
 
 COPY --from=builder /src/gosd /usr/bin/gosd
-COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
+
+RUN apk add --no-cache bash
+COPY --from=builder /go/pkg/mod/github.com/urfave/cli/v2@v2.3.0/autocomplete/bash_autocomplete /etc/bash/autocomplete.d/gosd
+RUN printf 'export PS1="\u@\h:\w\$ " && PROG=gosd source /etc/bash/autocomplete.d/gosd' >> /root/.bashrc
 
 ENV TZ=Asia/Shanghai
 
