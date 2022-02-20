@@ -10,5 +10,5 @@ func init() {
 
 var databaseCmd = &cli.Command{
 	Name:  "database",
-	Usage: "database",
+	Usage: "Database management utility",
 }

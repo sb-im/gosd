@@ -18,7 +18,7 @@ func init() {
 
 var userLsCmd = &cli.Command{
 	Name:  "ls",
-	Usage: "ls all users",
+	Usage: "Ls all user",
 	Action: func(c *cli.Context) error {
 		cc := client.NewClient(config.Opts().BaseURL)
 		users, err := cc.UserIndex()

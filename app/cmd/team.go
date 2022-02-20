@@ -10,5 +10,5 @@ func init() {
 
 var teamCmd = &cli.Command{
 	Name:  "team",
-	Usage: "team",
+	Usage: "Teams management utility",
 }

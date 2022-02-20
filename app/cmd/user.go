@@ -10,5 +10,5 @@ func init() {
 
 var userCmd = &cli.Command{
 	Name:  "user",
-	Usage: "user",
+	Usage: "Users management utility",
 }

@@ -17,7 +17,7 @@ func init() {
 
 var teamLsCmd = &cli.Command{
 	Name:  "ls",
-	Usage: "ls all team",
+	Usage: "Ls all team",
 	Action: func(c *cli.Context) error {
 		cc := client.NewClient(config.Opts().BaseURL)
 		teams, _ := cc.TeamIndex()
