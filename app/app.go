@@ -8,15 +8,13 @@ package app
 // @BasePath /gosd/api/v3
 // @query.collection.format multi
 
-// @securitydefinitions.bearerAuth BearerAuth
-// @scheme bearer
-// @bearerFormat JWT
+// @securitydefinitions.apiKey JWT Secret
+// @in header
+// @name Authorization
 
-// @securitydefinitions.oauth2.password OAuth2Password
-// @tokenUrl /oauth/token
-// @scope.read Grants read access
-// @scope.write Grants write access
-// @scope.admin Grants read and write access to administrative information
+// @securitydefinitions.apiKey APIKeyHeader
+// @in header
+// @name X-API-Key
 
 // @tag.name status
 // @tag.description Server Time, Running Status
@@ -25,8 +23,8 @@ package app
 // @tag.name team
 // @tag.description a Team, all resource belongs to team
 // @tag.name user
-// @tag.description User
+// @tag.description User management
 // @tag.name node
-// @tag.description Node
+// @tag.description Node management
 // @tag.name task
-// @tag.description Task
+// @tag.description Task management

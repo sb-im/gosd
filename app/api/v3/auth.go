@@ -154,3 +154,13 @@ func (h Handler) login(c *gin.Context) (interface{}, error) {
 
 	return nil, jwt.ErrFailedAuthentication
 }
+
+// @Summary Token Refresh
+// @Schemes Auth
+// @Description Refresh a token expired time
+// @Tags auth
+// @Accept multipart/form-data
+// @Produce json
+// @Success 200
+// @Router /refresh_token [GET]
+func (h *Handler) Refresh(c *gin.Context) {}
