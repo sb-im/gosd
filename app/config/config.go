@@ -21,7 +21,7 @@ type Config struct {
 	StorageURL  string `env:"STORAGE_URL"`
 	LuaFilePath string `env:"LUA_FILE"`
 	Debug       bool   `env:"DEBUG" yaml:"debug"`
-	SingleUser  bool   `yaml:"single_user"`
+	SingleUser  bool   `env:"SINGLE_USER" yaml:"single_user"`
 	Language    string `yaml:"language"`
 	Timezone    string `yaml:"timezone"`
 	Secret      string `yaml:"secret"`

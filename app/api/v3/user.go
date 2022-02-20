@@ -1,7 +1,6 @@
 package v3
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -143,7 +142,6 @@ func (h *Handler) UserAddTeam(c *gin.Context) {
 		TeamID: string2Uint(c.Param("team_id")),
 	}
 
-	fmt.Println(userTeam)
 	if err := h.orm.Create(userTeam).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
