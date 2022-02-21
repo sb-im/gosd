@@ -257,6 +257,6 @@ deploy develop:
   script:
     - go get -u github.com/swaggo/swag/cmd/swag
     - make swagger
-    - 'scp swag/swagger.json ${USER_CLOUD_DEVELOP}@${HOST_CLOUD_DEVELOP}:swagger.json'
+    - tar -cJf - -C swag swagger.json | ssh ${USER_CLOUD_DEVELOP}@${HOST_CLOUD_DEVELOP} "tar -xJf - && sed -i s/localhost:8000/${HOST_CLOUD_DEVELOP}/g swagger.json"
     - ssh ${USER_CLOUD_DEVELOP}@${HOST_CLOUD_DEVELOP} 'docker-compose pull -q gosd && docker-compose up -d'
 
