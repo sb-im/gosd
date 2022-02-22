@@ -117,8 +117,8 @@ func (h Handler) ScheduleDestroy(c *gin.Context) {
 // @Produce json
 // @Param id path int true "Schedule ID"
 // @Success 200 {object} model.Schedule
-// @Router /schedules/{id}/toggle [POST]
-func (h Handler) ScheduleToggle(c *gin.Context) {
+// @Router /schedules/{id}/trigger [POST]
+func (h *Handler) ScheduleTrigger(c *gin.Context) {
 	schedule := &model.Schedule{}
 	h.orm.First(schedule, c.Param("id"))
 	if err := h.srv.JSON.Call(schedule.Method, []byte(schedule.Params)); err != nil {

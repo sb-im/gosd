@@ -44,7 +44,7 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service) http.Handler
 	sr.POST("schedules", handler.ScheduleCreate)
 	sr.PATCH("schedules/:id", handler.ScheduleUpdate)
 	sr.DELETE("schedules/:id", handler.ScheduleDestroy)
-	sr.POST("schedules/:id/toggle", handler.ScheduleToggle)
+	sr.POST("/schedules/:id/trigger", handler.ScheduleTrigger)
 
 	sr.POST("blobs", handler.BlobCreate)
 	sr.PUT("blobs", handler.BlobUpdate)
