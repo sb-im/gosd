@@ -24,7 +24,10 @@ func (h Handler) ScheduleIndex(c *gin.Context) {
 	var schedules []model.Schedule
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
-	h.orm.Offset((page - 1) * size).Limit(size).Find(&schedules)
+	if err := h.orm.Offset((page-1)*size).Limit(size).Find(&schedules, "team_id = ?", h.getCurrent(c).TeamID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, schedules)
 }
 
@@ -42,14 +45,16 @@ func (h Handler) ScheduleIndex(c *gin.Context) {
 // @Success 201 {object} model.Schedule
 // @Router /schedules [post]
 func (h Handler) ScheduleCreate(c *gin.Context) {
-	schedule := model.Schedule{}
+	schedule := model.Schedule{
+		TeamID: h.getCurrent(c).TeamID,
+	}
 	if err := c.ShouldBind(&schedule); err != nil {
 		log.Error(schedule, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	if err := h.orm.Create(&schedule).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	} else {
 		h.srv.ScheduleAdd(schedule)
 	}
