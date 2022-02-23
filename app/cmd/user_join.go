@@ -19,7 +19,7 @@ var userJoinCmd = &cli.Command{
 	},
 	ArgsUsage: "<user id>",
 	Action: func(c *cli.Context) error {
-		cc := client.NewClient(config.Opts().BaseURL)
+		cc := client.NewClient(config.Opts().BaseURL, config.Opts().ApiKey)
 		return cc.UserAddTeam(c.Args().First(), c.String("team"))
 	},
 }

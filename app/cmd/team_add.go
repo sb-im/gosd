@@ -18,7 +18,7 @@ var teamAddCmd = &cli.Command{
 		&cli.StringFlag{Name: "name", Aliases: []string{"n"}},
 	},
 	Action: func(c *cli.Context) error {
-		cc := client.NewClient(config.Opts().BaseURL)
+		cc := client.NewClient(config.Opts().BaseURL, config.Opts().ApiKey)
 		team := &map[string]interface{}{
 			"name": c.String("name"),
 		}

@@ -23,7 +23,7 @@ var userSetCmd = &cli.Command{
 	},
 	ArgsUsage: "<id>",
 	Action: func(c *cli.Context) error {
-		cc := client.NewClient(config.Opts().BaseURL)
+		cc := client.NewClient(config.Opts().BaseURL, config.Opts().ApiKey)
 		user := make(map[string]interface{})
 		if k := c.Uint("team"); k != 0 {
 			user["team"] = k

@@ -9,7 +9,11 @@ import (
 )
 
 func (c *Client) UserIndex() (users []model.User, err error) {
-	res, err := http.Get(c.endpoint + "/users")
+	req, err := http.NewRequest("GET", c.endpoint+"/users", nil)
+	if err != nil {
+		return users, err
+	}
+	res, err := c.do(req)
 	if err != nil {
 		return users, err
 	}
@@ -56,8 +60,7 @@ func (c *Client) UserUpdate(id string, user interface{}) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", "application/json")
-	res, err := (&http.Client{}).Do(req)
+	res, err := c.do(req)
 	if err != nil {
 		return err
 	}

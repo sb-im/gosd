@@ -22,7 +22,7 @@ var userAddCmd = &cli.Command{
 		&cli.StringFlag{Name: "timezone"},
 	},
 	Action: func(c *cli.Context) error {
-		cc := client.NewClient(config.Opts().BaseURL)
+		cc := client.NewClient(config.Opts().BaseURL, config.Opts().ApiKey)
 		user := &map[string]interface{}{
 			"team_id":  c.Uint("team"),
 			"username": c.String("username"),

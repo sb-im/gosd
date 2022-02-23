@@ -19,7 +19,7 @@ var teamLsCmd = &cli.Command{
 	Name:  "ls",
 	Usage: "Ls all team",
 	Action: func(c *cli.Context) error {
-		cc := client.NewClient(config.Opts().BaseURL)
+		cc := client.NewClient(config.Opts().BaseURL, config.Opts().ApiKey)
 		teams, _ := cc.TeamIndex()
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 		fmt.Fprintln(w, "ID\tName")

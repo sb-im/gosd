@@ -11,11 +11,19 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var (
+const (
 	identityGinKey  = "jwt_current"
 	identityTeamKey = "tid"
 	identityUserKey = "uid"
 	identitySessKey = "sid"
+)
+
+var (
+	defaultCurrent = &Current{
+		TeamID: 1,
+		UserID: 1,
+		SessID: 1,
+	}
 )
 
 type bindLogin struct {
@@ -106,8 +114,30 @@ func (h Handler) InitAuth(r *gin.RouterGroup) {
 	//r.Use(authMiddleware.MiddlewareFunc())
 	authMid := authMiddleware.MiddlewareFunc()
 
+	isAuth := func(c *gin.Context) bool {
+		_, ok := c.Get(identityGinKey)
+		return ok
+	}
+
+	// 1. Auth: SingleUserMode
 	r.Use(func(c *gin.Context) {
 		if h.singleUserMode() {
+			c.Set(identityGinKey, defaultCurrent)
+		}
+		c.Next()
+	})
+
+	// 2. Auth: header X-Api-Key
+	r.Use(func(c *gin.Context) {
+		if v := c.Request.Header.Values("X-Api-Key"); len(v) > 0 && v[0] == h.cfg.ApiKey {
+			c.Set(identityGinKey, defaultCurrent)
+		}
+		c.Next()
+	})
+
+	// 3. Auth: jwt
+	r.Use(func(c *gin.Context) {
+		if isAuth(c) {
 			c.Next()
 		} else {
 			authMid(c)

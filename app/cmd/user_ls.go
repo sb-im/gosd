@@ -20,7 +20,7 @@ var userLsCmd = &cli.Command{
 	Name:  "ls",
 	Usage: "Ls all user",
 	Action: func(c *cli.Context) error {
-		cc := client.NewClient(config.Opts().BaseURL)
+		cc := client.NewClient(config.Opts().BaseURL, config.Opts().ApiKey)
 		users, err := cc.UserIndex()
 		if err != nil {
 			return err

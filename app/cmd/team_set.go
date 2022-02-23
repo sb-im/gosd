@@ -19,7 +19,7 @@ var teamSetCmd = &cli.Command{
 	},
 	ArgsUsage: "<id>",
 	Action: func(c *cli.Context) error {
-		cc := client.NewClient(config.Opts().BaseURL)
+		cc := client.NewClient(config.Opts().BaseURL, config.Opts().ApiKey)
 		team := make(map[string]interface{})
 		if k := c.String("name"); k != "" {
 			team["name"] = k

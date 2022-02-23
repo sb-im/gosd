@@ -24,6 +24,7 @@ type Config struct {
 	SingleUser  bool   `env:"SINGLE_USER" yaml:"single_user"`
 	Language    string `yaml:"language"`
 	Timezone    string `yaml:"timezone"`
+	ApiKey      string `yaml:"api_key"`
 	Secret      string `yaml:"secret"`
 }
 
