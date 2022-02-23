@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"sb.im/gosd/app/client"
-	"sb.im/gosd/app/config"
-
 	"github.com/urfave/cli/v2"
 )
 
@@ -18,8 +15,7 @@ var userJoinCmd = &cli.Command{
 		&cli.UintFlag{Name: "team"},
 	},
 	ArgsUsage: "<user id>",
-	Action: func(c *cli.Context) error {
-		cc := client.NewClient(config.Opts().BaseURL, config.Opts().ApiKey)
-		return cc.UserAddTeam(c.Args().First(), c.String("team"))
-	},
+	Action: ex(func(c *exContext) error {
+		return c.cnt.UserAddTeam(c.ctx.Args().First(), c.ctx.String("team"))
+	}),
 }

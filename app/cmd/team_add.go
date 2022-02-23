@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"sb.im/gosd/app/client"
-	"sb.im/gosd/app/config"
-
 	"github.com/urfave/cli/v2"
 )
 
@@ -17,12 +14,11 @@ var teamAddCmd = &cli.Command{
 	Flags: []cli.Flag{
 		&cli.StringFlag{Name: "name", Aliases: []string{"n"}},
 	},
-	Action: func(c *cli.Context) error {
-		cc := client.NewClient(config.Opts().BaseURL, config.Opts().ApiKey)
+	Action: ex(func(c *exContext) error {
 		team := &map[string]interface{}{
-			"name": c.String("name"),
+			"name": c.ctx.String("name"),
 		}
 
-		return cc.TeamCreate(team)
-	},
+		return c.cnt.TeamCreate(team)
+	}),
 }

@@ -1,9 +1,6 @@
 package cmd
 
 import (
-	"sb.im/gosd/app/client"
-	"sb.im/gosd/app/config"
-
 	"github.com/urfave/cli/v2"
 )
 
@@ -22,24 +19,23 @@ var userSetCmd = &cli.Command{
 		&cli.StringFlag{Name: "timezone"},
 	},
 	ArgsUsage: "<id>",
-	Action: func(c *cli.Context) error {
-		cc := client.NewClient(config.Opts().BaseURL, config.Opts().ApiKey)
+	Action: ex(func(c *exContext) error {
 		user := make(map[string]interface{})
-		if k := c.Uint("team"); k != 0 {
+		if k := c.ctx.Uint("team"); k != 0 {
 			user["team"] = k
 		}
-		if k := c.String("username"); k != "" {
+		if k := c.ctx.String("username"); k != "" {
 			user["username"] = k
 		}
-		if k := c.String("password"); k != "" {
+		if k := c.ctx.String("password"); k != "" {
 			user["password"] = k
 		}
-		if k := c.String("language"); k != "" {
+		if k := c.ctx.String("language"); k != "" {
 			user["language"] = k
 		}
-		if k := c.String("timezone"); k != "" {
+		if k := c.ctx.String("timezone"); k != "" {
 			user["timezone"] = k
 		}
-		return cc.UserUpdate(c.Args().First(), &user)
-	},
+		return c.cnt.UserUpdate(c.ctx.Args().First(), &user)
+	}),
 }

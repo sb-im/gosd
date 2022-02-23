@@ -6,9 +6,6 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"sb.im/gosd/app/client"
-	"sb.im/gosd/app/config"
-
 	"github.com/urfave/cli/v2"
 )
 
@@ -19,9 +16,8 @@ func init() {
 var userLsCmd = &cli.Command{
 	Name:  "ls",
 	Usage: "Ls all user",
-	Action: func(c *cli.Context) error {
-		cc := client.NewClient(config.Opts().BaseURL, config.Opts().ApiKey)
-		users, err := cc.UserIndex()
+	Action: ex(func(c *exContext) error {
+		users, err := c.cnt.UserIndex()
 		if err != nil {
 			return err
 		}
@@ -46,5 +42,5 @@ var userLsCmd = &cli.Command{
 		}
 
 		return w.Flush()
-	},
+	}),
 }
