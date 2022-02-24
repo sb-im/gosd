@@ -38,7 +38,7 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service) http.Handler
 	// Init Auth Middleware
 	handler.InitAuth(sr)
 
-	sr.GET("status", handler.Status)
+	sr.GET("/status", handler.Status)
 
 	sr.GET("schedules", handler.ScheduleIndex)
 	sr.POST("schedules", handler.ScheduleCreate)
