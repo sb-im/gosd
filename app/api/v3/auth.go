@@ -106,9 +106,9 @@ func (h Handler) InitAuth(r *gin.RouterGroup) {
 	//	c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	//})
 
-	auth := r.Group("/auth")
+	//auth := r.Group("/auth")
 	// Refresh time can be longer than token timeout
-	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
+	r.GET("/refresh_token", authMiddleware.RefreshHandler)
 
 	// Set Middleware to Handler
 	//r.Use(authMiddleware.MiddlewareFunc())
@@ -189,6 +189,7 @@ func (h Handler) login(c *gin.Context) (interface{}, error) {
 // @Schemes Auth
 // @Description Refresh a token expired time
 // @Tags auth
+// @Security JWTSecret
 // @Accept multipart/form-data
 // @Produce json
 // @Success 200

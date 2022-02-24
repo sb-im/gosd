@@ -21,7 +21,7 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service) http.Handler
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		AllowCredentials: false,
 		MaxAge:           12 * time.Hour,
 	}))
