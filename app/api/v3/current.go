@@ -1,7 +1,6 @@
 package v3
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -42,6 +41,8 @@ func (h Handler) getCurrent(c *gin.Context) *Current {
 // @Schemes Auth
 // @Description user login
 // @Tags auth
+// @Security BasicAuth
+// @Security JWTSecret
 // @Produce json
 // @Success 200 {object} model.Schedule
 // @Router /current [GET]
@@ -49,9 +50,10 @@ func (h Handler) Current(c *gin.Context) {
 	current := h.getCurrent(c)
 	if current.isUser() {
 		var user model.User
-		h.orm.Preload("Teams").First(&user, current.UserID)
-
-		fmt.Println(user.Teams)
+		if err := h.orm.Preload("Teams").First(&user, current.UserID).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusOK, user)
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Current User Error"})
