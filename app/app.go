@@ -8,6 +8,8 @@ package app
 // @BasePath /gosd/api/v3
 // @query.collection.format multi
 
+// @securitydefinitions.basic BasicAuth
+
 // @securitydefinitions.apiKey JWTSecret
 // @in header
 // @name Authorization

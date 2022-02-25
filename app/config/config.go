@@ -22,6 +22,7 @@ type Config struct {
 	LuaFilePath string `env:"LUA_FILE"`
 	Debug       bool   `env:"DEBUG" yaml:"debug"`
 	SingleUser  bool   `env:"SINGLE_USER" yaml:"single_user"`
+	BasicAuth   bool   `env:"BASIC_AUTH" yaml:"basic_auth"`
 	Language    string `yaml:"language"`
 	Timezone    string `yaml:"timezone"`
 	ApiKey      string `yaml:"api_key"`
@@ -41,6 +42,7 @@ func DefaultConfig() *Config {
 		LuaFilePath: "default.lua",
 		Debug:       true,
 		SingleUser:  true,
+		BasicAuth:   true,
 		Language:    "en_US",
 		Timezone:    "Asia/Shanghai",
 	}

@@ -1,4 +1,5 @@
 single_user: true
+basic_auth: false
 language: "en_US"
 timezone: "Asia/Shanghai"
 base_url: "http://localhost:8000/gosd/api/v3"
