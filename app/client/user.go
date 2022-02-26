@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bytes"
 	"encoding/json"
 	"net/http"
 
@@ -9,11 +8,7 @@ import (
 )
 
 func (c *Client) UserIndex() (users []model.User, err error) {
-	req, err := http.NewRequest("GET", c.endpoint+"/users", nil)
-	if err != nil {
-		return users, err
-	}
-	res, err := c.do(req)
+	res, err := c.do(http.MethodGet, c.endpoint+"/users", nil)
 	if err != nil {
 		return users, err
 	}
@@ -31,11 +26,7 @@ func (c *Client) UserIndex() (users []model.User, err error) {
 }
 
 func (c *Client) UserCreate(user interface{}) error {
-	buf := new(bytes.Buffer)
-	if err := json.NewEncoder(buf).Encode(user); err != nil {
-		return err
-	}
-	res, err := http.Post(c.endpoint+"/users", "application/json", buf)
+	res, err := c.do(http.MethodPost, c.endpoint+"/users", user)
 	if err != nil {
 		return err
 	}
@@ -52,15 +43,7 @@ func (c *Client) UserCreate(user interface{}) error {
 }
 
 func (c *Client) UserUpdate(id string, user interface{}) error {
-	buf := new(bytes.Buffer)
-	if err := json.NewEncoder(buf).Encode(user); err != nil {
-		return err
-	}
-	req, err := http.NewRequest("PATCH", c.endpoint+"/users/"+id, buf)
-	if err != nil {
-		return err
-	}
-	res, err := c.do(req)
+	res, err := c.do(http.MethodPatch, c.endpoint+"/users/"+id, user)
 	if err != nil {
 		return err
 	}
@@ -77,7 +60,7 @@ func (c *Client) UserUpdate(id string, user interface{}) error {
 }
 
 func (c *Client) UserAddTeam(userId, teamId string) error {
-	res, err := http.Post(c.endpoint+"/users/"+userId+"/teams/"+teamId, "application/json", nil)
+	res, err := c.do(http.MethodPost, c.endpoint+"/users/"+userId+"/teams/"+teamId, nil)
 	if err != nil {
 		return err
 	}

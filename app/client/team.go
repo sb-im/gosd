@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bytes"
 	"encoding/json"
 	"net/http"
 
@@ -9,21 +8,25 @@ import (
 )
 
 func (c *Client) TeamIndex() (teams []model.Team, err error) {
-	res, err := http.Get(c.endpoint + "/teams")
+	res, err := c.do(http.MethodGet, c.endpoint+"/teams", nil)
 	if err != nil {
 		return teams, err
 	}
 
-	err = json.NewDecoder(res.Body).Decode(&teams)
-	return
+	if res.StatusCode == http.StatusOK {
+		err = json.NewDecoder(res.Body).Decode(&teams)
+		return
+	} else {
+		err = &errMsg{
+			status: res.Status,
+		}
+		json.NewDecoder(res.Body).Decode(err)
+		return
+	}
 }
 
 func (c *Client) TeamCreate(team interface{}) error {
-	buf := new(bytes.Buffer)
-	if err := json.NewEncoder(buf).Encode(team); err != nil {
-		return err
-	}
-	res, err := http.Post(c.endpoint+"/teams", "application/json", buf)
+	res, err := c.do(http.MethodPost, c.endpoint+"/teams", team)
 	if err != nil {
 		return err
 	}
@@ -40,16 +43,7 @@ func (c *Client) TeamCreate(team interface{}) error {
 }
 
 func (c *Client) TeamUpdate(id string, team interface{}) error {
-	buf := new(bytes.Buffer)
-	if err := json.NewEncoder(buf).Encode(team); err != nil {
-		return err
-	}
-	req, err := http.NewRequest("PATCH", c.endpoint+"/teams/"+id, buf)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	res, err := (&http.Client{}).Do(req)
+	res, err := c.do(http.MethodPatch, c.endpoint+"/teams/"+id, team)
 	if err != nil {
 		return err
 	}

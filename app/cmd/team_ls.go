@@ -16,7 +16,10 @@ var teamLsCmd = &cli.Command{
 	Name:  "ls",
 	Usage: "Ls all team",
 	Action: ex(func(c *exContext) error {
-		teams, _ := c.cnt.TeamIndex()
+		teams, err := c.cnt.TeamIndex()
+		if err != nil {
+			return err
+		}
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 		fmt.Fprintln(w, "ID\tName")
 
