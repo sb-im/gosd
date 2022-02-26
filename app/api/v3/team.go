@@ -12,28 +12,36 @@ import (
 // @Schemes Team
 // @Description get all teams index
 // @Tags team
+// @Security APIKeyHeader
 // @Accept json
 // @Produce json
 // @Param page query uint false "Task Page Num"
 // @Param size query uint false "Page Max Count"
-// @Success 200
+// @Success 200 {object} []model.Team
+// @Failure 500
 // @Router /teams [GET]
 func (h *Handler) TeamIndex(c *gin.Context) {
 	var teams []model.Team
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
-	h.orm.Offset((page - 1) * size).Limit(size).Find(&teams)
+	if err := h.orm.Offset((page - 1) * size).Limit(size).Find(&teams).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, teams)
 }
 
 // @Summary Create a team
 // @Schemes Team
+// @Security APIKeyHeader
 // @Description create a new team
 // @Tags team
 // @Accept multipart/form-data
 // @Produce json
 // @Param   name formData string true "Team Name"
 // @Success 201 {object} model.Team
+// @Failure 400
+// @Failure 500
 // @Router /teams [POST]
 func (h *Handler) TeamCreate(c *gin.Context) {
 	team := &model.Team{}
@@ -52,11 +60,14 @@ func (h *Handler) TeamCreate(c *gin.Context) {
 // @Schemes Team
 // @Description update a new team
 // @Tags team
+// @Security APIKeyHeader
 // @Accept multipart/form-data
 // @Produce json
 // @Param id path uint true "Team ID"
 // @Param name formData string false "Name"
 // @Success 200 {object} model.Team
+// @Failure 400
+// @Failure 500
 // @Router /teams/{id} [PATCH]
 func (h *Handler) TeamUpdate(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
@@ -73,7 +84,7 @@ func (h *Handler) TeamUpdate(c *gin.Context) {
 	}
 
 	if err := h.orm.Updates(&team).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -84,13 +95,17 @@ func (h *Handler) TeamUpdate(c *gin.Context) {
 // @Schemes Team
 // @Description add a existing user to the team, id > username
 // @Tags team
+// @Security APIKeyHeader
 // @Accept multipart/form-data
 // @Produce json
 // @Param id formData string false "User ID"
 // @Param username formData string false "User Name"
 // @Success 200 {object} model.Team
 // @Router /teams/users [POST]
-func (h Handler) TeamUserAdd(c *gin.Context) {
+
+// TODO
+// This API Disable
+func (h *Handler) TeamUserAdd(c *gin.Context) {
 	current := h.getCurrent(c)
 
 	type bindUser struct {
@@ -125,7 +140,7 @@ func (h Handler) TeamUserAdd(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-func (h Handler) teamIsExist(id uint) bool {
+func (h *Handler) teamIsExist(id uint) bool {
 	var count int64
 	h.orm.Find(&model.Team{}, id).Count(&count)
 	if count > 0 {

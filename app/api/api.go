@@ -40,6 +40,16 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service) http.Handler
 
 	sr.GET("/status", handler.Status)
 
+	// === Manager API { ===
+	sr.GET("/teams", handler.TeamIndex)
+	sr.POST("/teams", handler.TeamCreate)
+	sr.PATCH("/teams/:id", handler.TeamUpdate)
+
+	// This api disable
+	// sr.POST("/teams/users", handler.TeamUserAdd)
+
+	// === Manager API } ===
+
 	sr.GET("schedules", handler.ScheduleIndex)
 	sr.POST("schedules", handler.ScheduleCreate)
 	sr.PATCH("schedules/:id", handler.ScheduleUpdate)
@@ -65,11 +75,6 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service) http.Handler
 
 	sr.GET("tasks/:id/jobs", handler.JobIndex)
 	sr.POST("tasks/:id/jobs", handler.JobCreate)
-
-	sr.GET("/teams", handler.TeamIndex)
-	sr.POST("/teams", handler.TeamCreate)
-	sr.PATCH("/teams/:id", handler.TeamUpdate)
-	sr.POST("teams/users", handler.TeamUserAdd)
 
 	sr.GET("/users", handler.UserIndex)
 	sr.POST("users", handler.UserCreate)
