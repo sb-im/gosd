@@ -120,41 +120,19 @@ func (h Handler) InitAuth(r *gin.RouterGroup) {
 	}
 
 	// 1. Auth: SingleUserMode
-	r.Use(func(c *gin.Context) {
-		if h.singleUserMode() {
-			c.Set(identityGinKey, defaultCurrent)
-		}
-		c.Next()
-	})
+	if h.singleUserMode() {
+		r.Use(middlewareAuthSingleUser())
+	}
 
 	// 2. Auth: header X-Api-Key
-	r.Use(func(c *gin.Context) {
-		if v := c.Request.Header.Values("X-Api-Key"); len(v) > 0 && v[0] == h.cfg.ApiKey {
-			c.Set(identityGinKey, defaultCurrent)
-		}
-		c.Next()
-	})
+	if h.cfg.ApiKey != "" {
+		r.Use(middlewareAuthApiKey("X-Api-Key", h.cfg.ApiKey))
+	}
 
 	// 3. Auth: header Basic Authentication
-	r.Use(func(c *gin.Context) {
-		if h.cfg.BasicAuth {
-			if v := c.Request.Header.Values("Authorization"); len(v) > 0 {
-				if username, password, err := basicAuthDecode(v[0]); err == nil {
-					var user model.User
-					if h.orm.Where("username = ?", username).First(&user).Error == nil {
-						if user.VerifyPassword(password) == nil {
-							c.Set(identityGinKey, &Current{
-								TeamID: user.TeamID,
-								UserID: user.ID,
-								SessID: 1,
-							})
-						}
-					}
-				}
-			}
-		}
-		c.Next()
-	})
+	if h.cfg.BasicAuth {
+		r.Use(middlewareAuthBasic(h.orm))
+	}
 
 	// 4. Auth: header JWT token
 	r.Use(func(c *gin.Context) {
