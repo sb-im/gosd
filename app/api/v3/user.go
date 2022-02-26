@@ -17,13 +17,17 @@ import (
 // @Produce json
 // @Param page query uint false "Task Page Num"
 // @Param size query uint false "Page Max Count"
-// @Success 200
+// @Success 200 {object} []model.User
+// @Failure 500
 // @Router /users [GET]
 func (h *Handler) UserIndex(c *gin.Context) {
 	var users []model.User
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
-	h.orm.Preload("Teams").Offset((page - 1) * size).Limit(size).Find(&users)
+	if err := h.orm.Preload("Teams").Offset((page - 1) * size).Limit(size).Find(&users).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, users)
 }
 
@@ -31,6 +35,7 @@ func (h *Handler) UserIndex(c *gin.Context) {
 // @Schemes User
 // @Description create a new user
 // @Tags user
+// @Security APIKeyHeader
 // @Accept multipart/form-data
 // @Produce json
 // @Param team_id  formData uint true "Team ID"
@@ -39,6 +44,9 @@ func (h *Handler) UserIndex(c *gin.Context) {
 // @Param language formData string false "Language Codes, such as 'zh_CN'" default(en_US)
 // @Param timezone formData string false "IANA Time Zone database, such as 'America/New_York'" default(Asia/Shanghai)
 // @Success 201 {object} model.User
+// @Failure 400
+// @Failure 404
+// @Failure 500
 // @Router /users [POST]
 func (h *Handler) UserCreate(c *gin.Context) {
 	type bindUser struct {
@@ -70,7 +78,7 @@ func (h *Handler) UserCreate(c *gin.Context) {
 		Timezone: u.Timezone,
 	}
 	if err := h.orm.Create(user).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusCreated, user)
@@ -80,6 +88,7 @@ func (h *Handler) UserCreate(c *gin.Context) {
 // @Schemes User
 // @Description update a new user
 // @Tags user
+// @Security APIKeyHeader
 // @Accept multipart/form-data
 // @Produce json
 // @Param id path uint true "User ID"
@@ -89,7 +98,9 @@ func (h *Handler) UserCreate(c *gin.Context) {
 // @Param language formData string false "Language"
 // @Param timezone formData string false "Timezone"
 // @Success 200 {object} model.User
-// @Router /users/{id} [patch]
+// @Failure 400
+// @Failure 500
+// @Router /users/{id} [PATCH]
 func (h *Handler) UserUpdate(c *gin.Context) {
 	type bindUser struct {
 		TeamID   uint   `json:"team_id" form:"team_id"`
@@ -113,20 +124,19 @@ func (h *Handler) UserUpdate(c *gin.Context) {
 		Timezone: u.Timezone,
 	}
 
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	user.ID = mustStringToUint(c.Param("id"))
+	if err := h.orm.Updates(user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	user.ID = uint(id)
-	h.orm.Updates(user)
 	c.JSON(http.StatusOK, user)
 }
 
 // @Summary Team Add user
 // @Schemes User
-// @Description add a existing user to the team, id > username
-// @Tags team
+// @Description add a user to team
+// @Tags user
+// @Security APIKeyHeader
 // @Accept multipart/form-data
 // @Produce json
 // @Param user_id path int true "User ID"
@@ -134,17 +144,13 @@ func (h *Handler) UserUpdate(c *gin.Context) {
 // @Success 201 {object} model.UserTeam
 // @Router /users/{user_id}/teams/{team_id} [POST]
 func (h *Handler) UserAddTeam(c *gin.Context) {
-	string2Uint := func(value string) uint {
-		num, _ := strconv.Atoi(value)
-		return uint(num)
-	}
 	userTeam := &model.UserTeam{
-		UserID: string2Uint(c.Param("user_id")),
-		TeamID: string2Uint(c.Param("team_id")),
+		UserID: mustStringToUint(c.Param("user_id")),
+		TeamID: mustStringToUint(c.Param("team_id")),
 	}
 
 	if err := h.orm.Create(userTeam).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

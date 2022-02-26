@@ -48,6 +48,11 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service) http.Handler
 	// This api disable
 	// sr.POST("/teams/users", handler.TeamUserAdd)
 
+	sr.GET("/users", handler.UserIndex)
+	sr.POST("/users", handler.UserCreate)
+	sr.PATCH("/users/:id", handler.UserUpdate)
+
+	sr.POST("/users/:user_id/teams/:team_id", handler.UserAddTeam)
 	// === Manager API } ===
 
 	sr.GET("schedules", handler.ScheduleIndex)
@@ -75,11 +80,6 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service) http.Handler
 
 	sr.GET("tasks/:id/jobs", handler.JobIndex)
 	sr.POST("tasks/:id/jobs", handler.JobCreate)
-
-	sr.GET("/users", handler.UserIndex)
-	sr.POST("users", handler.UserCreate)
-	sr.POST("/users/:user_id/teams/:team_id", handler.UserAddTeam)
-	sr.PATCH("users/:id", handler.UserUpdate)
 
 	sr.POST("mqtt/url", handler.MqttUserCreate)
 
