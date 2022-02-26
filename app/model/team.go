@@ -9,7 +9,7 @@ import (
 type Team struct {
 	Model
 
-	Name string `json:"name" form:"name"`
+	Name string `json:"name" form:"name" gorm:"uniqueIndex;not null"`
 }
 
 type UserTeam struct {

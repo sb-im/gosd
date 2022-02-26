@@ -41,7 +41,10 @@ func (h *Handler) TeamCreate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	h.orm.Create(team)
+	if err := h.orm.Create(team).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusCreated, team)
 }
 
