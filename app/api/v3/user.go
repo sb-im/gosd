@@ -12,6 +12,7 @@ import (
 // @Schemes User
 // @Description get all users index
 // @Tags user
+// @Security APIKeyHeader
 // @Accept json
 // @Produce json
 // @Param page query uint false "Task Page Num"
@@ -42,7 +43,7 @@ func (h *Handler) UserIndex(c *gin.Context) {
 func (h *Handler) UserCreate(c *gin.Context) {
 	type bindUser struct {
 		TeamID   uint   `json:"team_id" form:"team_id" binding:"required"`
-		Username string `json:"username" form:"username" binding:"required"`
+		Username string `json:"username" form:"username" binding:"required,alphanum"`
 		Password string `json:"password" form:"password" binding:"required"`
 		Language string `json:"language" form:"language"`
 		Timezone string `json:"timezone" form:"timezone"`
@@ -92,7 +93,7 @@ func (h *Handler) UserCreate(c *gin.Context) {
 func (h *Handler) UserUpdate(c *gin.Context) {
 	type bindUser struct {
 		TeamID   uint   `json:"team_id" form:"team_id"`
-		Username string `json:"username" form:"username"`
+		Username string `json:"username" form:"username" binding:"alphanum"`
 		Password string `json:"password" form:"password"`
 		Language string `json:"language" form:"language"`
 		Timezone string `json:"timezone" form:"timezone"`

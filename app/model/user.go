@@ -12,7 +12,7 @@ type User struct {
 	Team   *Team  `json:"team,omitempty"`
 	Teams  []Team `json:"teams,omitempty" gorm:"many2many:user_teams;"`
 
-	Username string `json:"username" gorm:"uniqueIndex"`
+	Username string `json:"username" gorm:"uniqueIndex;not null"`
 	Password string `json:"-"`
 	Language string `json:"language"`
 	Timezone string `json:"timezone"`
