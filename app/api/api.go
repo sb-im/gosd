@@ -12,6 +12,8 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service) http.Handler {
@@ -36,7 +38,9 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service) http.Handler
 	handler := v3.NewHandler(cfg, orm, srv)
 
 	// Init Auth Middleware
-	handler.InitAuth(sr)
+	if err := v3.InitAuthMiddleware(sr, handler); err != nil {
+		log.Fatal("JWT Error:" + err.Error())
+	}
 
 	sr.GET("/status", handler.Status)
 

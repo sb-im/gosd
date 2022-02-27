@@ -1,14 +1,12 @@
 package v3
 
 import (
-	"fmt"
 	"time"
 
 	"sb.im/gosd/app/model"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -31,9 +29,9 @@ type bindLogin struct {
 	Password string `form:"password" json:"password" binding:"required"`
 }
 
-func (h Handler) InitAuth(r *gin.RouterGroup) {
+func InitAuthMiddleware(r *gin.RouterGroup, h *Handler) error {
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
-		Realm:       "test zone",
+		Realm:       "gosd_zone",
 		Key:         []byte(h.cfg.Secret),
 		Timeout:     time.Hour,
 		MaxRefresh:  time.Hour,
@@ -56,7 +54,7 @@ func (h Handler) InitAuth(r *gin.RouterGroup) {
 				SessID: uint(claims[identitySessKey].(float64)),
 			}
 		},
-		Authenticator: h.login,
+		Authenticator: h.handlerAuthJWTlogin,
 		Authorizator: func(data interface{}, c *gin.Context) bool {
 			// TODO: other auth method
 			return true
@@ -67,6 +65,8 @@ func (h Handler) InitAuth(r *gin.RouterGroup) {
 				"message": message,
 			})
 		},
+		LoginResponse:   responseAuthJWTLogin,
+		RefreshResponse: responseAuthJWTRefresh,
 		// TokenLookup is a string in the form of "<source>:<name>" that is used
 		// to extract token from the request.
 		// Optional. Default value "header:Authorization".
@@ -87,15 +87,13 @@ func (h Handler) InitAuth(r *gin.RouterGroup) {
 	})
 
 	if err != nil {
-		log.Fatal("JWT Error:" + err.Error())
+		return err
 	}
 
 	// When you use jwt.New(), the function is already automatically called for checking,
 	// which means you don't need to call it again.
-	errInit := authMiddleware.MiddlewareInit()
-
-	if errInit != nil {
-		log.Fatal("authMiddleware.MiddlewareInit() Error:" + errInit.Error())
+	if err = authMiddleware.MiddlewareInit(); err != nil {
+		return err
 	}
 
 	r.POST("/login", authMiddleware.LoginHandler)
@@ -142,27 +140,19 @@ func (h Handler) InitAuth(r *gin.RouterGroup) {
 			authMid(c)
 		}
 	})
+	return nil
 }
 
-// @Summary User Login
-// @Schemes Auth
-// @Description user login
-// @Tags auth
-// @Accept multipart/form-data
-// @Produce json
-// @Param username formData string true "Username"
-// @Param password formData string true "Password"
-// @Success 200
-// @Router /login [POST]
-func (h Handler) login(c *gin.Context) (interface{}, error) {
+func (h *Handler) handlerAuthJWTlogin(c *gin.Context) (interface{}, error) {
 	var login bindLogin
 	if err := c.ShouldBind(&login); err != nil {
 		return nil, jwt.ErrMissingLoginValues
 	}
 
 	var user model.User
-	h.orm.Where("username = ?", login.Username).First(&user)
-	fmt.Println(user)
+	if err := h.orm.Where("username = ?", login.Username).First(&user).Error; err != nil {
+		return nil, err
+	}
 	if err := user.VerifyPassword(login.Password); err == nil {
 
 		// Create Session
@@ -184,6 +174,29 @@ func (h Handler) login(c *gin.Context) (interface{}, error) {
 	return nil, jwt.ErrFailedAuthentication
 }
 
+type responseJWT struct {
+	Expire time.Time `json:"expire" example:"2022-02-22T02:20:22.002222+08:00"`
+	Token  string    `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDU5NDcyNDAsIm9yaWdfaWF0IjoxNjQ1OTQzNjQwLCJzaWQiOjcsInRpZCI6MSwidWlkIjoxfQ.fnkuA08Be8Q3HGjOFdmND5Kc8aqWABXaoUravKX0bqg"`
+}
+
+// @Summary User Login
+// @Schemes Auth
+// @Description user login
+// @Tags auth
+// @Accept multipart/form-data
+// @Produce json
+// @Param username formData string true "Username"
+// @Param password formData string true "Password"
+// @Success 200 {object} responseJWT
+// @Failure 401
+// @Router /login [POST]
+func responseAuthJWTLogin(c *gin.Context, code int, message string, time time.Time) {
+	c.JSON(code, &responseJWT{
+		Expire: time,
+		Token:  message,
+	})
+}
+
 // @Summary Token Refresh
 // @Schemes Auth
 // @Description Refresh a token expired time
@@ -191,6 +204,12 @@ func (h Handler) login(c *gin.Context) (interface{}, error) {
 // @Security JWTSecret
 // @Accept multipart/form-data
 // @Produce json
-// @Success 200
+// @Success 200 {object} responseJWT
+// @Failure 401
 // @Router /refresh_token [GET]
-func (h *Handler) Refresh(c *gin.Context) {}
+func responseAuthJWTRefresh(c *gin.Context, code int, message string, time time.Time) {
+	c.JSON(code, &responseJWT{
+		Expire: time,
+		Token:  message,
+	})
+}
