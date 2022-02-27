@@ -1,6 +1,8 @@
 package v3
 
 import (
+	"errors"
+	"net/http"
 	"time"
 
 	"sb.im/gosd/app/model"
@@ -140,6 +142,23 @@ func InitAuthMiddleware(r *gin.RouterGroup, h *Handler) error {
 			authMid(c)
 		}
 	})
+
+	r.POST("/switch_team/:id", func(c *gin.Context) {
+		current, err := h.handlerAuthJWTSwitchTeam(c)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+
+		if token, expire, err := authMiddleware.TokenGenerator(current); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusOK, &responseJWT{
+				Token:  token,
+				Expire: expire,
+			})
+		}
+	})
 	return nil
 }
 
@@ -190,9 +209,9 @@ type responseJWT struct {
 // @Success 200 {object} responseJWT
 // @Failure 401
 // @Router /login [POST]
-func responseAuthJWTLogin(c *gin.Context, code int, message string, time time.Time) {
+func responseAuthJWTLogin(c *gin.Context, code int, message string, expire time.Time) {
 	c.JSON(code, &responseJWT{
-		Expire: time,
+		Expire: expire,
 		Token:  message,
 	})
 }
@@ -207,9 +226,38 @@ func responseAuthJWTLogin(c *gin.Context, code int, message string, time time.Ti
 // @Success 200 {object} responseJWT
 // @Failure 401
 // @Router /refresh_token [GET]
-func responseAuthJWTRefresh(c *gin.Context, code int, message string, time time.Time) {
+func responseAuthJWTRefresh(c *gin.Context, code int, message string, expire time.Time) {
 	c.JSON(code, &responseJWT{
-		Expire: time,
+		Expire: expire,
 		Token:  message,
 	})
+}
+
+// @Summary Switch Current Team
+// @Schemes Auth
+// @Description Switch Current Team
+// @Tags auth
+// @Security JWTSecret
+// @Accept multipart/form-data
+// @Produce json
+// @Param id path uint true "Team ID"
+// @Success 200 {object} responseJWT
+// @Failure 404
+// @Router /switch_team/{id} [POST]
+func (h *Handler) handlerAuthJWTSwitchTeam(c *gin.Context) (current *Current, err error) {
+	current = h.getCurrent(c)
+	teamId := mustStringToUint(c.Param("id"))
+
+	var count int64
+	if err = h.orm.Find(&model.UserTeam{}, "team_id = ? AND user_id = ?", teamId, current.UserID).Count(&count).Error; err != nil {
+		return
+	}
+
+	if count == 0 {
+		err = errors.New("Not Found This Team")
+		return
+	}
+
+	current.TeamID = teamId
+	return
 }
