@@ -2,24 +2,24 @@ package storage
 
 import (
 	"io/ioutil"
-	"net/url"
 	"os"
 	"path"
+	"strings"
 )
 
 type Storage struct {
 	path string
 }
 
-func (s *Storage) Path() string {
-	return s.path
+func (s *Storage) LocalPath(name string) string {
+	return path.Join(s.path, name)
 }
 
 func NewStorage(storageURL string) *Storage {
 	path := "data/storage"
-	u, err := url.Parse(storageURL)
-	if err == nil {
-		path = u.Path
+	p := strings.SplitN(storageURL, "://", 2)
+	if len(p) > 1 {
+		path = p[1]
 	}
 	os.MkdirAll(path, 0755)
 	return &Storage{path: path}

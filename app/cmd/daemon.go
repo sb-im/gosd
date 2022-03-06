@@ -60,7 +60,7 @@ func NewHandler(ctx context.Context) http.Handler {
 	srv := service.NewService(orm, rdb, worker)
 	srv.StartSchedule()
 
-	return api.NewApi(cfg, orm, srv)
+	return api.NewApi(cfg, orm, srv, ofs)
 }
 
 func Daemon() {

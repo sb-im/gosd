@@ -45,7 +45,8 @@ func (h Handler) BlobCreate(c *gin.Context) {
 			} else {
 				bindBlob[key+"."+strconv.Itoa(i)] = blob.UXID
 			}
-			if err := c.SaveUploadedFile(file, h.cfg.StorageURL+blob.UXID); err != nil {
+
+			if err := c.SaveUploadedFile(file, h.ofs.LocalPath(blob.UXID)); err != nil {
 				c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
 				return
 			}
@@ -122,13 +123,23 @@ func (h Handler) blobIsExist(id string) bool {
 	return false
 }
 
-func (h Handler) BlobShow(c *gin.Context) {
+// @Summary Blobs Get
+// @Schemes Blobs
+// @Description get a blob content
+// @Tags blob
+// @Accept multipart/form-data
+// @Produce json
+// @Param blobID path string true "blob ID"
+// @Success 200 {object} model.Blob
+// @Success 404
+// @Router /blobs/{blobID} [GET]
+func (h *Handler) BlobShow(c *gin.Context) {
 	blob := model.Blob{}
 	h.orm.Take(&blob, "uxid = ?", c.Param("blobID"))
 	if blob.ID != 0 {
 		c.FileAttachment(h.cfg.StorageURL+blob.UXID, blob.Name)
 	} else {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "NotFound this blob"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "NotFound this blob"})
 		return
 	}
 }

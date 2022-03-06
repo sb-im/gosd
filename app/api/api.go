@@ -9,6 +9,7 @@ import (
 	"sb.im/gosd/app/api/v3"
 	"sb.im/gosd/app/config"
 	"sb.im/gosd/app/service"
+	"sb.im/gosd/app/storage"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -16,7 +17,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service) http.Handler {
+func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service, ofs *storage.Storage) http.Handler {
 	r := gin.Default()
 
 	// CORS Middleware
@@ -35,7 +36,7 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service) http.Handler
 		})
 	})
 
-	handler := v3.NewHandler(cfg, orm, srv)
+	handler := v3.NewHandler(cfg, orm, srv, ofs)
 
 	// Init Auth Middleware
 	if err := v3.InitAuthMiddleware(sr, handler); err != nil {
