@@ -149,7 +149,7 @@ func (h *Handler) BlobShow(c *gin.Context) {
 	blob := model.Blob{}
 	h.orm.Take(&blob, "uxid = ?", c.Param("blobID"))
 	if blob.ID != 0 {
-		c.FileAttachment(h.cfg.StorageURL+blob.UXID, blob.Name)
+		c.FileAttachment(h.ofs.LocalPath(blob.UXID), blob.Name)
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{"error": "NotFound this blob"})
 		return
