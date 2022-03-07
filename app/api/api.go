@@ -66,10 +66,10 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service, ofs *storage
 	sr.DELETE("schedules/:id", handler.ScheduleDestroy)
 	sr.POST("/schedules/:id/trigger", handler.ScheduleTrigger)
 
-	sr.POST("blobs", handler.BlobCreate)
-	sr.PUT("blobs", handler.BlobUpdate)
-	sr.PUT("blobs/:blobID", handler.BlobUpdate)
-	sr.GET("blobs/:blobID", handler.BlobShow)
+	sr.POST("/blobs", handler.BlobCreate)
+	sr.PUT("/blobs", handler.BlobUpdate)
+	sr.PUT("/blobs/:blobID", handler.BlobUpdate)
+	sr.GET("/blobs/:blobID", handler.BlobShow)
 
 	sr.POST("nodes", handler.NodeCreate)
 	sr.GET("nodes", handler.NodeIndex)

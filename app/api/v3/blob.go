@@ -1,7 +1,6 @@
 package v3
 
 import (
-	"fmt"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -15,14 +14,16 @@ import (
 
 // @Summary Blobs Create
 // @Schemes Blobs
-// @Description create a new blobs
+// @Description create a new blobs, return map[string]string, key is key, value is blobID
 // @Tags blob
 // @Accept multipart/form-data
 // @Produce json
 // @Param file formData file true "this is a file"
-// @Success 200 {object} model.Blob
-// @Router /blobs [post]
-func (h Handler) BlobCreate(c *gin.Context) {
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /blobs [POST]
+func (h *Handler) BlobCreate(c *gin.Context) {
 	bindBlob := make(map[string]string)
 	if err := c.ShouldBind(&bindBlob); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -30,14 +31,14 @@ func (h Handler) BlobCreate(c *gin.Context) {
 	}
 	form, err := c.MultipartForm()
 	if err != nil {
-		c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	for key, value := range form.File {
 		for i, file := range value {
 			uxid, err := uuid.NewV4()
 			if err != nil {
-				c.String(http.StatusInternalServerError, err.Error())
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 
@@ -53,10 +54,13 @@ func (h Handler) BlobCreate(c *gin.Context) {
 			}
 
 			if err := c.SaveUploadedFile(file, h.ofs.LocalPath(blob.UXID)); err != nil {
-				c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			h.orm.Create(blob)
+			if err := h.orm.Create(blob).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
 		}
 	}
 	c.JSON(http.StatusOK, bindBlob)
@@ -71,8 +75,10 @@ func (h Handler) BlobCreate(c *gin.Context) {
 // @Param blobID path string true "blob ID"
 // @Param file formData file true "this is a file"
 // @Success 200 {object} model.Blob
+// @Failure 400
+// @Failure 500
 // @Router /blobs/{blobID} [PUT]
-func (h Handler) BlobUpdate(c *gin.Context) {
+func (h *Handler) BlobUpdate(c *gin.Context) {
 	bindBlob := make(map[string]string)
 	if err := c.ShouldBind(&bindBlob); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -80,7 +86,7 @@ func (h Handler) BlobUpdate(c *gin.Context) {
 	}
 	form, err := c.MultipartForm()
 	if err != nil {
-		c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -120,7 +126,7 @@ func (h Handler) BlobUpdate(c *gin.Context) {
 	c.JSON(http.StatusOK, bindBlob)
 }
 
-func (h Handler) blobIsExist(id string) bool {
+func (h *Handler) blobIsExist(id string) bool {
 	var count int64
 	h.orm.Model(&model.Blob{}).Where("uxid = ?", id).Count(&count)
 	if count > 0 {
