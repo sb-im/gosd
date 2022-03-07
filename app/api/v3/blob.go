@@ -10,7 +10,7 @@ import (
 	"sb.im/gosd/app/model"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/xid"
+	"github.com/gofrs/uuid"
 )
 
 // @Summary Blobs Create
@@ -35,8 +35,14 @@ func (h Handler) BlobCreate(c *gin.Context) {
 	}
 	for key, value := range form.File {
 		for i, file := range value {
+			uxid, err := uuid.NewV4()
+			if err != nil {
+				c.String(http.StatusInternalServerError, err.Error())
+				return
+			}
+
 			blob := &model.Blob{
-				UXID: xid.New().String(),
+				UXID: uxid.String(),
 				Name: filepath.Base(file.Filename),
 			}
 			log.Infoln(key, i, blob)

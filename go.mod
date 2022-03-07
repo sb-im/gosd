@@ -15,7 +15,6 @@ require (
 	github.com/onsi/ginkgo/v2 v2.0.0
 	github.com/onsi/gomega v1.17.0
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/rs/xid v1.2.1
 	github.com/sb-im/jsonrpc-lite v0.2.0
 	github.com/sirupsen/logrus v1.4.2
 	github.com/urfave/cli/v2 v2.3.0
@@ -29,6 +28,11 @@ require (
 	gorm.io/gorm v1.21.15
 	layeh.com/gopher-json v0.0.0-20190114024228-97fed8db8427
 	layeh.com/gopher-luar v1.0.8
+)
+
+require (
+	github.com/gofrs/uuid v4.0.0+incompatible
+	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
 )
 
 require (
@@ -63,5 +67,4 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.26.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )
