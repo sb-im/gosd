@@ -78,6 +78,7 @@ func (h *Handler) BlobCreate(c *gin.Context) {
 // @Failure 400
 // @Failure 500
 // @Router /blobs/{blobID} [PUT]
+
 func (h *Handler) BlobUpdate(c *gin.Context) {
 	bindBlob := make(map[string]string)
 	if err := c.ShouldBind(&bindBlob); err != nil {
