@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"sb.im/gosd/app/api"
 	"sb.im/gosd/app/client"
 	"sb.im/gosd/app/cmd"
 	"sb.im/gosd/app/config"
@@ -38,7 +39,7 @@ var _ = Describe("Task", func() {
 		s = httptest.NewServer(handler)
 
 		// TODO: need to ApiKey
-		c = client.NewClient(s.URL, "")
+		c = client.NewClient(s.URL + api.ApiPrefix, "")
 
 		go help.StartNcp(ctx, config.Parse().MqttURL, strconv.Itoa(int(nodeID)))
 
@@ -55,7 +56,9 @@ var _ = Describe("Task", func() {
 		It("create a new task", func() {
 			fmt.Println(os.Getenv("LUA_FILE"))
 			if node, err := c.NodeShow(strconv.Itoa(int(nodeID))); err != nil {
-				c.NodeCreate(&model.Node{})
+				c.NodeCreate(&model.Node{
+					Name: "Test Node",
+				})
 			} else {
 				fmt.Println(node)
 			}

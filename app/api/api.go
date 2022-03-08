@@ -17,6 +17,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const ApiPrefix = "/gosd/api/v3"
+
 func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service, ofs *storage.Storage) http.Handler {
 	r := gin.Default()
 
@@ -29,7 +31,7 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service, ofs *storage
 		MaxAge:           12 * time.Hour,
 	}))
 
-	sr := r.Group("/gosd/api/v3")
+	sr := r.Group(ApiPrefix)
 	sr.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
