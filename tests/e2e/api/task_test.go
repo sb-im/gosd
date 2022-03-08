@@ -54,6 +54,11 @@ var _ = Describe("Task", func() {
 	Context("Test Context", func() {
 		It("create a new task", func() {
 			fmt.Println(os.Getenv("LUA_FILE"))
+			if node, err := c.NodeShow(strconv.Itoa(int(nodeID))); err != nil {
+				c.NodeCreate(&model.Node{})
+			} else {
+				fmt.Println(node)
+			}
 			err := c.TaskCreate(&task)
 			Expect(err).NotTo(HaveOccurred())
 		})
