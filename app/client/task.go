@@ -1,30 +1,32 @@
 package client
 
 import (
-	"bytes"
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"sb.im/gosd/app/model"
 )
 
-func (c Client) TaskIndex() (tasks []model.Task, err error) {
-	res, err := http.Get(c.endpoint + "/gosd/api/v3/tasks")
+func (c *Client) TaskIndex() (tasks []model.Task, err error) {
+	res, err := c.do(http.MethodGet, c.endpoint+"/tasks", nil)
 	if err != nil {
 		return tasks, err
 	}
 
-	err = json.NewDecoder(res.Body).Decode(&tasks)
-	return
+	if res.StatusCode == http.StatusOK {
+		err = json.NewDecoder(res.Body).Decode(&tasks)
+		return
+	} else {
+		err = &errMsg{
+			status: res.Status,
+		}
+		json.NewDecoder(res.Body).Decode(err)
+		return
+	}
 }
 
-func (c Client) TaskCreate(task *model.Task) error {
-	buf := new(bytes.Buffer)
-	if err := json.NewEncoder(buf).Encode(task); err != nil {
-		return err
-	}
-	res, err := http.Post(c.endpoint+"/gosd/api/v3/tasks", "application/json", buf)
+func (c *Client) TaskCreate(task *model.Task) error {
+	res, err := c.do(http.MethodPost, c.endpoint+"/tasks", task)
 	if err != nil {
 		return err
 	}
@@ -32,6 +34,10 @@ func (c Client) TaskCreate(task *model.Task) error {
 	if res.StatusCode == http.StatusCreated {
 		return json.NewDecoder(res.Body).Decode(task)
 	} else {
-		return errors.New("Create Failed")
+		err := &errMsg{
+			status: res.Status,
+		}
+		json.NewDecoder(res.Body).Decode(err)
+		return err
 	}
 }
