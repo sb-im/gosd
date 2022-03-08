@@ -25,7 +25,7 @@ func (c *Client) NodeIndex() (nodes []model.Node, err error) {
 	}
 }
 
-func (c *Client) NodeCreate(node *model.Node) error {
+func (c *Client) NodeCreate(node interface{}) error {
 	res, err := c.do(http.MethodPost, c.endpoint+"/nodes", node)
 	if err != nil {
 		return err
