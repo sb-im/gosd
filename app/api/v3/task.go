@@ -19,12 +19,16 @@ import (
 // @Param page query uint false "Task Page Num"
 // @Param size query uint false "Page Max Count"
 // @Success 200
-// @Router /tasks [get]
+// @Failure 500
+// @Router /tasks [GET]
 func (h *Handler) TaskIndex(c *gin.Context) {
 	var tasks []model.Task
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
-	h.orm.Offset((page-1)*size).Limit(size).Find(&tasks, "team_id = ?", h.getCurrent(c).TeamID)
+	if err := h.orm.Offset((page-1)*size).Limit(size).Find(&tasks, "team_id = ?", h.getCurrent(c).TeamID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, tasks)
 }
 
@@ -37,7 +41,10 @@ func (h *Handler) TaskIndex(c *gin.Context) {
 // @Param name    formData string true "Task Name"
 // @Param node_id formData uint true "Node ID"
 // @Success 201
-// @Router /tasks [post]
+// @Failure 400
+// @Failure 404
+// @Failure 500
+// @Router /tasks [POST]
 func (h *Handler) TaskCreate(c *gin.Context) {
 	task := &model.Task{
 		TeamID: h.getCurrent(c).TeamID,
@@ -46,7 +53,21 @@ func (h *Handler) TaskCreate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	h.orm.Create(task)
+
+	// Verify: `node_id`
+	if err := h.orm.First(&model.Node{}, "id = ? AND team_id = ?", task.NodeID, h.getCurrent(c).TeamID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	if err := h.orm.Create(task).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusCreated, task)
 }
 
@@ -84,15 +105,31 @@ func (h Handler) TaskShow(c *gin.Context) {
 // @Produce json
 // @Param id   path int true "Task ID"
 // @Success 200
-// @Router /tasks/{id} [put]
-func (h Handler) TaskUpdate(c *gin.Context) {
+// @Failure 400
+// @Failure 404
+// @Failure 500
+// @Router /tasks/{id} [PUT]
+func (h *Handler) TaskUpdate(c *gin.Context) {
 	task := model.Task{}
 	if err := c.ShouldBind(&task); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	h.orm.Where("id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Updates(&task).Scan(&task)
+	// Verify: `node_id`
+	if err := h.orm.First(&model.Node{}, "id = ? AND team_id = ?", task.NodeID, h.getCurrent(c).TeamID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	if err := h.orm.Where("id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Updates(&task).Scan(&task).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, task)
 }
 
@@ -104,8 +141,12 @@ func (h Handler) TaskUpdate(c *gin.Context) {
 // @Produce json
 // @Param id path uint true "Task ID"
 // @Success 204
-// @Router /tasks/{id} [delete]
-func (h Handler) TaskDestroy(c *gin.Context) {
-	h.orm.Delete(&model.Task{}, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID)
+// @Failure 500
+// @Router /tasks/{id} [DELETE]
+func (h *Handler) TaskDestroy(c *gin.Context) {
+	if err := h.orm.Delete(&model.Task{}, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusNoContent, nil)
 }
