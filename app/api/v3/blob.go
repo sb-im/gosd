@@ -2,6 +2,7 @@ package v3
 
 import (
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"strconv"
 
@@ -10,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gofrs/uuid"
+	"golang.org/x/exp/utf8string"
 )
 
 // @Summary Blobs Create
@@ -150,7 +152,12 @@ func (h *Handler) BlobShow(c *gin.Context) {
 	blob := model.Blob{}
 	h.orm.Take(&blob, "uxid = ?", c.Param("blobID"))
 	if blob.ID != 0 {
-		c.FileAttachment(h.ofs.LocalPath(blob.UXID), blob.Name)
+		if utf8string.NewString(blob.Name).IsASCII() {
+			c.FileAttachment(h.ofs.LocalPath(blob.UXID), blob.Name)
+		} else {
+			c.Writer.Header().Set("Content-Disposition", `attachment; filename*=UTF-8''`+url.QueryEscape(blob.Name))
+			http.ServeFile(c.Writer, c.Request, h.ofs.LocalPath(blob.UXID))
+		}
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{"error": "NotFound this blob"})
 		return

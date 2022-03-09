@@ -19,6 +19,7 @@ require (
 	github.com/urfave/cli/v2 v2.3.0
 	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
+	golang.org/x/exp v0.0.0-20220307200941-a1099baf94bf
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	gorm.io/driver/postgres v1.3.1
 	gorm.io/gorm v1.23.2
