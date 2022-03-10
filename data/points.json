@@ -1,0 +1,35 @@
+[
+  {
+    "node_id":1,
+    "params": {"mode":["manual","auto","rc"],"yaw":[-90,90],"pitch":[-90,45]},
+    "type": "monitor"
+  },
+  {
+    "node_id":1,
+    "params": {
+      "common":{
+        "move":[
+          {"method":"goto"},
+          {"method":"pointto"},
+          {"method":"setROI","params":{"height":{ "type": "number", "required": false }}},
+          {"method":"goto_params","params":{
+            "height":{ "type": "number", "required": true },
+            "speed":{ "type": "number", "default": 3, "required": false }
+          }
+          }
+        ]
+      },
+      "map":{
+        "google":{"proxy":"sb.im"},
+        "amap":{}
+      },
+      "place":{
+        "home":{"stroke":"dotted", "color":"#67c23a"},
+        "target":{"stroke":"dashed"},
+        "roi":{"stroke":"solid", "color":"#f69730"},
+        "point_to":{"point":"glow", "color":"#f69730"}
+      }
+    },
+    "type":"map"
+  }
+]
