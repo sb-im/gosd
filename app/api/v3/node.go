@@ -87,6 +87,7 @@ func (h *Handler) NodeShow(c *gin.Context) {
 // @Produce json
 // @Param id   path int true "Node ID"
 // @Success 200
+// @Failure 400
 // @Failure 500
 // @Router /nodes/{id} [PUT]
 func (h *Handler) NodeUpdate(c *gin.Context) {

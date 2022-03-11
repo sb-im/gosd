@@ -17,7 +17,7 @@ func init() {
 var nodeGetCmd = &cli.Command{
 	Name:      "get",
 	Usage:     "Show a node detail",
-	ArgsUsage: "<user id>",
+	ArgsUsage: "<node id>",
 	Action: ex(func(c *exContext) error {
 		type point struct {
 			NodeID int             `json:"node_id"`

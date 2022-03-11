@@ -59,3 +59,20 @@ func (c *Client) NodeShow(nodeId string) (node model.Node, err error) {
 		return
 	}
 }
+
+func (c *Client) NodeUpdate(id string, node interface{}) error {
+	res, err := c.do(http.MethodPut, c.endpoint+"/nodes/"+id, node)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode == http.StatusOK {
+		return json.NewDecoder(res.Body).Decode(node)
+	} else {
+		err := &errMsg{
+			status: res.Status,
+		}
+		json.NewDecoder(res.Body).Decode(err)
+		return err
+	}
+}
