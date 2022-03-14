@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"gorm.io/gorm"
@@ -17,7 +18,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const ApiPrefix = "/gosd/api/v3"
+var ApiPrefix = "/gosd/api/v3"
 
 func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service, ofs *storage.Storage) http.Handler {
 	r := gin.Default()
@@ -30,6 +31,10 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service, ofs *storage
 		AllowCredentials: false,
 		MaxAge:           12 * time.Hour,
 	}))
+
+	if u, err := url.Parse(cfg.BaseURL); err == nil {
+		ApiPrefix = u.Path
+	}
 
 	sr := r.Group(ApiPrefix)
 	sr.GET("/ping", func(c *gin.Context) {
