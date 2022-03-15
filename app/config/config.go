@@ -26,6 +26,8 @@ type Config struct {
 	Language    string `yaml:"language"`
 	Timezone    string `yaml:"timezone"`
 	ApiKey      string `yaml:"api_key"`
+	ApiMqtt     string `env:"API_MQTT"`
+	ApiMqttWs   string `env:"API_MQTT_WS"`
 	Secret      string `yaml:"secret"`
 }
 
@@ -45,6 +47,8 @@ func DefaultConfig() *Config {
 		BasicAuth:   true,
 		Language:    "en_US",
 		Timezone:    "Asia/Shanghai",
+		ApiMqtt:     "mqtt://localhost:1883",
+		ApiMqttWs:   "ws://localhost:8083/mqtt",
 	}
 }
 

@@ -3,6 +3,7 @@ package v3
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -15,17 +16,21 @@ import (
 // @Accept multipart/form-data
 // @Produce json
 // @Router /mqtt/url [POST]
-func (h Handler) MqttUserCreate(c *gin.Context) {
+func (h *Handler) MqttUserCreate(c *gin.Context) {
+	u, err := url.Parse(h.cfg.ApiMqttWs)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	user := h.getCurrent(c)
+	username := strconv.Itoa(int(user.SessID))
+	password := h.srv.MqttAuthUser(username)
 
-	// TODO: this need config file
-	mqttURLFmt := "mqtt://%d:%s@localhost:1883"
-
-	u := h.getCurrent(c)
+	u.User = url.UserPassword(username, password)
 
 	// TODO: isSuperUser
-	fmt.Println(u)
+	fmt.Println(user)
 
-	passwd := h.srv.MqttAuthUser(strconv.Itoa(int(u.SessID)))
-	h.srv.MqttAuthACL(u.TeamID, strconv.Itoa(int(u.SessID)))
-	c.JSON(http.StatusOK, fmt.Sprintf(mqttURLFmt, u.SessID, passwd))
+	h.srv.MqttAuthACL(user.TeamID, username)
+	c.JSON(http.StatusOK, u.String())
 }
