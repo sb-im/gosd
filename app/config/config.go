@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 
 	"github.com/caarlos0/env/v6"
+	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
@@ -23,12 +24,12 @@ type Config struct {
 	Debug       bool   `env:"DEBUG" yaml:"debug"`
 	SingleUser  bool   `env:"SINGLE_USER" yaml:"single_user"`
 	BasicAuth   bool   `env:"BASIC_AUTH" yaml:"basic_auth"`
-	Language    string `yaml:"language"`
-	Timezone    string `yaml:"timezone"`
-	ApiKey      string `yaml:"api_key"`
+	Language    string `env:"LANGUAGE" yaml:"language"`
+	Timezone    string `env:"TIMEZONE" yaml:"timezone"`
+	ApiKey      string `env:"API_KEY" yaml:"api_key"`
 	ApiMqtt     string `env:"API_MQTT"`
 	ApiMqttWs   string `env:"API_MQTT_WS"`
-	Secret      string `yaml:"secret"`
+	Secret      string `env:"SECRET" yaml:"secret"`
 }
 
 var opts = DefaultConfig()
@@ -62,6 +63,10 @@ func loadYamlConfig(str string) error {
 	}
 }
 
+func loadDotEnvConfig() error {
+	return godotenv.Load()
+}
+
 func loadEnvConfig() error {
 	return env.Parse(opts)
 }
@@ -69,8 +74,11 @@ func loadEnvConfig() error {
 func Parse(args ...string) *Config {
 	if len(args) >= 1 {
 		if err := loadYamlConfig(args[0]); err != nil {
-			log.Info(err)
+			log.Debug(err)
 		}
+	}
+	if err := loadDotEnvConfig(); err != nil {
+		log.Debug(err)
 	}
 	if err := loadEnvConfig(); err != nil {
 		log.Info(err)

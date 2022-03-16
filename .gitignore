@@ -4,3 +4,4 @@ swag/
 gosd
 config.yml
 .data
+.env

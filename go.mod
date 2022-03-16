@@ -3,6 +3,7 @@ module sb.im/gosd
 go 1.17
 
 require (
+	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2
 	github.com/appleboy/gin-jwt/v2 v2.8.0
 	github.com/caarlos0/env/v6 v6.9.1
 	github.com/eclipse/paho.golang v0.10.0
@@ -11,6 +12,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/gomodule/redigo v1.8.8
+	github.com/joho/godotenv v1.4.0
 	github.com/onsi/ginkgo/v2 v2.1.3
 	github.com/onsi/gomega v1.18.1
 	github.com/robfig/cron/v3 v3.0.1
@@ -28,7 +30,6 @@ require (
 )
 
 require (
-	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
@@ -39,6 +40,7 @@ require (
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/golang-jwt/jwt/v4 v4.2.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/hokaccha/go-prettyjson v0.0.0-20211117102719-0474bc63780f // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.10.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
