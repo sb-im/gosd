@@ -7,6 +7,7 @@ type Node struct {
 
 	Name   string `json:"name" form:"name"`
 	TeamID uint   `json:"-"`
+	Secret string `json:"-"`
 	Points JSON   `json:"points"`
 }
 

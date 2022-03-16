@@ -50,3 +50,37 @@ func (s *Service) MqttAuthACL(teamID uint, user string) string {
 	s.rdb.HSet(context.Background(), mqttAuthACLPrefix+user, acl)
 	return ""
 }
+
+func (s *Service) MqttAuthNodeUser(nodeID string) error {
+	var node model.Node
+	if err := s.orm.Take(&node, nodeID).Error; err != nil {
+		return err
+	}
+
+	return s.rdb.HSet(context.Background(), mqttAuthUserPrefix+nodeID, map[string]interface{}{
+		"password": node.Secret,
+	}).Err()
+}
+
+func (s *Service) MqttAuthNodeACL(nodeID string) error {
+	return s.rdb.HSet(context.Background(), mqttAuthACLPrefix+nodeID, map[string]interface{}{
+		"nodes/" + nodeID + "/#": mqttAuthAccessPubSub,
+	}).Err()
+}
+
+func (s *Service) MqttAuthSync() error {
+	var nodes []model.Node
+	if err := s.orm.Find(&nodes).Error; err != nil {
+		return err
+	}
+	for _, v := range nodes {
+		strId := strconv.Itoa(int(v.ID))
+		if err := s.MqttAuthNodeUser(strId); err != nil {
+			return err
+		}
+		if err := s.MqttAuthNodeACL(strId); err != nil {
+			return err
+		}
+	}
+	return nil
+}

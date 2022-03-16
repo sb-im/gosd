@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"sb.im/gosd/app/helper"
 	"sb.im/gosd/app/model"
 )
 
@@ -47,6 +48,7 @@ func (h *Handler) NodeIndex(c *gin.Context) {
 func (h *Handler) NodeCreate(c *gin.Context) {
 	node := &model.Node{
 		TeamID: h.getCurrent(c).TeamID,
+		Secret: helper.GenSecret(16),
 	}
 	if err := c.Bind(node); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -56,6 +58,18 @@ func (h *Handler) NodeCreate(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	strId := strconv.Itoa(int(node.ID))
+
+	if err := h.srv.MqttAuthNodeUser(strId); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	if err := h.srv.MqttAuthNodeACL(strId); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusCreated, node)
 }
 

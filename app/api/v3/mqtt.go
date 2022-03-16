@@ -9,6 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	mqttClientIdUserPrefix = "user."
+	mqttClientIdNodePrefix = "node."
+)
+
 // @Summary Create a mqtt user
 // @Schemes Mqtt
 // @Description create a new mqtt user
@@ -23,7 +28,7 @@ func (h *Handler) MqttUserCreate(c *gin.Context) {
 		return
 	}
 	user := h.getCurrent(c)
-	username := strconv.Itoa(int(user.SessID))
+	username := mqttClientIdUserPrefix + strconv.Itoa(int(user.SessID))
 	password := h.srv.MqttAuthUser(username)
 
 	u.User = url.UserPassword(username, password)
