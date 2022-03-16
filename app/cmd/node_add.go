@@ -21,19 +21,23 @@ var nodeAddCmd = &cli.Command{
 	},
 	ArgsUsage: "<point path>",
 	Action: ex(func(c *exContext) error {
-		path := c.ctx.Args().First()
-		f, err := os.Open(path)
-		if err != nil {
-			panic(err)
-		}
-		data, err := ioutil.ReadAll(f)
-		if err != nil {
-			panic(err)
+		var points interface{}
+		if c.ctx.Args().Len() > 0 {
+			path := c.ctx.Args().First()
+			f, err := os.Open(path)
+			if err != nil {
+				panic(err)
+			}
+			data, err := ioutil.ReadAll(f)
+			if err != nil {
+				panic(err)
+			}
+			points = json.RawMessage(data)
 		}
 		return c.cnt.NodeCreate(&map[string]interface{}{
 			"team_id": c.ctx.Uint("team"),
 			"name":    c.ctx.String("name"),
-			"points":  json.RawMessage(data),
+			"points":  points,
 		})
 	}),
 }
