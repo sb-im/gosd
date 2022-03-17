@@ -4,12 +4,14 @@ import (
 	"crypto/rand"
 	"fmt"
 	"os"
+	"time"
 
+	"sb.im/gosd/app/helper"
 	"sb.im/gosd/app/model"
 )
 
 const (
-	blob_url = "api/v1/blobs/%s"
+	blob_url = "/blobs/%s?token=%s"
 )
 
 // Reader
@@ -53,9 +55,12 @@ func (s Service) BlobCreate(filename, content string) int64 {
 // TODO: test token
 // api/v1/plans/{planID}?token={token}
 func (s Service) BlobUrl(blobID string) string {
-	token, _ := genToken(16)
-	s.rdb.Set(s.ctx, fmt.Sprintf("token/%s", token), nil, 0)
-	return fmt.Sprintf(os.Getenv("BASE_URL")+blob_url, blobID)
+	//token, _ := genToken(16)
+	token := helper.GenSecret(16)
+
+	// TODO: need common lib
+	s.rdb.Set(s.ctx, fmt.Sprintf("token/%s", token), s.Task.TeamID, 2*time.Hour)
+	return fmt.Sprintf(os.Getenv("BASE_URL")+blob_url, blobID, token)
 }
 
 func genToken(n int) (string, error) {

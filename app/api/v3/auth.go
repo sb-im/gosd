@@ -129,6 +129,11 @@ func InitAuthMiddleware(r *gin.RouterGroup, h *Handler) error {
 		r.Use(middlewareAuthApiKey("X-Api-Key", h.cfg.ApiKey))
 	}
 
+	// 2.5 Auth: url token
+	if h.cfg.ApiKey != "" {
+		r.Use(middlewareAuthUrlToken(h.rdb))
+	}
+
 	// 3. Auth: header Basic Authentication
 	if h.cfg.BasicAuth {
 		r.Use(middlewareAuthBasic(h.orm))

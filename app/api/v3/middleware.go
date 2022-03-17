@@ -1,9 +1,12 @@
 package v3
 
 import (
+	"context"
+
 	"sb.im/gosd/app/model"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
@@ -39,6 +42,21 @@ func middlewareAuthBasic(orm *gorm.DB) gin.HandlerFunc {
 					}
 				}
 			}
+		}
+		c.Next()
+	}
+}
+
+func middlewareAuthUrlToken(rdb *redis.Client) gin.HandlerFunc {
+	const key = "token"
+	return func(c *gin.Context) {
+		token := c.Request.URL.Query().Get(key)
+		if tid, err := rdb.Get(context.Background(), "token/"+token).Uint64(); err == nil {
+			c.Set(identityGinKey, &Current{
+				TeamID: uint(tid),
+				UserID: 0,
+				SessID: 1,
+			})
 		}
 		c.Next()
 	}
