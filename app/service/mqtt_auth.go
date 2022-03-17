@@ -47,6 +47,12 @@ func (s *Service) MqttAuthACL(teamID uint, user string) string {
 		acl["nodes/"+strconv.Itoa(int(node.ID))+"/#"] = mqttAuthAccessPubSub
 	}
 
+	var tasks []model.Task
+	s.orm.Find(&tasks, "team_id = ?", teamID)
+	for _, task := range tasks {
+		acl["tasks/"+strconv.Itoa(int(task.ID))+"/#"] = mqttAuthAccessPubSub
+	}
+
 	s.rdb.HSet(context.Background(), mqttAuthACLPrefix+user, acl)
 	return ""
 }
