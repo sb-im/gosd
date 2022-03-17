@@ -2,13 +2,13 @@ package service
 
 import (
 	"encoding/json"
-	"fmt"
 
+	log "github.com/sirupsen/logrus"
 	"sb.im/gosd/app/model"
 )
 
-func (s Service) TaskRun(task *model.Task) error {
-	fmt.Println(task)
+func (s *Service) TaskRun(task *model.Task) error {
+	log.Println(task)
 
 	files := make(map[string]string)
 	extra := make(map[string]string)
@@ -16,10 +16,12 @@ func (s Service) TaskRun(task *model.Task) error {
 	json.Unmarshal(task.Files, &files)
 	json.Unmarshal(task.Extra, &extra)
 
-	fmt.Println("files: ", files)
-	fmt.Println("extra: ", extra)
+	log.Println("files: ", files)
+	log.Println("extra: ", extra)
 
-	// TODO: join this worker
-	s.worker.AddTask(task)
-	return nil
+	return s.worker.AddTask(task)
+}
+
+func (s *Service) TaskKill(taskId string) error {
+	return s.worker.Kill(taskId)
 }

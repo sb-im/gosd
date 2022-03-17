@@ -1,12 +1,10 @@
 package v3
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"sb.im/gosd/app/model"
 )
 
@@ -45,22 +43,6 @@ func (h Handler) JobIndex(c *gin.Context) {
 // @Param id path uint true "Task ID"
 // @Success 201
 // @Router /tasks/{id}/jobs [post]
-func (h Handler) JobCreate(c *gin.Context) {
-	var task model.Task
-	if err := h.orm.First(&task, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
-
-	job := model.Job{
-		TaskID: task.ID,
-	}
-	h.orm.Create(&job)
-	task.Job = &job
-
-	if err := h.srv.TaskRun(&task); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
-
-	c.JSON(http.StatusCreated, nil)
+func (h *Handler) JobCreate(c *gin.Context) {
+	h.TaskRunningCreate(c)
 }

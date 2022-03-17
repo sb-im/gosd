@@ -30,3 +30,5 @@ package app
 // @tag.description Node management
 // @tag.name task
 // @tag.description Task management
+// @tag.name running
+// @tag.description Task Running management

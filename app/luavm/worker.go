@@ -3,6 +3,8 @@ package luavm
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"strconv"
 	"sync"
 	"time"
@@ -182,6 +184,8 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 		}
 	}
 
+	fmt.Println(string(script))
+
 	// Core: Load Script
 	if err := l.DoString(string(script)); err != nil {
 		return err
@@ -199,17 +203,24 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 	return nil
 }
 
-func (w Worker) Kill(planID string) {
-	if service, ok := w.Running[planID]; ok {
+func (w *Worker) Kill(taskID string) error {
+	w.mutex.Lock()
+	service, ok := w.Running[taskID]
+	w.mutex.Unlock()
+	if ok {
 		service.Close()
 		log.Warn("==> luavm Kill")
+		return nil
 	}
+	return errors.New("Not Found This Task")
 }
 
-func (w Worker) Close() {
+func (w *Worker) Close() {
+	w.mutex.Lock()
 	for _, service := range w.Running {
 		service.Close()
 	}
+	w.mutex.Unlock()
 
 	log.Warn("==> luaVM Worker Close")
 }

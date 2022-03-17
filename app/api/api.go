@@ -92,6 +92,9 @@ func NewApi(cfg *config.Config, orm *gorm.DB, srv *service.Service, ofs *storage
 	sr.PUT("tasks/:id", handler.TaskUpdate)
 	sr.DELETE("tasks/:id", handler.TaskDestroy)
 
+	sr.POST("/tasks/:id/running", handler.TaskRunningCreate)
+	sr.DELETE("/tasks/:id/running", handler.TaskRunningDestroy)
+
 	sr.GET("tasks/:id/jobs", handler.JobIndex)
 	sr.POST("tasks/:id/jobs", handler.JobCreate)
 

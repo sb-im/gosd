@@ -150,3 +150,12 @@ func (h *Handler) TaskDestroy(c *gin.Context) {
 	}
 	c.JSON(http.StatusNoContent, nil)
 }
+
+func (h *Handler) taskTeamIsExist(taskId, teamId interface{}) bool {
+	var count int64
+	h.orm.Find(&model.Task{}, "id = ? AND team_id = ?", taskId, teamId).Count(&count)
+	if count > 0 {
+		return true
+	}
+	return false
+}
