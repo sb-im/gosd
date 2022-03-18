@@ -60,7 +60,7 @@ function NewPlan(nodeID)
       self.SetAttach(self, data)
     end,
     GetFiles = function(self)
-      return self.GetAttach(self).files
+      return self.GetAttach(self).files or {}
     end,
     SetFiles = function(self, files)
       local data = self.GetAttach(self)
@@ -68,7 +68,7 @@ function NewPlan(nodeID)
       self.SetAttach(self, data)
     end,
     GetJobFiles = function(self)
-      return self.GetAttach(self).job.files
+      return self.GetAttach(self).job.files or {}
     end,
     SetJobFiles = function(self, files)
       local data = self.GetAttach(self)
