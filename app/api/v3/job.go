@@ -31,7 +31,7 @@ func (h Handler) JobIndex(c *gin.Context) {
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
 
-	h.orm.Offset((page-1)*size).Limit(size).Find(&jobs, "task_id = ?", c.Param("id"))
+	h.orm.Order("id desc").Offset((page-1)*size).Limit(size).Find(&jobs, "task_id = ?", c.Param("id"))
 	c.JSON(http.StatusOK, jobs)
 }
 
