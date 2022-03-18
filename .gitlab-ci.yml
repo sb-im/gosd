@@ -98,11 +98,11 @@ test emqx latest:
     MQTT_URL: "mqtt://emqx:1883"
   extends: .test-broker
 
-test emqx 4.2.6:
+test emqx 4.4.1:
   stage: broker
   services:
     - redis:latest
-    - name: emqx/emqx:4.2.6
+    - name: emqx/emqx:4.4.1
       alias: emqx
   variables:
     REDIS_URL: "redis://redis:6379"
