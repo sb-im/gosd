@@ -77,10 +77,7 @@ func NewApi(cfg *config.Config, orm *gorm.DB, rdb *redis.Client, srv *service.Se
 
 	sr.POST("/blobs", handler.BlobCreate)
 	sr.GET("/blobs/:blobID", handler.BlobShow)
-
-	// blob cannot be updated
-	// sr.PUT("/blobs", handler.BlobUpdate)
-	// sr.PUT("/blobs/:blobID", handler.BlobUpdate)
+	sr.PUT("/blobs/:blobID", handler.BlobUpdate)
 
 	sr.POST("nodes", handler.NodeCreate)
 	sr.GET("nodes", handler.NodeIndex)

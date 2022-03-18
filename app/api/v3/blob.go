@@ -76,57 +76,42 @@ func (h *Handler) BlobCreate(c *gin.Context) {
 // @Produce json
 // @Param blobID path string true "blob ID"
 // @Param file formData file true "this is a file"
-// @Success 200 {object} model.Blob
-// @Failure 400
+// @Success 200
+// @Failure 404
 // @Failure 500
 // @Router /blobs/{blobID} [PUT]
-
 func (h *Handler) BlobUpdate(c *gin.Context) {
-	bindBlob := make(map[string]string)
-	if err := c.ShouldBind(&bindBlob); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	blob := model.Blob{}
+	if err := h.orm.Take(&blob, "uxid = ?", c.Param("blobID")).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
+	if blob.ID == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "NotFound this blob"})
+		return
+	}
+
 	form, err := c.MultipartForm()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	// blobID: url, key
-	// squash key / value
-	updateBlob := make(map[string]interface{})
-
-	blobID := c.Param("blobID")
 	for key, value := range form.File {
-		if !h.blobIsExist(key) {
-			if blobID != "" {
-				// TODO: url param
-				// if url param h.blobIsExist
-				if h.blobIsExist(blobID) {
-					updateBlob[blobID] = value[0]
+		for _, file := range value {
+			blob.Name = filepath.Base(file.Filename)
+			log.Infoln(key, blob)
 
-					// This blobID only use once
-					blobID = ""
-				} else {
-					c.JSON(http.StatusBadRequest, gin.H{"error": "blobID error"})
-					return
-				}
-			} else {
-				c.JSON(http.StatusBadRequest, gin.H{"error": "blobID error"})
+			if err := c.SaveUploadedFile(file, h.ofs.LocalPath(blob.UXID)); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			if err := h.orm.Updates(&blob).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 		}
-		updateBlob[key] = value[0]
 	}
-
-	for key, value := range updateBlob {
-		bindBlob[key] = "ok"
-		// TODO: update blob
-		log.Warnln("needs implement update blob", value)
-	}
-
-	c.JSON(http.StatusOK, bindBlob)
+	c.JSON(http.StatusOK, blob)
 }
 
 func (h *Handler) blobIsExist(id string) bool {
