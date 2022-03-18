@@ -77,7 +77,7 @@ function NewPlan(nodeID)
     end,
     GetFileContent = function(self, key)
       local id = self.GetFiles(self)[key]
-      return SD:BlobReader(tonumber(id))
+      return SD:BlobReader(id)
     end,
     SetFileContent = function(self, key, filename, content)
       local id = tonumber(self.GetFiles(self)[key])

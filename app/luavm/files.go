@@ -1,13 +1,14 @@
 package luavm
 
 import (
-	"crypto/rand"
 	"fmt"
 	"os"
 	"time"
 
 	"sb.im/gosd/app/helper"
 	"sb.im/gosd/app/model"
+
+	"github.com/gofrs/uuid"
 )
 
 const (
@@ -15,7 +16,7 @@ const (
 )
 
 // Reader
-func (s Service) BlobReader(id int64) (string, string) {
+func (s Service) BlobReader(id string) (string, string) {
 	blob := model.Blob{}
 	if err := s.orm.First(&blob, "uxid = ?", id); err != nil {
 		return "", ""
@@ -25,7 +26,7 @@ func (s Service) BlobReader(id int64) (string, string) {
 }
 
 // Update
-func (s Service) BlobUpdate(id int64, filename, content string) {
+func (s Service) BlobUpdate(id, filename, content string) {
 	blob := model.Blob{}
 	if err := s.orm.First(&blob, "uxid = ?", id); err != nil {
 		return
@@ -39,34 +40,28 @@ func (s Service) BlobUpdate(id int64, filename, content string) {
 }
 
 // Create
-func (s Service) BlobCreate(filename, content string) int64 {
+func (s Service) BlobCreate(filename, content string) string {
+	uxid, _ := uuid.NewV4()
+
 	blob := model.Blob{
 		Name: filename,
+		UXID: uxid.String(),
 	}
 	s.orm.Save(&blob)
 
 	s.ofs.Set(blob.UXID, []byte(content))
-	return int64(blob.ID)
+	return blob.UXID
 }
 
 // Delete
 // TODO: need storage blobs delete
 
 // TODO: test token
-// api/v1/plans/{planID}?token={token}
+// {BASE_URL}/blobs/{UUID}?token={token}
 func (s Service) BlobUrl(blobID string) string {
-	//token, _ := genToken(16)
 	token := helper.GenSecret(16)
 
 	// TODO: need common lib
 	s.rdb.Set(s.ctx, fmt.Sprintf("token/%s", token), s.Task.TeamID, 2*time.Hour)
 	return fmt.Sprintf(os.Getenv("BASE_URL")+blob_url, blobID, token)
-}
-
-func genToken(n int) (string, error) {
-	b := make([]byte, n)
-	if _, err := rand.Read(b); err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%x", b), nil
 }

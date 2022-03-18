@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strconv"
 	"sync"
 	"time"
@@ -184,7 +183,7 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 		}
 	}
 
-	fmt.Println(string(script))
+	log.Debug(string(script))
 
 	// Core: Load Script
 	if err := l.DoString(string(script)); err != nil {

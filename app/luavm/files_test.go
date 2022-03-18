@@ -10,6 +10,12 @@ func TestLuaFiles(t *testing.T) {
 	task := &model.Task{}
 	task.ID = 1
 
+	job := model.Job{
+		TaskID: task.ID,
+	}
+	task.Job = &job
+	task.Job.ID = 1
+
 	w := newWorker(t)
 	if err := w.doRun(task, []byte(`
 function main(task)
@@ -29,6 +35,7 @@ function main(task)
     task:SetFileContent("test_files", "test.txt", "233")
   end
   print(task:GetFileContent("test_files"))
+  print(task:FileUrl("test_files_url"))
 
   print("### END Files END ###")
 end
