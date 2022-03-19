@@ -16,7 +16,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param id path uint true "Task ID"
-// @Success 200
+// @Success 201
 // @Failure 500
 // @Router /tasks/{id}/running [POST]
 func (h *Handler) TaskRunningCreate(c *gin.Context) {
@@ -46,7 +46,7 @@ func (h *Handler) TaskRunningCreate(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, task)
+	c.JSON(http.StatusCreated, task)
 }
 
 // @Summary Task Cancel
