@@ -82,18 +82,23 @@ func (h *Handler) TaskCreate(c *gin.Context) {
 // @Param size query uint false "Page Max Count"
 // @Success 200
 // @failure 404
-// @Router /tasks/{id} [get]
-func (h Handler) TaskShow(c *gin.Context) {
+// @failure 500
+// @Router /tasks/{id} [GET]
+func (h *Handler) TaskShow(c *gin.Context) {
 	var task model.Task
 	if err := h.orm.First(&task, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
-	// TODO:
-	//page, _ := strconv.Atoi(c.Query("page"))
-	//size, _ := strconv.Atoi(c.Query("size"))
-	//h.orm.Offset((page - 1) * size).Limit(size).Find(&task, "team_id = ?", h.getCurrent(c).TeamID)
+	page := mustStringToInt(c.Query("page"))
+	size := mustStringToInt(c.Query("size"))
+
+	if err := h.orm.Order("index desc").Offset((page-1)*size).Limit(size).Find(&task.Jobs, "task_id = ?", c.Param("id")).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, task)
 }
 

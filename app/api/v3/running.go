@@ -16,18 +16,24 @@ import (
 // @Accept json
 // @Produce json
 // @Param id path uint true "Task ID"
-// @Success 204
+// @Success 200
 // @Failure 500
 // @Router /tasks/{id}/running [POST]
 func (h *Handler) TaskRunningCreate(c *gin.Context) {
 	var task model.Task
-	if err := h.orm.First(&task, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
+	if err := h.orm.Model(&task).Where("id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).UpdateColumn("index", gorm.Expr("index + ?", 1)).Scan(&task).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	}
 
 	job := model.Job{
 		TaskID: task.ID,
+		Index:  task.Index,
 	}
 	if err := h.orm.Create(&job).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -40,7 +46,7 @@ func (h *Handler) TaskRunningCreate(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, nil)
+	c.JSON(http.StatusOK, task)
 }
 
 // @Summary Task Cancel

@@ -8,9 +8,11 @@ type Task struct {
 	Name   string `json:"name" form:"name"`
 	TeamID uint   `json:"-"`
 	NodeID uint   `json:"node_id" form:"node_id"`
-	Job    *Job   `json:"job,omitempty" form:"-"`
+	Index  uint   `json:"index" gorm:"default:0;not null"`
 	Files  JSON   `json:"files"`
 	Extra  JSON   `json:"extra"`
+	Job    *Job   `json:"job,omitempty" form:"-"`
+	Jobs   []Job  `json:"jobs,omitempty" form:"-"`
 }
 
 func (t *Task) BeforeSave(tx *gorm.DB) error {
