@@ -10,7 +10,6 @@ import (
 	"sb.im/gosd/app/model"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gofrs/uuid"
 	"golang.org/x/exp/utf8string"
 )
 
@@ -38,16 +37,15 @@ func (h *Handler) BlobCreate(c *gin.Context) {
 	}
 	for key, value := range form.File {
 		for i, file := range value {
-			uxid, err := uuid.NewV4()
-			if err != nil {
+			blob := &model.Blob{
+				Name: filepath.Base(file.Filename),
+			}
+
+			if err := h.orm.Create(blob).Error; err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 
-			blob := &model.Blob{
-				UXID: uxid.String(),
-				Name: filepath.Base(file.Filename),
-			}
 			log.Infoln(key, i, blob)
 			if i == 0 {
 				bindBlob[key] = blob.UXID
@@ -56,10 +54,6 @@ func (h *Handler) BlobCreate(c *gin.Context) {
 			}
 
 			if err := c.SaveUploadedFile(file, h.ofs.LocalPath(blob.UXID)); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-			if err := h.orm.Create(blob).Error; err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}

@@ -7,8 +7,6 @@ import (
 
 	"sb.im/gosd/app/helper"
 	"sb.im/gosd/app/model"
-
-	"github.com/gofrs/uuid"
 )
 
 const (
@@ -41,11 +39,8 @@ func (s Service) BlobUpdate(id, filename, content string) {
 
 // Create
 func (s Service) BlobCreate(filename, content string) string {
-	uxid, _ := uuid.NewV4()
-
 	blob := model.Blob{
 		Name: filename,
-		UXID: uxid.String(),
 	}
 	s.orm.Save(&blob)
 
