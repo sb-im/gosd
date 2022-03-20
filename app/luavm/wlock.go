@@ -28,7 +28,7 @@ func (w Worker) preTaskCheck(task *model.Task) error {
 }
 
 func (w Worker) lockTaskSet(id string) error {
-	return w.rdb.Set(w.ctx, lockTaskPrefix+id, w.instance, w.timeout).Err()
+	return w.rdb.Set(w.ctx, lockTaskPrefix+id, w.cfg.Instance, w.timeout).Err()
 }
 
 func (w Worker) lockTaskGet(id string) (string, error) {
@@ -40,7 +40,7 @@ func (w Worker) lockTaskDel(id string) error {
 }
 
 func (w Worker) lockNodeSet(id string) error {
-	return w.rdb.Set(w.ctx, lockNodePrefix+id, w.instance, w.timeout).Err()
+	return w.rdb.Set(w.ctx, lockNodePrefix+id, w.cfg.Instance, w.timeout).Err()
 }
 
 func (w Worker) lockNodeGet(id string) (string, error) {

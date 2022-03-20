@@ -42,8 +42,7 @@ type Worker struct {
 	script []byte
 	mutex  *sync.Mutex
 
-	instance string
-	timeout  time.Duration
+	timeout time.Duration
 
 	rpc     *rpc2mqtt.Rpc2mqtt
 	Running map[string]*Service
