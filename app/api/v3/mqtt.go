@@ -1,17 +1,10 @@
 package v3
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
-)
-
-const (
-	mqttClientIdUserPrefix = "user."
-	mqttClientIdNodePrefix = "node."
 )
 
 // @Summary Create a mqtt user
@@ -28,14 +21,13 @@ func (h *Handler) MqttUserCreate(c *gin.Context) {
 		return
 	}
 	user := h.getCurrent(c)
-	username := mqttClientIdUserPrefix + strconv.Itoa(int(user.SessID))
-	password := h.srv.MqttAuthUser(username)
+	username, password, err := h.srv.MqttAuthReqTeam(user.TeamID)
 
 	u.User = url.UserPassword(username, password)
 
 	// TODO: isSuperUser
-	fmt.Println(user)
+	//fmt.Println(user)
 
-	h.srv.MqttAuthACL(user.TeamID, username)
+	h.srv.MqttAuthAclTeam(user.TeamID)
 	c.JSON(http.StatusOK, u.String())
 }

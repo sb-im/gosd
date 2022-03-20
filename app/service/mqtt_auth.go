@@ -2,16 +2,21 @@ package service
 
 import (
 	"context"
-	"crypto/rand"
 	"fmt"
-	"strconv"
 
+	"sb.im/gosd/app/helper"
 	"sb.im/gosd/app/model"
 )
 
 const (
-	mqttAuthUserPrefix = "mqtt_user:"
-	mqttAuthACLPrefix  = "mqtt_acl:"
+	mqttAuthReqPrefix = "mqtt_user:"
+	mqttAuthAclPrefix = "mqtt_acl:"
+
+	mqttAuthTeam = "user.%d"
+	mqttAuthNode = "node.%d"
+
+	mqttTopicNode = "nodes/%d/#"
+	mqttTopicTask = "tasks/%d/#"
 )
 
 // Emqx auth acl plugin
@@ -22,71 +27,83 @@ const (
 	mqttAuthAccessPubSub    = 3
 )
 
-func genToken(n int) (string, error) {
-	b := make([]byte, n)
-	if _, err := rand.Read(b); err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%x", b), nil
-}
-
-func (s *Service) MqttAuthUser(user string) string {
-	password, _ := genToken(8)
-	s.rdb.HSet(context.Background(), mqttAuthUserPrefix+user, map[string]interface{}{
+func (s *Service) MqttAuthReqTeam(teamID uint) (username string, password string, err error) {
+	username = fmt.Sprintf(mqttAuthTeam, teamID)
+	password = helper.GenSecret(8)
+	err = s.rdb.HSet(context.Background(), mqttAuthReqPrefix+username, map[string]interface{}{
 		"password": password,
-	})
-	return password
+	}).Err()
+	return
 }
 
-func (s *Service) MqttAuthACL(teamID uint, user string) string {
+func (s *Service) MqttAuthAclTeam(teamID uint) error {
+	username := fmt.Sprintf(mqttAuthTeam, teamID)
+
 	var nodes []model.Node
-	s.orm.Find(&nodes, "team_id = ?", teamID)
+	if err := s.orm.Find(&nodes, "team_id = ?", teamID).Error; err != nil {
+		return err
+	}
 
 	acl := make(map[string]interface{})
 	for _, node := range nodes {
-		acl["nodes/"+strconv.Itoa(int(node.ID))+"/#"] = mqttAuthAccessPubSub
+		acl[fmt.Sprintf(mqttTopicNode, node.ID)] = mqttAuthAccessPubSub
 	}
 
 	var tasks []model.Task
-	s.orm.Find(&tasks, "team_id = ?", teamID)
+	if err := s.orm.Find(&tasks, "team_id = ?", teamID).Error; err != nil {
+		return err
+	}
 	for _, task := range tasks {
-		acl["tasks/"+strconv.Itoa(int(task.ID))+"/#"] = mqttAuthAccessPubSub
+		acl[fmt.Sprintf(mqttTopicTask, task.ID)] = mqttAuthAccessPubSub
 	}
 
-	s.rdb.HSet(context.Background(), mqttAuthACLPrefix+user, acl)
-	return ""
+	return s.rdb.HSet(context.Background(), mqttAuthAclPrefix+username, acl).Err()
 }
 
-func (s *Service) MqttAuthNodeUser(nodeID string) error {
+func (s *Service) MqttAuthReqNode(nodeID uint) error {
+	username := fmt.Sprintf(mqttAuthTeam, nodeID)
+
 	var node model.Node
 	if err := s.orm.Take(&node, nodeID).Error; err != nil {
 		return err
 	}
 
-	return s.rdb.HSet(context.Background(), mqttAuthUserPrefix+nodeID, map[string]interface{}{
+	return s.rdb.HSet(context.Background(), mqttAuthReqPrefix+username, map[string]interface{}{
 		"password": node.Secret,
 	}).Err()
 }
 
-func (s *Service) MqttAuthNodeACL(nodeID string) error {
-	return s.rdb.HSet(context.Background(), mqttAuthACLPrefix+nodeID, map[string]interface{}{
-		"nodes/" + nodeID + "/#": mqttAuthAccessPubSub,
+func (s *Service) MqttAuthAclNode(nodeID uint) error {
+	username := fmt.Sprintf(mqttAuthTeam, nodeID)
+
+	return s.rdb.HSet(context.Background(), mqttAuthAclPrefix+username, map[string]interface{}{
+		fmt.Sprintf(mqttTopicNode, nodeID): mqttAuthAccessPubSub,
 	}).Err()
 }
 
-func (s *Service) MqttAuthSync() error {
+func (s *Service) MqttAuthNodeSync() error {
 	var nodes []model.Node
 	if err := s.orm.Find(&nodes).Error; err != nil {
 		return err
 	}
 	for _, v := range nodes {
-		strId := strconv.Itoa(int(v.ID))
-		if err := s.MqttAuthNodeUser(strId); err != nil {
+		if err := s.MqttAuthReqNode(v.ID); err != nil {
 			return err
 		}
-		if err := s.MqttAuthNodeACL(strId); err != nil {
+		if err := s.MqttAuthAclNode(v.ID); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (s *Service) MqttAuthTeamSync() error {
+	var teams []model.Team
+	if err := s.orm.Find(&teams).Error; err != nil {
+		return err
+	}
+	for _, team := range teams {
+		s.MqttAuthAclTeam(team.ID)
 	}
 	return nil
 }

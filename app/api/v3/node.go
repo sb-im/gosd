@@ -59,13 +59,11 @@ func (h *Handler) NodeCreate(c *gin.Context) {
 		return
 	}
 
-	strId := strconv.Itoa(int(node.ID))
-
-	if err := h.srv.MqttAuthNodeUser(strId); err != nil {
+	if err := h.srv.MqttAuthReqNode(node.ID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.srv.MqttAuthNodeACL(strId); err != nil {
+	if err := h.srv.MqttAuthAclNode(node.ID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

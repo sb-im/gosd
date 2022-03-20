@@ -68,6 +68,10 @@ func (h *Handler) TaskCreate(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Need Sync mqtt acl new task, this team
+	h.srv.MqttAuthAclTeam(h.getCurrent(c).TeamID)
+
 	c.JSON(http.StatusCreated, task)
 }
 
