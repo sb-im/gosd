@@ -2,7 +2,6 @@ package luavm
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"sb.im/gosd/app/helper"
@@ -58,5 +57,5 @@ func (s Service) BlobUrl(blobID string) string {
 
 	// TODO: need common lib
 	s.rdb.Set(s.ctx, fmt.Sprintf("token/%s", token), s.Task.TeamID, 2*time.Hour)
-	return fmt.Sprintf(os.Getenv("BASE_URL")+blob_url, blobID, token)
+	return fmt.Sprintf(s.cfg.BaseURL+blob_url, blobID, token)
 }

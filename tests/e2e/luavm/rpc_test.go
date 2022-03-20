@@ -65,7 +65,7 @@ var _ = Describe("LuaVM Rpc", func() {
 	if err == nil {
 		log.Warn("Use Lua File Path:", cfg.LuaFilePath)
 	}
-	worker := luavm.NewWorker(orm, rdb, ofs, rpcServer, luaFile)
+	worker := luavm.NewWorker(luavm.DefaultConfig(), orm, rdb, ofs, rpcServer, luaFile)
 	go worker.Run(ctx)
 
 	go help.StartNcp(ctx, config.Parse().MqttURL, strconv.Itoa(int(task.NodeID)))

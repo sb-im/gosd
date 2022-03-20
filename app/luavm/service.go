@@ -16,6 +16,7 @@ import (
 )
 
 type Service struct {
+	cfg Config
 	orm *gorm.DB
 	rdb *redis.Client
 	ofs *storage.Storage

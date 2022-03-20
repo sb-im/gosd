@@ -23,12 +23,6 @@ import (
 	luar "layeh.com/gopher-luar"
 )
 
-const (
-	//defaultLuaFile = "default.lua"
-	defaultLuaFile = "test_min.lua"
-	defaultLuaTask = "lua"
-)
-
 var (
 	libs = []string{
 		"lib_plan.lua",
@@ -40,6 +34,7 @@ var (
 )
 
 type Worker struct {
+	cfg    Config
 	ctx    context.Context
 	orm    *gorm.DB
 	rdb    *redis.Client
@@ -54,10 +49,10 @@ type Worker struct {
 	Running map[string]*Service
 }
 
-func NewWorker(orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage, rpc *rpc2mqtt.Rpc2mqtt, script []byte) *Worker {
+func NewWorker(cfg Config, orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage, rpc *rpc2mqtt.Rpc2mqtt, script []byte) *Worker {
 	// default LuaFile: input > default
 	if len(script) == 0 {
-		if data, err := lualib.LuaFile.ReadFile(defaultLuaFile); err != nil {
+		if data, err := lualib.LuaFile.ReadFile(cfg.LuaFile); err != nil {
 			log.Error(err)
 		} else {
 			script = data
@@ -67,7 +62,14 @@ func NewWorker(orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage, rpc *rpc2m
 	// Enable Redis Events
 	rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$K")
 
+	timeout, err := time.ParseDuration(cfg.Timeout)
+	if err != nil {
+		log.Error(err)
+		timeout = 2 * time.Hour
+	}
+
 	return &Worker{
+		cfg:    cfg,
 		ctx:    context.TODO(),
 		orm:    orm,
 		rdb:    rdb,
@@ -75,8 +77,7 @@ func NewWorker(orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage, rpc *rpc2m
 		script: script,
 		mutex:  &sync.Mutex{},
 
-		instance: "gosd.0",
-		timeout:  time.Hour,
+		timeout: timeout,
 
 		rpc:     rpc,
 		Running: make(map[string]*Service),
@@ -108,10 +109,10 @@ func (w Worker) AddTask(task *model.Task) error {
 	return nil
 }
 
-func (w Worker) getScript(task *model.Task) (script []byte) {
+func (w *Worker) getScript(task *model.Task) (script []byte) {
 	files := make(map[string]string)
 	if err := json.Unmarshal(task.Files, &files); err == nil {
-		if key, ok := files[defaultLuaTask]; ok {
+		if key, ok := files[w.cfg.LuaTask]; ok {
 			if data, err := w.ofs.Get(key); err == nil {
 				script = data
 			}
@@ -148,6 +149,7 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 	luajson.Preload(l)
 
 	service := NewService(task)
+	service.cfg = w.cfg
 	service.orm = w.orm
 	service.rdb = w.rdb
 	service.ofs = w.ofs
