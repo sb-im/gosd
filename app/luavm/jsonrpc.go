@@ -10,12 +10,17 @@ import (
 )
 
 type Rpc struct {
-	pendings map[string]chan []byte
+	pendings map[string]tRpc
+}
+
+type tRpc struct {
+	req []byte
+	ch chan []byte
 }
 
 func NewRpc() *Rpc {
 	return &Rpc{
-		pendings: make(map[string]chan []byte),
+		pendings: make(map[string]tRpc),
 	}
 }
 
@@ -42,7 +47,10 @@ func (s *Service) RpcSend(nodeId string, raw []byte) (string, error) {
 		return "", err
 	}
 	ch := make(chan []byte, 128)
-	s.Rpc.pendings[rpc.ID.String()] = ch
+	s.Rpc.pendings[rpc.ID.String()] = tRpc{
+		req: raw,
+		ch: ch,
+	}
 
 	// Prevent issuing non-compliant jsonrpc 2.0
 	req, err := rpc.ToJSON()
@@ -59,11 +67,11 @@ func (s *Service) RpcSend(nodeId string, raw []byte) (string, error) {
 }
 
 func (s *Service) RpcRecv(id string) (string, error) {
-	if ch, ok := s.Rpc.pendings[id]; ok {
+	if trpc, ok := s.Rpc.pendings[id]; ok {
 		select {
 		case <-s.ctx.Done():
 			return "", errors.New("Be killed")
-		case raw := <-ch:
+		case raw := <-trpc.ch:
 			delete(s.Rpc.pendings, jsonrpc.ParseObject(raw).ID.String())
 			return string(raw), nil
 		}

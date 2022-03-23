@@ -9,8 +9,6 @@ import (
 	"sb.im/gosd/app/model"
 	"sb.im/gosd/app/storage"
 
-	jsonrpc "github.com/sb-im/jsonrpc-lite"
-
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
@@ -49,14 +47,8 @@ func (s Service) onStart() error {
 func (s *Service) Close() error {
 	s.cancel()
 
-	for _, ch := range s.Rpc.pendings {
-		rpc := jsonrpc.NewErrors("user.killed")
-		rpc.Errors.InternalError("Be killed")
-		data, err := rpc.ToJSON()
-		if err != nil {
-			return err
-		}
-		ch <- data
+	for _, trpc := range s.Rpc.pendings {
+		s.Server.KillRpc(trpc.req)
 	}
 
 	// Need Reset Kill status
