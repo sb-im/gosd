@@ -7,6 +7,7 @@ require (
 	github.com/go-oauth2/oauth2/v4 v4.3.0
 	github.com/gomodule/redigo v1.8.4
 	github.com/gorilla/mux v1.7.4
+	github.com/jpillora/backoff v1.0.0
 	github.com/lib/pq v1.6.0
 	github.com/sb-im/jsonrpc-lite v0.2.0
 	github.com/sirupsen/logrus v1.2.0

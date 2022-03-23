@@ -3,12 +3,12 @@ package rpc2mqtt
 import (
 	"context"
 	"errors"
-	"math"
 	"time"
 
 	"sb.im/gosd/mqttd"
 
 	"github.com/sb-im/jsonrpc-lite"
+	"github.com/jpillora/backoff"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -17,7 +17,8 @@ var (
 	loopWait = 100 * time.Millisecond
 
 	// Max Resend interval 1h
-	timeout = float64(3600)
+	maxRetryTime   = time.Minute
+	commandTimeout = time.Hour
 )
 
 type Pending struct {
@@ -25,7 +26,9 @@ type Pending struct {
 	Msg   []byte
 	Time  time.Time
 	Reply chan []byte
-	Count int
+
+	backoff *backoff.Backoff
+	duration time.Duration
 }
 
 type Rpc2mqtt struct {
@@ -75,19 +78,19 @@ func (t *Rpc2mqtt) Run(ctx context.Context) {
 		case <-ticker.C:
 			// Resend
 			for id, pending := range t.pending {
-				if now := time.Since(pending.Time).Seconds(); now > math.Ldexp(1, pending.Count) && now <= timeout {
+				if now := time.Now(); now.After(pending.Time.Add(pending.duration)) && now.Before(pending.Time.Add(maxRetryTime)) {
 					select {
 					case t.i <- mqttd.MqttRpc{
 						ID:      pending.Dst,
 						Payload: pending.Msg,
 					}:
-						pending.Count++
+						pending.duration = pending.backoff.Duration()
 						log.Tracef("SEND: %s", pending.Msg)
 
 					default:
 						log.Error("Buffer full")
 					}
-				} else if now > timeout {
+				} else if now.After(pending.Time.Add(maxRetryTime)) {
 					rpc := jsonrpc.NewError(id, 1, "timeout", nil)
 					data, _ := rpc.ToJSON()
 					delete(t.pending, *rpc.ID)
@@ -106,8 +109,14 @@ func (t *Rpc2mqtt) AsyncRpc(id string, req []byte, ch_res chan []byte) error {
 		Time:  time.Now(),
 		Dst:   id,
 		Msg:   req,
-		Count: 1,
 		Reply: ch_res,
+
+		duration: time.Microsecond,
+		backoff: &backoff.Backoff{
+			Factor: 2,
+			Min: loopWait,
+			Max: maxRetryTime,
+		},
 	}:
 	default:
 		return errors.New("Send cache buffer full")
