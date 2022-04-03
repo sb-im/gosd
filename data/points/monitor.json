@@ -1,0 +1,8 @@
+{
+  "params": {
+    "mode": ["manual","auto","rc"],
+    "yaw": [-90,90],
+    "pitch": [-90,45]
+  },
+  "type": "monitor"
+}

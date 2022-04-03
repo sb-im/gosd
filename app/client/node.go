@@ -3,7 +3,9 @@ package client
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
+	"sb.im/gosd/app/client/read"
 	"sb.im/gosd/app/model"
 )
 
@@ -75,4 +77,19 @@ func (c *Client) NodeUpdate(id string, node interface{}) error {
 		json.NewDecoder(res.Body).Decode(err)
 		return err
 	}
+}
+
+func (c *Client) NodeSync(teamId uint, path string) error {
+	nodes := read.ParseNode(path)
+	for _, n := range nodes {
+		n.TeamID = teamId
+		if n.ID == 0 {
+			// Create
+			c.NodeCreate(n)
+		} else {
+			// Update
+			c.NodeUpdate(strconv.Itoa(int(n.ID)), n)
+		}
+	}
+	return nil
 }
