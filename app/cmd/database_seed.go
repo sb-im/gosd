@@ -6,10 +6,10 @@ import (
 
 func init() {
 	databaseCmd.Subcommands = append(databaseCmd.Subcommands, &cli.Command{
-		Name:  "migrate",
-		Usage: "migrate",
+		Name:  "seed",
+		Usage: "seed",
 		Action: ex(func(c *exContext) error {
-			c.cnt.DatabaseMigrate()
+			c.cnt.DatabaseSeed()
 			return nil
 		}),
 	})

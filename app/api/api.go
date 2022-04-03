@@ -99,6 +99,9 @@ func NewApi(cfg *config.Config, orm *gorm.DB, rdb *redis.Client, srv *service.Se
 
 	sr.POST("mqtt/url", handler.MqttUserCreate)
 
+	sr.POST("/database/migrate", handler.DatabaseMigrate)
+	sr.POST("/database/seed", handler.DatabaseSeed)
+
 	sr.GET("current", handler.Current)
 
 	r.NoRoute(func(c *gin.Context) {
@@ -108,7 +111,7 @@ func NewApi(cfg *config.Config, orm *gorm.DB, rdb *redis.Client, srv *service.Se
 		})
 	})
 
-	handler.InitSeed()
-	handler.UserOverride()
+	//handler.InitSeed()
+	//handler.UserOverride()
 	return r
 }

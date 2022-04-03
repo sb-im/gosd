@@ -4,7 +4,7 @@ import (
 	"sb.im/gosd/app/model"
 )
 
-func (h Handler) InitSeed() {
+func (h *Handler) InitSeed() {
 
 	// init seed:
 	// - team id: 1
