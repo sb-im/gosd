@@ -51,7 +51,8 @@ test luavm:
   before_script:
     - go version
   script:
-    - go run main.go database migrate
+    - go run main.go database --local migrate
+    - go run main.go database --local seed
     - make test-luavm
 
 .test-broker:
@@ -145,7 +146,8 @@ test-simulation:
   script:
     - go get -u github.com/swaggo/swag/cmd/swag
     - make
-    - ./gosd database migrate
+    - ./gosd database --local migrate
+    - ./gosd database --local seed
     - make test-simulation
 
 build-binary:

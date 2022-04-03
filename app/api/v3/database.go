@@ -25,6 +25,11 @@ func (h *Handler) DatabaseMigrate(c *gin.Context) {
 	c.JSON(http.StatusNoContent, nil)
 }
 
+// seed:
+//   - default
+//   - test
+//   - demo
+//   - multi
 func (h *Handler) DatabaseSeed(c *gin.Context) {
 	h.InitSeed()
 	c.JSON(http.StatusNoContent, nil)
