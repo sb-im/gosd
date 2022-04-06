@@ -83,13 +83,15 @@ func (c *Client) NodeSync(teamId uint, path string) error {
 	nodes := read.ParseNode(path)
 	for _, n := range nodes {
 		n.TeamID = teamId
-		if n.ID == 0 {
-			// Create
-			c.NodeCreate(n)
-		} else {
-			// Update
-			c.NodeUpdate(strconv.Itoa(int(n.ID)), n)
+		if n.ID != 0 {
+			if _, err := c.NodeShow(strconv.Itoa(int(n.ID))); err == nil {
+				// Update
+				c.NodeUpdate(strconv.Itoa(int(n.ID)), n)
+				continue
+			}
 		}
+		// Create
+		c.NodeCreate(n)
 	}
 	return nil
 }
