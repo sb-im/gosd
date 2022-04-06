@@ -1,0 +1,12 @@
+.data
+storages
+
+.git
+.gitignore
+
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+README.md
+

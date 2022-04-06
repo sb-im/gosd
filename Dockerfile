@@ -14,6 +14,7 @@ RUN make build
 # COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 FROM alpine AS bin
 
+COPY --from=builder /src/data /var/lib/gosd/data
 COPY --from=builder /src/gosd /usr/bin/gosd
 
 RUN apk add --no-cache bash
