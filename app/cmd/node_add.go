@@ -19,25 +19,31 @@ var nodeAddCmd = &cli.Command{
 		&cli.UintFlag{Name: "team"},
 		&cli.StringFlag{Name: "name"},
 	},
-	ArgsUsage: "<point path>",
+	ArgsUsage: "<point path> <point path> ...",
 	Action: ex(func(c *exContext) error {
-		var points interface{}
+		ps := make([]json.RawMessage, c.ctx.Args().Len())
 		if c.ctx.Args().Len() > 0 {
-			path := c.ctx.Args().First()
-			f, err := os.Open(path)
-			if err != nil {
-				panic(err)
+			for i, v := range c.ctx.Args().Slice() {
+				f, err := os.Open(v)
+				if err != nil {
+					panic(err)
+				}
+				data, err := ioutil.ReadAll(f)
+				if err != nil {
+					panic(err)
+				}
+
+				ps[i] = json.RawMessage(data)
 			}
-			data, err := ioutil.ReadAll(f)
-			if err != nil {
-				panic(err)
-			}
-			points = json.RawMessage(data)
+		}
+		points, err := json.Marshal(ps)
+		if err != nil {
+			panic(err)
 		}
 		return c.cnt.NodeCreate(&map[string]interface{}{
 			"team_id": c.ctx.Uint("team"),
 			"name":    c.ctx.String("name"),
-			"points":  points,
+			"points":  json.RawMessage(points),
 		})
 	}),
 }
