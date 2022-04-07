@@ -1,4 +1,4 @@
-image: golang:1.17-buster
+image: golang:1.18-buster
 
 stages:
   - build
@@ -19,6 +19,10 @@ stages:
 
 go1.17 build:
   image: golang:1.17-buster
+  extends: .gobuild
+
+go1.18 build:
+  image: golang:1.18-buster
   extends: .gobuild
 
 test database:
