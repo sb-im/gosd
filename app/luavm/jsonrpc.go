@@ -15,7 +15,7 @@ type Rpc struct {
 
 type tRpc struct {
 	req []byte
-	ch chan []byte
+	ch  chan []byte
 }
 
 func NewRpc() *Rpc {
@@ -49,7 +49,7 @@ func (s *Service) RpcSend(nodeId string, raw []byte) (string, error) {
 	ch := make(chan []byte, 128)
 	s.Rpc.pendings[rpc.ID.String()] = tRpc{
 		req: raw,
-		ch: ch,
+		ch:  ch,
 	}
 
 	// Prevent issuing non-compliant jsonrpc 2.0
