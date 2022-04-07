@@ -21,6 +21,7 @@ func (h *Handler) DatabaseMigrate(c *gin.Context) {
 	orm.AutoMigrate(&model.Task{})
 	orm.AutoMigrate(&model.Blob{})
 	orm.AutoMigrate(&model.Job{})
+	orm.AutoMigrate(&model.Profile{})
 
 	c.JSON(http.StatusNoContent, nil)
 }

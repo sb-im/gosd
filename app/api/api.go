@@ -104,6 +104,9 @@ func NewApi(cfg *config.Config, orm *gorm.DB, rdb *redis.Client, srv *service.Se
 
 	sr.GET("current", handler.Current)
 
+	sr.GET("/profiles/:key", handler.ProfileGet)
+	sr.PUT("/profiles/:key", handler.ProfileSet)
+
 	r.NoRoute(func(c *gin.Context) {
 		fmt.Println(c.Request.URL)
 		c.JSON(http.StatusNotFound, gin.H{
