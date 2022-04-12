@@ -4,7 +4,7 @@
   { "type": "node", "args": "drone" },
   { "type": "node", "args": "depot" },
   {
-    "icon": "log",
+    "icon": "doc",
     "name": "日志",
     "type": "iframe",
     "args": "https://cloud.sbnet.xyz/logger"

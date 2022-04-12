@@ -1,0 +1,10 @@
+{
+  "type": "livestream_webrtc2",
+  "name": "depot livestream module",
+  "params": {
+    "source": [],
+    "control": {},
+    "action": []
+  }
+}
+

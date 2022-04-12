@@ -1,3 +1,4 @@
 {
-  "type": "monitor"
+  "name": "xxxx",
+  "type": "livestream_webrtc2"
 }

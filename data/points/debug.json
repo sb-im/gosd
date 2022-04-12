@@ -1,0 +1,14 @@
+{
+  "type": "debug",
+  "params": [
+    "power_cooling_fan_on",
+    "power_cooling_fan_off",
+    "power_on_remote",
+    "power_off_remote",
+    "power_autocharge_on",
+    "power_autocharge_off",
+    "returnhome",
+    "pause"
+  ]
+}
+

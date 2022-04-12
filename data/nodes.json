@@ -3,15 +3,29 @@
     "id": 1,
     "name": "test-drone",
     "points": [
-      "monitor",
-      "map"
+      "drone-status",
+      "webrtc2",
+      "map",
+      "console",
+      "debug"
     ]
   },
   {
     "id": 2,
     "name": "test-depot",
     "points": [
-      "monitor-readonly"
+      "depot-status",
+      "webrtc2",
+      "weather",
+      "console",
+      "debug"
+    ]
+  },
+  {
+    "id":3,
+    "name": "test-depot",
+    "points": [
+      "monitor-readonly3"
     ]
   }
 ]

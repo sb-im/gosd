@@ -1,0 +1,59 @@
+{
+  "type": "console",
+  "name": "console module",
+  "params": [
+    {
+      "icon": "reset",
+      "item": [
+        {
+          "name": "　急停　",
+          "mission": "emergency_stop",
+          "type": "danger"
+        },
+        {
+          "name": "解除错误",
+          "mission": "clear_errorstatus"
+        }
+      ]
+    },
+    {
+      "icon": "depot",
+      "item": [
+        {
+          "name": "depot.ctl.dooropen",
+          "mission": "dooropen_user"
+        },
+        {
+          "name": "depot.ctl.doorclose",
+          "mission": "doorclose_user"
+        }
+      ]
+    },
+    {
+      "icon": "battery",
+      "item": [
+        {
+          "name": "depot.ctl.charge_on",
+          "mission": "power_autocharge_on"
+        },
+        {
+          "name": "depot.ctl.charge_off",
+          "mission": "power_autocharge_off"
+        }
+      ]
+    },
+    {
+      "icon": "expand",
+      "item": [
+        {
+          "name": "depot.ctl.fixdrone",
+          "mission": "fixdrone_user"
+        },
+        {
+          "name": "depot.ctl.freedrone",
+          "mission": "freedrone_user"
+        }
+      ]
+    }
+  ]
+}

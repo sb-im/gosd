@@ -1,0 +1,8 @@
+{
+  "type": "livestream_webrtc3",
+  "name": "livestream webrtc 3",
+  "params": {
+    "url": "wss://send.22333.fun/s/1234"
+  }
+}
+
