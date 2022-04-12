@@ -1,12 +1,11 @@
 [
   { "type": "overview" },
   { "type": "plan" },
-  { "type": "node", "args": "drone" },
-  { "type": "node", "args": "depot" },
+  { "type": "node" },
   {
     "icon": "doc",
     "name": "日志",
     "type": "iframe",
-    "args": "https://cloud.sbnet.xyz/logger"
+    "args": "https://bilibili.com"
   }
 ]
