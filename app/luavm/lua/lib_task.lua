@@ -1,6 +1,9 @@
-function NewPlan(nodeID)
+function NewTask(nodeID)
   return {
     nodeID = nodeID,
+    name = function(self)
+      return SD:TaskName()
+    end,
     ToggleDialog = function(self, dialog)
       local err = SD:ToggleDialog(dialog)
       if err ~= nil then

@@ -25,7 +25,7 @@ import (
 
 var (
 	libs = []string{
-		"lib_plan.lua",
+		"lib_task.lua",
 		"lib_node.lua",
 		"lib_geo.lua",
 		"lib_log.lua",

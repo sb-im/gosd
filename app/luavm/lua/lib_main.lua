@@ -5,5 +5,5 @@ sleep = function(time)
 end
 
 function SD_main(node_id)
-  return main(NewPlan(node_id))
+  return main(NewTask(node_id))
 end
