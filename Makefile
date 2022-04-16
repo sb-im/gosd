@@ -33,7 +33,7 @@ run:
 
 .PHONY: swagger
 swagger:
-	# go get -u github.com/swaggo/swag/cmd/swag
+	# go install github.com/swaggo/swag/cmd/swag
 	swag init -g app/app.go -o swag
 	@ rm swag/docs.go
 	@ rm swag/swagger.yaml
