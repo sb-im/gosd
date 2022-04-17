@@ -1,5 +1,7 @@
 package luavm
 
-func (s *Service) TaskName() string {
-	return s.Task.Name
+import "sb.im/gosd/app/model"
+
+func (s *Service) GetTask() *model.Task {
+	return s.Task
 }

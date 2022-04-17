@@ -1,9 +1,8 @@
 function NewTask(nodeID)
+  local task = SD:GetTask()
   return {
+    name = task.name,
     nodeID = nodeID,
-    name = function(self)
-      return SD:TaskName()
-    end,
     ToggleDialog = function(self, dialog)
       local err = SD:ToggleDialog(dialog)
       if err ~= nil then
