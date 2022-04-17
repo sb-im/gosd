@@ -1,4 +1,4 @@
-FROM golang:1.17-buster AS builder
+FROM golang:1.18-buster AS builder
 
 ENV TZ=Asia/Shanghai
 #ENV GOPROXY=https://goproxy.cn,direct

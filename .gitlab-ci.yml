@@ -259,7 +259,7 @@ deploy develop:
     - chmod 700 ~/.ssh
     - ssh-keyscan ${HOST_CLOUD_DEVELOP} > ~/.ssh/known_hosts
   script:
-    - go install github.com/swaggo/swag/cmd/swag
+    - go install github.com/swaggo/swag/cmd/swag@latest
     - make swagger
     - tar -czf - -C swag swagger.json | ssh ${USER_CLOUD_DEVELOP}@${HOST_CLOUD_DEVELOP} "tar -xzf - && sed -i s/localhost:8000/${HOST_CLOUD_DEVELOP}/g swagger.json && docker-compose restart swagger"
     - ssh ${USER_CLOUD_DEVELOP}@${HOST_CLOUD_DEVELOP} 'docker-compose pull -q gosd && docker-compose up -d'
