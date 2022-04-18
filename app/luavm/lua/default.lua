@@ -35,25 +35,23 @@ function MergeTables(...)
   return origin
 end
 
-function main(plan)
+function main(task)
   print("=== START Lua ===")
   sleep("1ms")
   local debug = true
 
-  local drone_id = plan.nodeID
+  local drone_id = task.nodeID
   local drone = NewNode(drone_id)
 
   local depot_id = drone:GetID()
   local depot = NewNode(depot_id)
-
-  local plan = NewPlan()
 
   print("Drone Id:", drone.id)
   print("Depot Id:", depot.id)
 
   print("Drone Status:", json.encode(drone:GetStatus()))
 
-  plan:CleanDialog()
+  task:CleanDialog()
   local ask_status = {
     name = "错误",
     message = "请联系管理员在后端指定默认流程，或者上传自定义流程",
@@ -62,17 +60,17 @@ function main(plan)
       {name = "返回", message = 'no', level = 'primary'},
     }
   }
-  plan:ToggleDialog(ask_status)
+  task:ToggleDialog(ask_status)
 
-  if plan:Gets() == "no" then
+  if task:Gets() == "no" then
     print("Task canceled")
     return
   end
-  plan:CleanDialog()
+  task:CleanDialog()
 
   -- drone:SyncCall("test")
 
   print("=== END Lua END ===")
-  plan:SetJobFileContent("luavm", "luavm.txt", log:GetContent())
+  task:SetJobFileContent("luavm", "luavm.txt", log:GetContent())
   return
 end

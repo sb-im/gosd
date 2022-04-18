@@ -1,17 +1,15 @@
-function main(plan)
+function main(task)
   print("=== START Lua ===")
   sleep("1ms")
 
   -- DEBUG Mode
   local debug = true
 
-  local drone_id = plan.nodeID
+  local drone_id = task.nodeID
   local drone = NewNode(drone_id)
 
   local depot_id = drone:GetID()
   local depot = NewNode(depot_id)
-
-  local plan = NewPlan()
 
   print("Drone Id:", drone.id)
   print("Depot Id:", depot.id)
@@ -22,7 +20,7 @@ function main(plan)
     print(json.encode(data))
   end
 
-  plan:CleanDialog()
+  task:CleanDialog()
   ask_status = {
     name = "确定要执行任务吗？",
     buttons = {
@@ -30,20 +28,20 @@ function main(plan)
       {name = "是的，我要执行", message = 'yes', level = 'danger'},
     }
   }
-  plan:ToggleDialog(ask_status)
+  task:ToggleDialog(ask_status)
 
-  if plan:Gets() ~= "yes" then
+  if task:Gets() ~= "yes" then
     print("Task canceled")
     return
   end
-  plan:CleanDialog()
+  task:CleanDialog()
 
   -- drone:SyncCall("test")
 
   -- Check UPS
   local ups_status = depot:GetMsg("ups_status")
   if ups_status.status ~= "online" then
-    plan:ToggleDialog({
+    task:ToggleDialog({
       name = "无法执行此任务",
       message = json.encode(ups_status),
       level = "danger",
@@ -52,13 +50,13 @@ function main(plan)
       }
     })
 
-    if plan:Gets() ~= "know" then
+    if task:Gets() ~= "know" then
       print("Task canceled")
-      plan:CleanDialog()
+      task:CleanDialog()
       return
     end
 
-    plan:CleanDialog()
+    task:CleanDialog()
     return
   end
 
@@ -76,7 +74,7 @@ function main(plan)
   print(json.encode(data))
 
   if debug then
-    plan:ToggleDialog({
+    task:ToggleDialog({
       name = "请继续",
       items = {
         {name = "剩余电量", message = battery.remain .. '%', level = 'info'},
@@ -88,14 +86,14 @@ function main(plan)
     })
   end
 
-  if plan:Gets() ~= 'confirm' then
+  if task:Gets() ~= 'confirm' then
     print("cancel")
-    plan:CleanDialog()
+    task:CleanDialog()
     drone:SyncCall("emergency_stop")
 
     return
   end
-  plan:CleanDialog()
+  task:CleanDialog()
 
   if tonumber(battery.remain) < 90 then
     depot:SyncCall("exchange_battery")
@@ -106,7 +104,7 @@ function main(plan)
   xpcall(function()
 
     drone:SyncCall("check_gps")
-    drone:SyncCall("ncp", {"download", "map", plan:FileUrl("file")})
+    drone:SyncCall("ncp", {"download", "map", task:FileUrl("file")})
     drone:SyncCall("loadmap")
 
     depot:SyncCall("freedrone")
@@ -118,7 +116,7 @@ function main(plan)
 
 
   if debug then
-    plan:ToggleDialog({
+    task:ToggleDialog({
       name = "最后确认",
       buttons = {
         {name = "Cancel", message = 'cancel', level = 'primary'},
@@ -127,14 +125,14 @@ function main(plan)
     })
   end
 
-  if plan:Gets() ~= 'confirm' then
+  if task:Gets() ~= 'confirm' then
     print("cancel")
-    plan:CleanDialog()
+    task:CleanDialog()
     drone:SyncCall("emergency_stop")
 
     return
   end
-  plan:CleanDialog()
+  task:CleanDialog()
 
   xpcall(function()
 
