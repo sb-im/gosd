@@ -16,7 +16,7 @@ const (
 )
 
 type dataNode struct {
-	ID     uint     `json:"id"`
+	ID     string   `json:"id"`
 	Name   string   `json:"name"`
 	Points []string `json:"points"`
 }

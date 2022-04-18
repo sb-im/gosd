@@ -1,6 +1,6 @@
 [
   {
-    "id": 1,
+    "id": "1",
     "name": "test-drone",
     "points": [
       "drone-status",
@@ -11,7 +11,7 @@
     ]
   },
   {
-    "id": 2,
+    "id": "2",
     "name": "test-depot",
     "points": [
       "depot-status",
@@ -22,7 +22,7 @@
     ]
   },
   {
-    "id":3,
+    "id": "3",
     "name": "test-depot",
     "points": [
       "monitor-readonly3"

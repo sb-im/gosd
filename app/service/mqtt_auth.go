@@ -13,9 +13,9 @@ const (
 	mqttAuthAclPrefix = "mqtt_acl:"
 
 	mqttAuthTeam = "user.%d"
-	mqttAuthNode = "node.%d"
+	mqttAuthNode = "node.%s"
 
-	mqttTopicNode = "nodes/%d/#"
+	mqttTopicNode = "nodes/%s/#"
 	mqttTopicTask = "tasks/%d/#"
 )
 
@@ -60,11 +60,11 @@ func (s *Service) MqttAuthAclTeam(teamID uint) error {
 	return s.rdb.HSet(context.Background(), mqttAuthAclPrefix+username, acl).Err()
 }
 
-func (s *Service) MqttAuthReqNode(nodeID uint) error {
-	username := fmt.Sprintf(mqttAuthTeam, nodeID)
+func (s *Service) MqttAuthReqNode(nodeID string) error {
+	username := fmt.Sprintf(mqttAuthNode, nodeID)
 
 	var node model.Node
-	if err := s.orm.Take(&node, nodeID).Error; err != nil {
+	if err := s.orm.Take(&node, "id", nodeID).Error; err != nil {
 		return err
 	}
 
@@ -73,8 +73,8 @@ func (s *Service) MqttAuthReqNode(nodeID uint) error {
 	}).Err()
 }
 
-func (s *Service) MqttAuthAclNode(nodeID uint) error {
-	username := fmt.Sprintf(mqttAuthTeam, nodeID)
+func (s *Service) MqttAuthAclNode(nodeID string) error {
+	username := fmt.Sprintf(mqttAuthNode, nodeID)
 
 	return s.rdb.HSet(context.Background(), mqttAuthAclPrefix+username, map[string]interface{}{
 		fmt.Sprintf(mqttTopicNode, nodeID): mqttAuthAccessPubSub,
