@@ -39,7 +39,7 @@ func (h *Handler) TaskIndex(c *gin.Context) {
 // @Accept multipart/form-data
 // @Produce json
 // @Param name    formData string true "Task Name"
-// @Param node_id formData uint true "Node ID"
+// @Param node_id formData string true "Node ID"
 // @Success 201
 // @Failure 400
 // @Failure 404

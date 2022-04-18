@@ -6,8 +6,8 @@ type Task struct {
 	Model
 
 	Name   string `json:"name" form:"name"`
+	NodeID string `json:"node_id" form:"node_id"`
 	TeamID uint   `json:"-"`
-	NodeID uint   `json:"node_id" form:"node_id"`
 	Index  uint   `json:"index" gorm:"default:0;not null"`
 	Files  JSON   `json:"files"`
 	Extra  JSON   `json:"extra"`
