@@ -31,7 +31,7 @@ var nodeLsCmd = &cli.Command{
 		fmt.Fprintln(w, "ID\tName\tPoints")
 
 		for _, i := range nodes {
-			fmt.Fprintf(w, "%d\t%s\t%s\n",
+			fmt.Fprintf(w, "%s\t%s\t%s\n",
 				i.ID,
 				i.Name,
 				func() string {
