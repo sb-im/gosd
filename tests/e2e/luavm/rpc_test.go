@@ -3,8 +3,6 @@ package luavm_test
 import (
 	"context"
 	"io/ioutil"
-
-	"strconv"
 	"time"
 
 	"sb.im/gosd/app/config"
@@ -32,7 +30,7 @@ var _ = Describe("LuaVM Rpc", func() {
 	ctx, _ := context.WithCancel(context.Background())
 	task := model.Task{
 		Name:   "E2E Test",
-		NodeID: 1,
+		NodeID: "1",
 	}
 
 	cfg := config.Parse()
@@ -68,7 +66,7 @@ var _ = Describe("LuaVM Rpc", func() {
 	worker := luavm.NewWorker(luavm.DefaultConfig(), orm, rdb, ofs, rpcServer, luaFile)
 	go worker.Run(ctx)
 
-	go help.StartNcp(ctx, config.Parse().MqttURL, strconv.Itoa(int(task.NodeID)))
+	go help.StartNcp(ctx, config.Parse().MqttURL, task.NodeID)
 
 	// Wait mqttd server startup && sub topic on broker
 	time.Sleep(100 * time.Millisecond)
