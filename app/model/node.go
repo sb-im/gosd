@@ -19,7 +19,7 @@ type Node struct {
 	Points JSON   `json:"points"`
 }
 
-func (n *Node) BeforeSave(tx *gorm.DB) error {
+func (n *Node) BeforeCreate(tx *gorm.DB) error {
 	if n.ID == "" {
 		n.ID = helper.GenNumberSecret(6)
 	}
@@ -27,7 +27,10 @@ func (n *Node) BeforeSave(tx *gorm.DB) error {
 	if n.Secret == "" {
 		n.Secret = helper.GenSecret(16)
 	}
+	return nil
+}
 
+func (n *Node) BeforeSave(tx *gorm.DB) error {
 	if !jsonIsArray(n.Points) {
 		n.Points = JSON("[]")
 	}

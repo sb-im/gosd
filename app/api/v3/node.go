@@ -77,7 +77,7 @@ func (h *Handler) NodeCreate(c *gin.Context) {
 // @Tags node
 // @Accept json
 // @Produce json
-// @Param id path uint true "Task ID"
+// @Param id path string true "Node ID"
 // @Success 200
 // @failure 404
 // @Router /nodes/{id} [GET]
@@ -97,7 +97,7 @@ func (h *Handler) NodeShow(c *gin.Context) {
 // @Tags node
 // @Accept json
 // @Produce json
-// @Param id   path int true "Node ID"
+// @Param id path string true "Node ID"
 // @Success 200
 // @Failure 400
 // @Failure 500
@@ -122,7 +122,7 @@ func (h *Handler) NodeUpdate(c *gin.Context) {
 // @Tags node
 // @Accept json
 // @Produce json
-// @Param id path uint true "Node ID"
+// @Param id path string true "Node ID"
 // @Success 204
 // @Failure 500
 // @Router /nodes/{id} [DELETE]
