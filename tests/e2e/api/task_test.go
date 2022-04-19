@@ -56,6 +56,7 @@ var _ = Describe("Task", func() {
 			fmt.Println(os.Getenv("LUA_FILE"))
 			if node, err := c.NodeShow(nodeID); err != nil {
 				c.NodeCreate(&model.Node{
+					ID:   nodeID,
 					Name: "Test Node",
 				})
 			} else {
