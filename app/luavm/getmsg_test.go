@@ -3,7 +3,6 @@ package luavm
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"testing"
 	"time"
 )
@@ -18,15 +17,15 @@ func TestLuaGetMsg(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	if err := rdb.Set(ctx, fmt.Sprintf(topicNodeSys, strconv.Itoa(int(task.NodeID)), "status"), `{"code":0}`, time.Second).Err(); err != nil {
+	if err := rdb.Set(ctx, fmt.Sprintf(topicNodeSys, task.NodeID, "status"), `{"code":0}`, time.Second).Err(); err != nil {
 		t.Error(err)
 	}
 
-	if err := rdb.Set(ctx, fmt.Sprintf(topicNodeSys, strconv.Itoa(int(task.NodeID)), "network"), `{"code":0}`, time.Second).Err(); err != nil {
+	if err := rdb.Set(ctx, fmt.Sprintf(topicNodeSys, task.NodeID, "network"), `{"code":0}`, time.Second).Err(); err != nil {
 		t.Error(err)
 	}
 
-	if err := rdb.Set(ctx, fmt.Sprintf(topicNodeMsg, strconv.Itoa(int(task.NodeID)), "weather"), `{"code":0}`, time.Second).Err(); err != nil {
+	if err := rdb.Set(ctx, fmt.Sprintf(topicNodeMsg, task.NodeID, "weather"), `{"code":0}`, time.Second).Err(); err != nil {
 		t.Error(err)
 	}
 

@@ -8,7 +8,7 @@ import (
 func TestPreTaskCheck(t *testing.T) {
 	task := newTestTask(t)
 	taskID := strconv.Itoa(int(task.ID))
-	nodeID := strconv.Itoa(int(task.NodeID))
+	nodeID := task.NodeID
 
 	w := newWorker(t)
 
