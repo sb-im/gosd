@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http/httptest"
 	"os"
-	"strconv"
 	"time"
 
 	"sb.im/gosd/app/api"
@@ -24,7 +23,7 @@ var _ = Describe("Task", func() {
 	var s *httptest.Server
 	var c *client.Client
 
-	nodeID := uint(1)
+	nodeID := "1"
 
 	task := model.Task{
 		Name:   "E2E Test",
@@ -41,7 +40,7 @@ var _ = Describe("Task", func() {
 		// TODO: need to ApiKey
 		c = client.NewClient(s.URL + api.ApiPrefix, "")
 
-		go help.StartNcp(ctx, config.Parse().MqttURL, strconv.Itoa(int(nodeID)))
+		go help.StartNcp(ctx, config.Parse().MqttURL, nodeID)
 
 		// Wait mqttd server startup && sub topic on broker
 		time.Sleep(100 * time.Millisecond)
@@ -55,7 +54,7 @@ var _ = Describe("Task", func() {
 	Context("Test Context", func() {
 		It("create a new task", func() {
 			fmt.Println(os.Getenv("LUA_FILE"))
-			if node, err := c.NodeShow(strconv.Itoa(int(nodeID))); err != nil {
+			if node, err := c.NodeShow(nodeID); err != nil {
 				c.NodeCreate(&model.Node{
 					Name: "Test Node",
 				})
