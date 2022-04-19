@@ -21,7 +21,7 @@ type Node struct {
 
 func (n *Node) BeforeSave(tx *gorm.DB) error {
 	if n.ID == "" {
-		n.ID = helper.GenSecret(8)
+		n.ID = helper.GenNumberSecret(6)
 	}
 
 	if n.Secret == "" {
