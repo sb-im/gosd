@@ -50,6 +50,8 @@ ncpio:
   - type: jsonrpc2
     params: "233"
     i_rules:
+      - regexp: '.*"method": ?"(__luavm_test__no_result)".*'
+        invert: true
       - regexp: '.*'
     o_rules:
       - regexp: '.*'

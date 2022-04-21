@@ -47,9 +47,13 @@ func (s Service) onStart() error {
 func (s *Service) Close() error {
 	s.cancel()
 
-	for _, trpc := range s.Rpc.pendings {
-		s.Server.KillRpc(trpc.req)
-	}
+	// TODO: remove
+	// This is have bug
+	// Need better solution
+
+	//for _, trpc := range s.Rpc.pendings {
+	//	s.Server.KillRpc(trpc.req)
+	//}
 
 	// Need Reset Kill status
 	// Maybe multiple click Kill button

@@ -3,6 +3,7 @@ package luavm_test
 import (
 	"context"
 	"io/ioutil"
+	"strconv"
 	"time"
 
 	"sb.im/gosd/app/config"
@@ -27,7 +28,7 @@ import (
 )
 
 var _ = Describe("LuaVM Rpc", func() {
-	ctx, _ := context.WithCancel(context.Background())
+	ctx := context.TODO()
 	task := model.Task{
 		Name:   "E2E Test",
 		NodeID: "1",
@@ -66,7 +67,11 @@ var _ = Describe("LuaVM Rpc", func() {
 	worker := luavm.NewWorker(luavm.DefaultConfig(), orm, rdb, ofs, rpcServer, luaFile)
 	go worker.Run(ctx)
 
-	go help.StartNcp(ctx, config.Parse().MqttURL, task.NodeID)
+	go func() {
+		if err := help.StartNcp(ctx, config.Parse().MqttURL, task.NodeID); err != nil {
+			panic(err)
+		}
+	}()
 
 	// Wait mqttd server startup && sub topic on broker
 	time.Sleep(100 * time.Millisecond)
@@ -84,8 +89,25 @@ var _ = Describe("LuaVM Rpc", func() {
 			luaFile, err := lualib.LuaFile.ReadFile("test_rpc.lua")
 			Expect(err).NotTo(HaveOccurred())
 
-			worker.RunTask(&task, luaFile)
+			err = worker.RunTask(&task, luaFile)
 			Expect(err).NotTo(HaveOccurred())
+		})
+	})
+
+	Context("Test Context Cancel", func() {
+		It("run luaFile no result", func() {
+			luaFile, err := lualib.LuaFile.ReadFile("test_rpc_error.lua")
+			Expect(err).NotTo(HaveOccurred())
+
+			ch := make(chan error)
+			go func() {
+				ch <- worker.RunTask(&task, luaFile)
+			}()
+
+			time.Sleep(100 * time.Millisecond)
+			err = worker.Kill(strconv.Itoa(int(task.ID)))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(<-ch).NotTo(HaveOccurred())
 		})
 	})
 })
