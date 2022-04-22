@@ -1,6 +1,11 @@
 function NewNode(nodeID)
+  local node = SD:GetNode(nodeID)
+  if node == nil then
+    error("Not Found Node ID")
+  end
   return {
-    id = tostring(nodeID),
+    id = node.ID,
+    name = node.name,
     AsyncCall = function(self, method, params)
       rpc = {
         id = SD:GenRpcID(),

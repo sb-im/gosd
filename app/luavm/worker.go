@@ -148,10 +148,13 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 	luajson.Preload(l)
 
 	service := NewService(task)
+	var nodes []model.Node
+	w.orm.Find(&nodes, "team_id = ?", task.TeamID)
 	service.cfg = w.cfg
 	service.orm = w.orm
 	service.rdb = w.rdb
 	service.ofs = w.ofs
+	service.nodes = nodes
 	service.Server = w.rpc
 
 	w.mutex.Lock()

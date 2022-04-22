@@ -25,6 +25,7 @@ type Service struct {
 	cancel context.CancelFunc
 	Rpc    *Rpc
 	Task   *model.Task
+	nodes  []model.Node
 	Server *rpc2mqtt.Rpc2mqtt
 }
 
