@@ -41,6 +41,12 @@ func (s *Service) GenRpcID() string {
 }
 
 func (s *Service) RpcSend(nodeId string, raw []byte) (string, error) {
+
+	// Verify BelongsTo Team
+	if s.GetNode(nodeId) == nil {
+		return "", errors.New("Node not found this node.id")
+	}
+
 	// TODO: Detect online status
 	rpc, err := jsonrpc.Parse(raw)
 	if err != nil {
