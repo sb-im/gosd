@@ -44,7 +44,7 @@ func (s Service) onStart() error {
 	return s.running(s.Task)
 }
 
-func (s *Service) Close() error {
+func (s *Service) Kill() {
 	s.cancel()
 
 	// TODO: remove
@@ -59,7 +59,9 @@ func (s *Service) Close() error {
 	// Maybe multiple click Kill button
 	// IOGets: need to sleep some time
 	s.ctx, s.cancel = context.WithCancel(context.Background())
+}
 
+func (s *Service) Close() error {
 	return s.onClose()
 }
 

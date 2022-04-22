@@ -208,7 +208,7 @@ func (w *Worker) Kill(taskID string) error {
 	service, ok := w.Running[taskID]
 	w.mutex.Unlock()
 	if ok {
-		service.Close()
+		service.Kill()
 		log.Warn("==> luavm Kill")
 		return nil
 	}
