@@ -5,6 +5,12 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"sb.im/gosd/app/config"
+	"sb.im/gosd/app/model"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func TestLuaGetMsg(t *testing.T) {
@@ -12,6 +18,21 @@ func TestLuaGetMsg(t *testing.T) {
 
 	w := newWorker(t)
 
+	cfg := config.Parse()
+	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+
+	nodeID := "1"
+	task.NodeID = nodeID
+
+	node := &model.Node{
+		ID:     nodeID,
+		TeamID: task.TeamID,
+	}
+
+	orm.Save(node)
 	rdb := w.rdb
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
