@@ -41,6 +41,13 @@ var _ = Describe("LuaVM Rpc", func() {
 		panic(err)
 	}
 
+	node := &model.Node{
+		ID:     task.NodeID,
+		TeamID: task.TeamID,
+	}
+
+	orm.Save(node)
+
 	redisOpt, err := redis.ParseURL(cfg.RedisURL)
 	if err != nil {
 		panic(err)
