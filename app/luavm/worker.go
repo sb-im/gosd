@@ -72,6 +72,7 @@ func NewWorker(cfg Config, s *store.Store, rpc *rpc2mqtt.Rpc2mqtt, script []byte
 		orm:    s.Orm(),
 		rdb:    s.Rdb(),
 		ofs:    s.Ofs(),
+		store:  s,
 		script: script,
 		mutex:  &sync.Mutex{},
 

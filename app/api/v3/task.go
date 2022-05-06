@@ -116,6 +116,7 @@ func (h *Handler) TaskShow(c *gin.Context) {
 // @Success 200
 // @Failure 400
 // @Failure 404
+// @Failure 409
 // @Failure 500
 // @Router /tasks/{id} [PUT]
 func (h *Handler) TaskUpdate(c *gin.Context) {
@@ -155,6 +156,7 @@ func (h *Handler) TaskUpdate(c *gin.Context) {
 // @Produce json
 // @Param id path uint true "Task ID"
 // @Success 204
+// @Failure 409
 // @Failure 500
 // @Router /tasks/{id} [DELETE]
 func (h *Handler) TaskDestroy(c *gin.Context) {
