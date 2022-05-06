@@ -8,6 +8,7 @@ import (
 	lualib "sb.im/gosd/app/luavm/lua"
 	"sb.im/gosd/app/model"
 	"sb.im/gosd/app/storage"
+	"sb.im/gosd/app/store"
 
 	"github.com/go-redis/redis/v8"
 	"gorm.io/driver/postgres"
@@ -31,7 +32,7 @@ func helpTestNewWorker(t *testing.T, script []byte) *Worker {
 		panic(err)
 	}
 
-	return NewWorker(DefaultConfig(), orm, redis.NewClient(redisOpt), storage.NewStorage(cfg.StorageURL), nil, script)
+	return NewWorker(DefaultConfig(), store.NewStore(nil, orm, redis.NewClient(redisOpt), storage.NewStorage(cfg.StorageURL)), nil, script)
 }
 
 func newTestTask(t *testing.T) *model.Task {

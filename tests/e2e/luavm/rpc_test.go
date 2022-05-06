@@ -11,6 +11,7 @@ import (
 	lualib "sb.im/gosd/app/luavm/lua"
 	"sb.im/gosd/app/model"
 	"sb.im/gosd/app/storage"
+	"sb.im/gosd/app/store"
 
 	"sb.im/gosd/rpc2mqtt"
 	"sb.im/gosd/tests/help"
@@ -54,12 +55,12 @@ var _ = Describe("LuaVM Rpc", func() {
 	}
 	rdb := redis.NewClient(redisOpt)
 
-	store := state.NewState(cfg.RedisURL)
+	s2 := state.NewState(cfg.RedisURL)
 
 	chI := make(chan mqttd.MqttRpc, 128)
 	chO := make(chan mqttd.MqttRpc, 128)
 
-	mqtt := mqttd.NewMqttd(cfg.MqttURL, store, chI, chO)
+	mqtt := mqttd.NewMqttd(cfg.MqttURL, s2, chI, chO)
 	go mqtt.Run(ctx)
 
 	rpcServer := rpc2mqtt.NewRpc2Mqtt(chI, chO)
@@ -71,7 +72,7 @@ var _ = Describe("LuaVM Rpc", func() {
 	if err == nil {
 		log.Warn("Use Lua File Path:", cfg.LuaFilePath)
 	}
-	worker := luavm.NewWorker(luavm.DefaultConfig(), orm, rdb, ofs, rpcServer, luaFile)
+	worker := luavm.NewWorker(luavm.DefaultConfig(), store.NewStore(nil, orm, rdb, ofs), rpcServer, luaFile)
 	go worker.Run(ctx)
 
 	go func() {
