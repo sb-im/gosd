@@ -32,7 +32,7 @@ func helpTestNewWorker(t *testing.T, script []byte) *Worker {
 		panic(err)
 	}
 
-	return NewWorker(DefaultConfig(), store.NewStore(nil, orm, redis.NewClient(redisOpt), storage.NewStorage(cfg.StorageURL)), nil, script)
+	return NewWorker(DefaultConfig(), store.NewStore(cfg, orm, redis.NewClient(redisOpt), storage.NewStorage(cfg.StorageURL)), nil, script)
 }
 
 func newTestTask(t *testing.T) *model.Task {
