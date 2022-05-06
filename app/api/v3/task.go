@@ -119,6 +119,11 @@ func (h *Handler) TaskShow(c *gin.Context) {
 // @Failure 500
 // @Router /tasks/{id} [PUT]
 func (h *Handler) TaskUpdate(c *gin.Context) {
+	if id, _ := h.store.LockTaskGet(c.Param("id")); id != "" {
+		c.JSON(http.StatusConflict, gin.H{"error": "This Task is Running"})
+		return
+	}
+
 	task := model.Task{}
 	if err := c.ShouldBind(&task); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -153,6 +158,11 @@ func (h *Handler) TaskUpdate(c *gin.Context) {
 // @Failure 500
 // @Router /tasks/{id} [DELETE]
 func (h *Handler) TaskDestroy(c *gin.Context) {
+	if id, _ := h.store.LockTaskGet(c.Param("id")); id != "" {
+		c.JSON(http.StatusConflict, gin.H{"error": "This Task is Running"})
+		return
+	}
+
 	if err := h.orm.Delete(&model.Task{}, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
