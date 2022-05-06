@@ -7,12 +7,7 @@ import (
 	"sb.im/gosd/app/model"
 )
 
-const (
-	lockTaskPrefix = "luavm.lock.task."
-	lockNodePrefix = "luavm.lock.node."
-)
-
-func (w Worker) preTaskCheck(task *model.Task) error {
+func (w *Worker) preTaskCheck(task *model.Task) error {
 	taskID := strconv.Itoa(int(task.ID))
 	nodeID := task.NodeID
 
@@ -27,26 +22,26 @@ func (w Worker) preTaskCheck(task *model.Task) error {
 	return nil
 }
 
-func (w Worker) lockTaskSet(id string) error {
-	return w.rdb.Set(w.ctx, lockTaskPrefix+id, w.cfg.Instance, w.timeout).Err()
+func (w *Worker) lockTaskSet(id string) error {
+	return w.store.LockTaskSet(id)
 }
 
-func (w Worker) lockTaskGet(id string) (string, error) {
-	return w.rdb.Get(w.ctx, lockTaskPrefix+id).Result()
+func (w *Worker) lockTaskGet(id string) (string, error) {
+	return w.store.LockTaskGet(id)
 }
 
-func (w Worker) lockTaskDel(id string) error {
-	return w.rdb.Del(w.ctx, lockTaskPrefix+id).Err()
+func (w *Worker) lockTaskDel(id string) error {
+	return w.store.LockTaskDel(id)
 }
 
-func (w Worker) lockNodeSet(id string) error {
-	return w.rdb.Set(w.ctx, lockNodePrefix+id, w.cfg.Instance, w.timeout).Err()
+func (w *Worker) lockNodeSet(id string) error {
+	return w.store.LockNodeSet(id)
 }
 
-func (w Worker) lockNodeGet(id string) (string, error) {
-	return w.rdb.Get(w.ctx, lockNodePrefix+id).Result()
+func (w *Worker) lockNodeGet(id string) (string, error) {
+	return w.store.LockNodeGet(id)
 }
 
-func (w Worker) lockNodeDel(id string) error {
-	return w.rdb.Del(w.ctx, lockNodePrefix+id).Err()
+func (w *Worker) lockNodeDel(id string) error {
+	return w.store.LockNodeDel(id)
 }

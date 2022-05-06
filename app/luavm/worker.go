@@ -13,6 +13,7 @@ import (
 	lualib "sb.im/gosd/app/luavm/lua"
 	"sb.im/gosd/app/model"
 	"sb.im/gosd/app/storage"
+	"sb.im/gosd/app/store"
 
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
@@ -39,6 +40,7 @@ type Worker struct {
 	orm    *gorm.DB
 	rdb    *redis.Client
 	ofs    *storage.Storage
+	store  *store.Store
 	script []byte
 	mutex  *sync.Mutex
 
@@ -48,7 +50,7 @@ type Worker struct {
 	Running map[string]*Service
 }
 
-func NewWorker(cfg Config, orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage, rpc *rpc2mqtt.Rpc2mqtt, script []byte) *Worker {
+func NewWorker(cfg Config, s *store.Store, rpc *rpc2mqtt.Rpc2mqtt, script []byte) *Worker {
 	// default LuaFile: input > default
 	if len(script) == 0 {
 		if data, err := lualib.LuaFile.ReadFile(cfg.LuaFile); err != nil {
@@ -57,9 +59,6 @@ func NewWorker(cfg Config, orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage
 			script = data
 		}
 	}
-
-	// Enable Redis Events
-	rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$K")
 
 	timeout, err := time.ParseDuration(cfg.Timeout)
 	if err != nil {
@@ -70,9 +69,9 @@ func NewWorker(cfg Config, orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage
 	return &Worker{
 		cfg:    cfg,
 		ctx:    context.TODO(),
-		orm:    orm,
-		rdb:    rdb,
-		ofs:    ofs,
+		orm:    s.Orm(),
+		rdb:    s.Rdb(),
+		ofs:    s.Ofs(),
 		script: script,
 		mutex:  &sync.Mutex{},
 

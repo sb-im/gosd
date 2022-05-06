@@ -7,22 +7,18 @@ import (
 	"time"
 
 	"sb.im/gosd/app/api/v3"
-	"sb.im/gosd/app/config"
 	"sb.im/gosd/app/service"
-	"sb.im/gosd/app/storage"
+	"sb.im/gosd/app/store"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-
-	"github.com/go-redis/redis/v8"
-	"gorm.io/gorm"
 
 	log "github.com/sirupsen/logrus"
 )
 
 var ApiPrefix = "/gosd/api/v3"
 
-func NewApi(cfg *config.Config, orm *gorm.DB, rdb *redis.Client, srv *service.Service, ofs *storage.Storage) http.Handler {
+func NewApi(s *store.Store, srv *service.Service) http.Handler {
 	r := gin.Default()
 
 	// CORS Middleware
@@ -34,7 +30,7 @@ func NewApi(cfg *config.Config, orm *gorm.DB, rdb *redis.Client, srv *service.Se
 		MaxAge:           12 * time.Hour,
 	}))
 
-	if u, err := url.Parse(cfg.BaseURL); err == nil {
+	if u, err := url.Parse(s.Cfg().BaseURL); err == nil {
 		ApiPrefix = u.Path
 	}
 
@@ -45,7 +41,7 @@ func NewApi(cfg *config.Config, orm *gorm.DB, rdb *redis.Client, srv *service.Se
 		})
 	})
 
-	handler := v3.NewHandler(cfg, orm, rdb, srv, ofs)
+	handler := v3.NewHandler(s, srv)
 
 	// Init Auth Middleware
 	if err := v3.InitAuthMiddleware(sr, handler); err != nil {

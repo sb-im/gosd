@@ -10,6 +10,7 @@ import (
 	"sb.im/gosd/app/luavm"
 	"sb.im/gosd/app/service"
 	"sb.im/gosd/app/storage"
+	"sb.im/gosd/app/store"
 	"sb.im/gosd/rpc2mqtt"
 
 	"sb.im/gosd/mqttd"
@@ -37,6 +38,9 @@ func NewHandler(ctx context.Context) http.Handler {
 	}
 	rdb := redis.NewClient(redisOpt)
 
+	ofs := storage.NewStorage(cfg.StorageURL)
+	s := store.NewStore(cfg, orm, rdb, ofs)
+
 	store := state.NewState(cfg.RedisURL)
 
 	chI := make(chan mqttd.MqttRpc, 128)
@@ -48,19 +52,17 @@ func NewHandler(ctx context.Context) http.Handler {
 	rpcServer := rpc2mqtt.NewRpc2Mqtt(chI, chO)
 	go rpcServer.Run(ctx)
 
-	ofs := storage.NewStorage(cfg.StorageURL)
-
 	luaFile, err := ioutil.ReadFile(cfg.LuaFilePath)
 	if err == nil {
 		log.Warn("Use Lua File Path:", cfg.LuaFilePath)
 	}
-	worker := luavm.NewWorker(luavm.DefaultConfig(), orm, rdb, ofs, rpcServer, luaFile)
+	worker := luavm.NewWorker(luavm.DefaultConfig(), s, rpcServer, luaFile)
 	go worker.Run(ctx)
 
 	srv := service.NewService(orm, rdb, worker)
 	srv.StartSchedule()
 
-	return api.NewApi(cfg, orm, rdb, srv, ofs)
+	return api.NewApi(s, srv)
 }
 
 func Daemon() {
