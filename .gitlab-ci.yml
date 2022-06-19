@@ -55,8 +55,8 @@ test luavm:
   before_script:
     - go version
   script:
-    - go run main.go database --local migrate
-    - go run main.go database --local seed
+    - go run main.go database migrate
+    - go run main.go database seed
     - make test-luavm
 
 .test-broker:
@@ -149,8 +149,8 @@ test-simulation:
     - cd ..
   script:
     - make
-    - ./gosd database --local migrate
-    - ./gosd database --local seed
+    - ./gosd database migrate
+    - ./gosd database seed
     - make test-simulation
 
 build-binary:

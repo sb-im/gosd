@@ -1,9 +1,11 @@
 package cmd
 
 import (
-	"time"
+	"sb.im/gosd/app/config"
 
 	"github.com/urfave/cli/v2"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func init() {
@@ -20,11 +22,10 @@ var databaseCmd = &cli.Command{
 			Usage: "Disable remote database management",
 		},
 	},
-	Before: func(c *cli.Context) error {
-		if c.Bool("local") {
-			go Daemon()
-			time.Sleep(time.Second)
-		}
-		return nil
-	},
+}
+
+func DatabaseOrm() (*gorm.DB, error) {
+	cfg := config.Opts()
+
+	return gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
 }

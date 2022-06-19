@@ -95,9 +95,6 @@ func NewApi(s *store.Store, srv *service.Service) http.Handler {
 
 	sr.POST("mqtt/url", handler.MqttUserCreate)
 
-	sr.POST("/database/migrate", handler.DatabaseMigrate)
-	sr.POST("/database/seed", handler.DatabaseSeed)
-
 	sr.GET("current", handler.Current)
 
 	sr.GET("/profiles/:key", handler.ProfileGet)
@@ -110,7 +107,6 @@ func NewApi(s *store.Store, srv *service.Service) http.Handler {
 		})
 	})
 
-	//handler.InitSeed()
 	//handler.UserOverride()
 	return r
 }
