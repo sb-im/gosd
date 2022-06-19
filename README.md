@@ -33,6 +33,13 @@ make swagger
 DATABASE_URL=postgres://postgres:password@localhost/gosd?sslmode=disable \
 ./gosd database migrate
 
+# Create database init seed
+# Default:
+# - TeamId: 1
+# - UserId: 1
+# - SessId: 1
+DATABASE_URL=postgres://postgres:password@localhost/gosd?sslmode=disable \
+./gosd database seed
 
 # Create User
 # gosd users add <username> <password>
