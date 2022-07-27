@@ -1,46 +1,30 @@
 package cmd
 
 import (
-	"os"
-
-	"sb.im/gosd/version"
-
-	"github.com/urfave/cli/v2"
-
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
-var (
-	app = &cli.App{
-		EnableBashCompletion: true,
-
-		Name:    "gosd",
-		Version: version.Version + " " + version.Date,
-		Usage:   "SuperDock Cloud Service",
-		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:  "debug",
-				Value: false,
-				Usage: "Enabled Debug mode",
-			},
-		},
-		Before: func(c *cli.Context) error {
-			if c.Bool("debug") {
-				log.SetReportCaller(true)
-				log.SetLevel(log.DebugLevel)
-			}
-			return nil
-		},
-		Action: func(c *cli.Context) error {
-			Daemon()
-			return nil
-		},
-	}
-)
+var rootCmd = &cobra.Command{
+	Use:   "gosd",
+	Short: "SuperDock Cloud Service",
+	Long: `StrawBerry Innovation
+						SuperDock Cloud Service
+						https://sb.im`,
+	PreRun: func(c *cobra.Command, args []string) {
+		if verbose, _ := c.Flags().GetBool("verbose"); verbose {
+			log.SetReportCaller(true)
+			log.SetLevel(log.DebugLevel)
+		}
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		Daemon()
+	},
+}
 
 func Execute() {
-	err := app.Run(os.Args)
-	if err != nil {
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
+	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -1,22 +1,20 @@
 package cmd
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 )
 
 func init() {
-	teamCmd.Subcommands = append(teamCmd.Subcommands, teamAddCmd)
+	teamCmd.AddCommand(teamAddCmd)
+	teamAddCmd.Flags().String("name", "", "team name")
 }
 
-var teamAddCmd = &cli.Command{
-	Name:  "add",
-	Usage: "Create a new team",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "name", Aliases: []string{"n"}},
-	},
-	Action: ex(func(c *exContext) error {
+var teamAddCmd = &cobra.Command{
+	Use:   "add",
+	Short: "Create a new team",
+	RunE: ex(func(c *exContext) error {
 		team := &map[string]interface{}{
-			"name": c.ctx.String("name"),
+			"name": mustGetString(c.ctx.Flags(), "name"),
 		}
 
 		return c.cnt.TeamCreate(team)

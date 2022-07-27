@@ -5,25 +5,23 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 )
 
 func init() {
-	nodeCmd.Subcommands = append(nodeCmd.Subcommands, nodeAddCmd)
+	nodeCmd.AddCommand(nodeAddCmd)
+
+	nodeAddCmd.Flags().UintP("team", "t", 0, "Team Id")
+	nodeAddCmd.Flags().StringP("username", "u", "", "new username")
 }
 
-var nodeAddCmd = &cli.Command{
-	Name:  "add",
-	Usage: "Create a new node",
-	Flags: []cli.Flag{
-		&cli.UintFlag{Name: "team"},
-		&cli.StringFlag{Name: "name"},
-	},
-	ArgsUsage: "<point path> <point path> ...",
-	Action: ex(func(c *exContext) error {
-		ps := make([]json.RawMessage, c.ctx.Args().Len())
-		if c.ctx.Args().Len() > 0 {
-			for i, v := range c.ctx.Args().Slice() {
+var nodeAddCmd = &cobra.Command{
+	Use:   "add",
+	Short: "Create a new node",
+	RunE: ex(func(c *exContext) error {
+		ps := make([]json.RawMessage, len(c.arg))
+		if len(c.arg) > 0 {
+			for i, v := range c.arg {
 				f, err := os.Open(v)
 				if err != nil {
 					panic(err)
@@ -41,8 +39,8 @@ var nodeAddCmd = &cli.Command{
 			panic(err)
 		}
 		return c.cnt.NodeCreate(&map[string]interface{}{
-			"team_id": c.ctx.Uint("team"),
-			"name":    c.ctx.String("name"),
+			"team_id": mustGetUint(c.ctx.Flags(), "team"),
+			"name":    mustGetString(c.ctx.Flags(), "name"),
 			"points":  json.RawMessage(points),
 		})
 	}),

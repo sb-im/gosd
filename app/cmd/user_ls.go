@@ -6,17 +6,17 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 )
 
 func init() {
-	userCmd.Subcommands = append(userCmd.Subcommands, userLsCmd)
+	userCmd.AddCommand(userLsCmd)
 }
 
-var userLsCmd = &cli.Command{
-	Name:  "ls",
-	Usage: "Ls all user",
-	Action: ex(func(c *exContext) error {
+var userLsCmd = &cobra.Command{
+	Use:   "ls",
+	Short: "Ls all user",
+	RunE: ex(func(c *exContext) error {
 		users, err := c.cnt.UserIndex()
 		if err != nil {
 			return err

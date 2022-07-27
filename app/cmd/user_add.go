@@ -1,30 +1,28 @@
 package cmd
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 )
 
 func init() {
-	userCmd.Subcommands = append(userCmd.Subcommands, userAddCmd)
+	userCmd.AddCommand(userAddCmd)
+	userAddCmd.Flags().Uint("team", 0, "Team ID")
+	userAddCmd.Flags().StringP("username", "u", "", "Username")
+	userAddCmd.Flags().StringP("password", "p", "", "Password")
+	userAddCmd.Flags().String("language", "", "Language")
+	userAddCmd.Flags().String("timezone", "", "Timezone")
 }
 
-var userAddCmd = &cli.Command{
-	Name:  "add",
-	Usage: "Create a new user",
-	Flags: []cli.Flag{
-		&cli.UintFlag{Name: "team"},
-		&cli.StringFlag{Name: "username", Aliases: []string{"u"}},
-		&cli.StringFlag{Name: "password", Aliases: []string{"p"}},
-		&cli.StringFlag{Name: "language"},
-		&cli.StringFlag{Name: "timezone"},
-	},
-	Action: ex(func(c *exContext) error {
+var userAddCmd = &cobra.Command{
+	Use:   "add",
+	Short: "Create a new user",
+	RunE: ex(func(c *exContext) error {
 		user := &map[string]interface{}{
-			"team_id":  c.ctx.Uint("team"),
-			"username": c.ctx.String("username"),
-			"password": c.ctx.String("password"),
-			"language": c.ctx.String("language"),
-			"timezone": c.ctx.String("timezone"),
+			"team_id":  mustGetUint(c.ctx.Flags(), "team"),
+			"username": mustGetString(c.ctx.Flags(), "username"),
+			"password": mustGetString(c.ctx.Flags(), "password"),
+			"language": mustGetString(c.ctx.Flags(), "language"),
+			"timezone": mustGetString(c.ctx.Flags(), "timezone"),
 		}
 
 		return c.cnt.UserCreate(user)

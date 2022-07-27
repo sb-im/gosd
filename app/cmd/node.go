@@ -1,14 +1,14 @@
 package cmd
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 )
 
 func init() {
-	app.Commands = append(app.Commands, nodeCmd)
+	rootCmd.AddCommand(nodeCmd)
 }
 
-var nodeCmd = &cli.Command{
-	Name:  "node",
-	Usage: "Nodes management utility",
+var nodeCmd = &cobra.Command{
+	Use:   "node",
+	Short: "Nodes management utility",
 }

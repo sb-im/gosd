@@ -5,26 +5,23 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 )
 
 func init() {
-	nodeCmd.Subcommands = append(nodeCmd.Subcommands, nodeSetCmd)
+	nodeCmd.AddCommand(nodeSetCmd)
+	nodeSetCmd.Flags().Uint("team", 0, "Team ID")
+	nodeSetCmd.Flags().String("name", "", "Node Name")
+	nodeSetCmd.Flags().String("id", "", "id")
 }
 
-var nodeSetCmd = &cli.Command{
-	Name:  "set",
-	Usage: "Update a node",
-	Flags: []cli.Flag{
-		&cli.UintFlag{Name: "team"},
-		&cli.StringFlag{Name: "name"},
-		&cli.StringFlag{Name: "id"},
-	},
-	ArgsUsage: "<point path> <point path> ...",
-	Action: ex(func(c *exContext) error {
-		ps := make([]json.RawMessage, c.ctx.Args().Len())
-		if c.ctx.Args().Len() > 0 {
-			for i, v := range c.ctx.Args().Slice() {
+var nodeSetCmd = &cobra.Command{
+	Use:   "set <point path> <point path> ...",
+	Short: "Update a node",
+	RunE: ex(func(c *exContext) error {
+		ps := make([]json.RawMessage, len(c.arg))
+		if len(c.arg) > 0 {
+			for i, v := range c.arg {
 				f, err := os.Open(v)
 				if err != nil {
 					panic(err)
@@ -42,9 +39,9 @@ var nodeSetCmd = &cli.Command{
 			panic(err)
 		}
 
-		return c.cnt.NodeUpdate(c.ctx.String("id"), &map[string]interface{}{
-			"team_id": c.ctx.Uint("team"),
-			"name":    c.ctx.String("name"),
+		return c.cnt.NodeUpdate(mustGetString(c.ctx.Flags(), "id"), &map[string]interface{}{
+			"team_id": mustGetUint(c.ctx.Flags(), "team"),
+			"name":    mustGetString(c.ctx.Flags(), "name"),
 			"points":  json.RawMessage(points),
 		})
 	}),

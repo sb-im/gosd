@@ -29,7 +29,7 @@ build:
 
 .PHONY: run
 run:
-	@ go run main.go --debug
+	@ go run main.go -v
 
 .PHONY: swagger
 swagger:
