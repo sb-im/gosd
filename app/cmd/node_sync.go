@@ -1,21 +1,19 @@
 package cmd
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 )
 
 func init() {
-	nodeCmd.Subcommands = append(nodeCmd.Subcommands, nodeSyncCmd)
+	nodeCmd.AddCommand(nodeSyncCmd)
+	nodeSyncCmd.Flags().Uint("team", 0, "Team ID")
 }
 
-var nodeSyncCmd = &cli.Command{
-	Name:  "sync",
-	Usage: "Create Or Update batch nodes",
-	Flags: []cli.Flag{
-		&cli.UintFlag{Name: "team"},
-	},
-	ArgsUsage: "<path>",
-	Action: ex(func(c *exContext) error {
-		return c.cnt.NodeSync(c.ctx.Uint("team"), c.ctx.Args().First())
+var nodeSyncCmd = &cobra.Command{
+	Use:   "sync <path>",
+	Short: "Create Or Update batch nodes",
+	Args:  cobra.ExactArgs(1),
+	RunE: ex(func(c *exContext) error {
+		return c.cnt.NodeSync(mustGetUint(c.ctx.Flags(), "team"), c.arg[0])
 	}),
 }

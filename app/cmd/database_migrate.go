@@ -4,24 +4,27 @@ import (
 	"sb.im/gosd/app/model"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 )
 
 func init() {
-	databaseCmd.Subcommands = append(databaseCmd.Subcommands, &cli.Command{
-		Name:  "migrate",
-		Usage: "migrate",
-		Action: func(c *cli.Context) error {
-			orm, err := DatabaseOrm()
-			if err != nil {
-				return err
-			}
-			DatabaseMigrate(orm)
-			log.Warn("=== Database Migrate Done ===")
-			return nil
-		},
-	})
+	databaseCmd.AddCommand(databaseMigrateCmd)
+}
+
+var databaseMigrateCmd = &cobra.Command{
+	Use:   "migrate",
+	Short: "migrate",
+	Args:  cobra.ExactArgs(0),
+	RunE: func(c *cobra.Command, args []string) error {
+		orm, err := DatabaseOrm()
+		if err != nil {
+			return err
+		}
+		DatabaseMigrate(orm)
+		log.Warn("=== Database Migrate Done ===")
+		return nil
+	},
 }
 
 func DatabaseMigrate(orm *gorm.DB) {

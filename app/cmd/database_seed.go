@@ -4,24 +4,27 @@ import (
 	"sb.im/gosd/app/model"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 	"gorm.io/gorm"
 )
 
 func init() {
-	databaseCmd.Subcommands = append(databaseCmd.Subcommands, &cli.Command{
-		Name:  "seed",
-		Usage: "seed",
-		Action: func(c *cli.Context) error {
-			orm, err := DatabaseOrm()
-			if err != nil {
-				return err
-			}
-			err = DatabaseSeed(orm)
-			log.Warn("=== Database Seed Done ===")
+	databaseCmd.AddCommand(databaseSeedCmd)
+}
+
+var databaseSeedCmd = &cobra.Command{
+	Use:   "seed",
+	Short: "seed",
+	Args:  cobra.ExactArgs(0),
+	RunE: func(c *cobra.Command, args []string) error {
+		orm, err := DatabaseOrm()
+		if err != nil {
 			return err
-		},
-	})
+		}
+		err = DatabaseSeed(orm)
+		log.Warn("=== Database Seed Done ===")
+		return err
+	},
 }
 
 func DatabaseSeed(orm *gorm.DB) error {

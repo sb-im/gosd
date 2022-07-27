@@ -5,17 +5,17 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 )
 
 func init() {
-	teamCmd.Subcommands = append(teamCmd.Subcommands, teamLsCmd)
+	teamCmd.AddCommand(teamLsCmd)
 }
 
-var teamLsCmd = &cli.Command{
-	Name:  "ls",
-	Usage: "Ls all team",
-	Action: ex(func(c *exContext) error {
+var teamLsCmd = &cobra.Command{
+	Use:   "ls",
+	Short: "Ls all team",
+	RunE: ex(func(c *exContext) error {
 		teams, err := c.cnt.TeamIndex()
 		if err != nil {
 			return err

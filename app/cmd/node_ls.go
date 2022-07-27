@@ -7,17 +7,17 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 )
 
 func init() {
-	nodeCmd.Subcommands = append(nodeCmd.Subcommands, nodeLsCmd)
+	nodeCmd.AddCommand(nodeLsCmd)
 }
 
-var nodeLsCmd = &cli.Command{
-	Name:  "ls",
-	Usage: "Ls all node",
-	Action: ex(func(c *exContext) error {
+var nodeLsCmd = &cobra.Command{
+	Use:   "ls",
+	Short: "List all nodes",
+	RunE: ex(func(c *exContext) error {
 		type point struct {
 			NodeID int             `json:"node_id"`
 			Params json.RawMessage `json:"params"`

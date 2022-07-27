@@ -7,24 +7,24 @@ import (
 	"text/tabwriter"
 
 	"github.com/TylerBrock/colorjson"
-	"github.com/urfave/cli/v2"
+	"github.com/spf13/cobra"
 )
 
 func init() {
-	nodeCmd.Subcommands = append(nodeCmd.Subcommands, nodeGetCmd)
+	nodeCmd.AddCommand(nodeGetCmd)
 }
 
-var nodeGetCmd = &cli.Command{
-	Name:      "get",
-	Usage:     "Show a node detail",
-	ArgsUsage: "<node id>",
-	Action: ex(func(c *exContext) error {
+var nodeGetCmd = &cobra.Command{
+	Use:   "get <id>",
+	Short: "Show a node detail",
+	Args:  cobra.ExactArgs(1),
+	RunE: ex(func(c *exContext) error {
 		type point struct {
 			NodeID int             `json:"node_id"`
 			Params json.RawMessage `json:"params"`
 			Type   string          `json:"type"`
 		}
-		node, err := c.cnt.NodeShow(c.ctx.Args().First())
+		node, err := c.cnt.NodeShow(c.arg[0])
 		if err != nil {
 			return err
 		}
