@@ -97,7 +97,7 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 			// https://stackoverflow.com/questions/65314401/cannot-connect-to-mosquitto-2-0-with-paho-library
 			PasswordFlag: true,
 			UsernameFlag: true,
-			ClientID: fmt.Sprintf(config.Client, config.ID),
+			ClientID:     fmt.Sprintf(config.Client, config.ID),
 			//CleanStart: false,
 			CleanStart: true,
 			// interval 10s

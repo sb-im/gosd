@@ -38,7 +38,7 @@ var _ = Describe("Task", func() {
 		s = httptest.NewServer(handler)
 
 		// TODO: need to ApiKey
-		c = client.NewClient(s.URL + api.ApiPrefix, "")
+		c = client.NewClient(s.URL+api.ApiPrefix, "")
 
 		go help.StartNcp(ctx, config.Parse().MqttURL, nodeID)
 
