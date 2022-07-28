@@ -8,7 +8,8 @@ import (
 )
 
 type Node struct {
-	ID        string         `json:"id" gorm:"primaryKey"`
+	ID_ID     int            `json:"id_id" gorm:"primaryKey"`
+	ID        string         `json:"id" gorm:"unique"`
 	CreatedAt time.Time      `json:"created_at,omitempty"`
 	UpdatedAt time.Time      `json:"updated_at,omitempty"`
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
