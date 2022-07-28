@@ -24,12 +24,14 @@ func TestLuaNode(t *testing.T) {
 	task.NodeID = nodeID
 
 	node := &model.Node{
-		ID:     nodeID,
+		UUID:   nodeID,
 		Name:   nodeName,
 		TeamID: task.TeamID,
 	}
 
-	orm.Save(node)
+	if err := orm.Save(node).Error; err != nil {
+		t.Error(err)
+	}
 
 	w := newWorker(t)
 

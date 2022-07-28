@@ -28,7 +28,7 @@ func TestLuaGetMsg(t *testing.T) {
 	task.NodeID = nodeID
 
 	node := &model.Node{
-		ID:     nodeID,
+		UUID:   nodeID,
 		TeamID: task.TeamID,
 	}
 

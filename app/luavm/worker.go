@@ -157,6 +157,13 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 	service.nodes = nodes
 	service.Server = w.rpc
 
+	var currentNode model.Node
+	for _, n := range nodes {
+		if task.NodeID == strconv.Itoa(int(n.ID)) {
+			currentNode = n
+		}
+	}
+
 	w.mutex.Lock()
 	w.Running[strconv.Itoa(int(task.ID))] = service
 	w.mutex.Unlock()
@@ -198,7 +205,7 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 		Fn:      l.GetGlobal("SD_main"),
 		NRet:    1,
 		Protect: true,
-	}, lua.LString(task.NodeID)); err != nil {
+	}, lua.LString(currentNode.UUID)); err != nil {
 		return err
 	}
 
