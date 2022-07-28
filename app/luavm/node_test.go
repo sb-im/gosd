@@ -1,6 +1,7 @@
 package luavm
 
 import (
+	"strconv"
 	"testing"
 
 	"sb.im/gosd/app/config"
@@ -19,12 +20,11 @@ func TestLuaNode(t *testing.T) {
 		panic(err)
 	}
 
-	nodeID := "__luavm_test__node"
+	uuid := "__luavm_test__node"
 	nodeName := "__luavm_test__node_name"
-	task.NodeID = nodeID
 
 	node := &model.Node{
-		UUID:   nodeID,
+		UUID:   uuid,
 		Name:   nodeName,
 		TeamID: task.TeamID,
 	}
@@ -33,6 +33,7 @@ func TestLuaNode(t *testing.T) {
 		t.Error(err)
 	}
 
+	task.NodeID = strconv.Itoa(int(node.ID))
 	w := newWorker(t)
 
 	if err := w.doRun(task, []byte(`
@@ -41,7 +42,7 @@ function main(task)
 
   local node = NewNode(task.nodeID)
 
-  if node.id ~= "`+nodeID+`" then
+  if node.id ~= "`+uuid+`" then
     error("node id is: " .. node.id)
   end
 
@@ -51,7 +52,7 @@ function main(task)
 
   local isError = false
   pcall(function()
-    local node = NewNode("`+nodeID+"not_exist"+`")
+    local node = NewNode("`+uuid+"not_exist"+`")
     isError = true
   end)
 

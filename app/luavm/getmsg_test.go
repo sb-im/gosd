@@ -3,6 +3,7 @@ package luavm
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
@@ -24,29 +25,32 @@ func TestLuaGetMsg(t *testing.T) {
 		panic(err)
 	}
 
-	nodeID := "1"
-	task.NodeID = nodeID
-
+	uuid := "__luavm_test__getmsg"
 	node := &model.Node{
-		UUID:   nodeID,
+		UUID:   uuid,
 		TeamID: task.TeamID,
 	}
 
-	orm.Save(node)
+	if err := orm.Save(node).Error; err != nil {
+		t.Error(err)
+	}
+
+	task.NodeID = strconv.Itoa(int(node.ID))
+
 	rdb := w.rdb
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	if err := rdb.Set(ctx, fmt.Sprintf(topicNodeSys, task.NodeID, "status"), `{"code":0}`, time.Second).Err(); err != nil {
+	if err := rdb.Set(ctx, fmt.Sprintf(topicNodeSys, uuid, "status"), `{"code":0}`, time.Second).Err(); err != nil {
 		t.Error(err)
 	}
 
-	if err := rdb.Set(ctx, fmt.Sprintf(topicNodeSys, task.NodeID, "network"), `{"code":0}`, time.Second).Err(); err != nil {
+	if err := rdb.Set(ctx, fmt.Sprintf(topicNodeSys, uuid, "network"), `{"code":0}`, time.Second).Err(); err != nil {
 		t.Error(err)
 	}
 
-	if err := rdb.Set(ctx, fmt.Sprintf(topicNodeMsg, task.NodeID, "weather"), `{"code":0}`, time.Second).Err(); err != nil {
+	if err := rdb.Set(ctx, fmt.Sprintf(topicNodeMsg, uuid, "weather"), `{"code":0}`, time.Second).Err(); err != nil {
 		t.Error(err)
 	}
 
