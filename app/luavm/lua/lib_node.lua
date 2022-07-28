@@ -4,7 +4,7 @@ function NewNode(nodeID)
     error("Not Found Node ID")
   end
   return {
-    id = node.ID,
+    id = node.UUID,
     name = node.name,
     AsyncCall = function(self, method, params)
       rpc = {

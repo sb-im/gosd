@@ -29,7 +29,7 @@ func TestLuaNode(t *testing.T) {
 		TeamID: task.TeamID,
 	}
 
-	if err := orm.Save(node).Error; err != nil {
+	if err := orm.FirstOrCreate(node, "uuid = ?", uuid).Error; err != nil {
 		t.Error(err)
 	}
 

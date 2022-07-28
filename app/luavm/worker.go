@@ -157,11 +157,16 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 	service.nodes = nodes
 	service.Server = w.rpc
 
-	var currentNode model.Node
+	var node model.Node
 	for _, n := range nodes {
 		if task.NodeID == strconv.Itoa(int(n.ID)) {
-			currentNode = n
+			node = n
 		}
+	}
+	log.Debugf("Task: %+v", task)
+	log.Debugf("Node: %+v", node)
+	if node.ID == 0 {
+		return errors.New("Not Found This Node: " + task.NodeID)
 	}
 
 	w.mutex.Lock()
@@ -205,7 +210,7 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 		Fn:      l.GetGlobal("SD_main"),
 		NRet:    1,
 		Protect: true,
-	}, lua.LString(currentNode.UUID)); err != nil {
+	}, lua.LString(node.UUID)); err != nil {
 		return err
 	}
 
