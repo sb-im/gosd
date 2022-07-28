@@ -28,11 +28,12 @@ var nodeLsCmd = &cobra.Command{
 			return err
 		}
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "ID\tName\tPoints")
+		fmt.Fprintln(w, "ID\tUUID\tName\tPoints")
 
 		for _, i := range nodes {
-			fmt.Fprintf(w, "%s\t%s\t%s\n",
+			fmt.Fprintf(w, "%d\t%s\t%s\t%s\n",
 				i.ID,
+				i.UUID,
 				i.Name,
 				func() string {
 					var points []point

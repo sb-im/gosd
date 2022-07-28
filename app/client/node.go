@@ -82,10 +82,10 @@ func (c *Client) NodeSync(teamId uint, path string) error {
 	nodes := read.ParseNode(path)
 	for _, n := range nodes {
 		n.TeamID = teamId
-		if n.ID != "" {
-			if _, err := c.NodeShow(n.ID); err == nil {
+		if n.UUID != "" {
+			if _, err := c.NodeShow(n.UUID); err == nil {
 				// Update
-				c.NodeUpdate(n.ID, n)
+				c.NodeUpdate(n.UUID, n)
 				continue
 			}
 		}

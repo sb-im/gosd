@@ -12,7 +12,7 @@ func init() {
 	nodeCmd.AddCommand(nodeAddCmd)
 
 	nodeAddCmd.Flags().UintP("team", "t", 0, "Team Id")
-	nodeAddCmd.Flags().StringP("username", "u", "", "new username")
+	nodeAddCmd.Flags().String("name", "", "Node name")
 }
 
 var nodeAddCmd = &cobra.Command{

@@ -59,11 +59,20 @@ func (h *Handler) NodeCreate(c *gin.Context) {
 		return
 	}
 
-	if err := h.srv.MqttAuthReqNode(node.ID); err != nil {
+	if node.UUID == "" {
+		uuid := strconv.Itoa(int(node.ID))
+		if err := h.orm.Model(&model.Node{}).Where("id = ?", node.ID).Update("uuid", uuid).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		node.UUID = uuid
+	}
+
+	if err := h.srv.MqttAuthReqNode(node.UUID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.srv.MqttAuthAclNode(node.ID); err != nil {
+	if err := h.srv.MqttAuthAclNode(node.UUID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
