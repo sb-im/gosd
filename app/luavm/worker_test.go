@@ -45,7 +45,7 @@ func newTestTask(t *testing.T) *model.Task {
 		task := model.Task{
 			Name:   "Unit Test",
 			TeamID: 1,
-			NodeID: "1",
+			NodeID: 1,
 		}
 		orm.Create(&task)
 
@@ -106,7 +106,7 @@ end
 	task := newTestTask(t)
 	task2 := newTestTask(t)
 	task3 := newTestTask(t)
-	task3.NodeID = "3"
+	task3.NodeID = 3
 
 	if err := w.AddTask(task); err != nil {
 		t.Error(err)

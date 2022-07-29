@@ -3,7 +3,6 @@ package luavm
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"testing"
 	"time"
 
@@ -35,7 +34,7 @@ func TestLuaGetMsg(t *testing.T) {
 		t.Error(err)
 	}
 
-	task.NodeID = strconv.Itoa(int(node.ID))
+	task.NodeID = node.ID
 
 	rdb := w.rdb
 

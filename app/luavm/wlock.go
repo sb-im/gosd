@@ -9,7 +9,7 @@ import (
 
 func (w *Worker) preTaskCheck(task *model.Task) error {
 	taskID := strconv.Itoa(int(task.ID))
-	nodeID := task.NodeID
+	nodeID := strconv.Itoa(int(task.NodeID))
 
 	if instance, _ := w.lockTaskGet(taskID); instance != "" {
 		return errors.New("This Task already running at: " + instance)

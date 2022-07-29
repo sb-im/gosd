@@ -64,7 +64,7 @@ var _ = Describe("Task", func() {
 
 			task := model.Task{
 				Name:   "E2E Test",
-				NodeID: strconv.Itoa(int(node.ID)),
+				NodeID: node.ID,
 			}
 
 			err = c.TaskCreate(&task)

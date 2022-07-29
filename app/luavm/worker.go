@@ -89,7 +89,7 @@ func (w Worker) AddTask(task *model.Task) error {
 	}
 
 	taskID := strconv.Itoa(int(task.ID))
-	nodeID := task.NodeID
+	nodeID := strconv.Itoa(int(task.NodeID))
 
 	// Lock
 	w.lockTaskSet(taskID)
@@ -159,7 +159,7 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 
 	var node model.Node
 	for _, n := range nodes {
-		if task.NodeID == strconv.Itoa(int(n.ID)) {
+		if task.NodeID == n.ID {
 			node = n
 		}
 	}

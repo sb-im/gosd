@@ -48,7 +48,7 @@ var _ = Describe("LuaVM Rpc", func() {
 
 	task := model.Task{
 		Name:   "E2E Test",
-		NodeID: strconv.Itoa(int(node.ID)),
+		NodeID: node.ID,
 		TeamID: node.TeamID,
 	}
 

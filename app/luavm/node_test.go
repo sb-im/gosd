@@ -1,7 +1,6 @@
 package luavm
 
 import (
-	"strconv"
 	"testing"
 
 	"sb.im/gosd/app/config"
@@ -33,7 +32,7 @@ func TestLuaNode(t *testing.T) {
 		t.Error(err)
 	}
 
-	task.NodeID = strconv.Itoa(int(node.ID))
+	task.NodeID = node.ID
 	w := newWorker(t)
 
 	if err := w.doRun(task, []byte(`
