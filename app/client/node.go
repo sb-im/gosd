@@ -78,6 +78,23 @@ func (c *Client) NodeUpdate(id string, node interface{}) error {
 	}
 }
 
+func (c *Client) NodeDestroy(id string) error {
+	res, err := c.do(http.MethodDelete, c.endpoint+"/nodes/"+id, nil)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode == http.StatusNoContent {
+		return nil
+	} else {
+		err := &errMsg{
+			status: res.Status,
+		}
+		json.NewDecoder(res.Body).Decode(err)
+		return err
+	}
+}
+
 func (c *Client) NodeSync(teamId uint, path string) error {
 	nodes := read.ParseNode(path)
 	for _, n := range nodes {

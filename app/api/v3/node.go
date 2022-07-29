@@ -199,19 +199,17 @@ func (h *Handler) NodeDestroy(c *gin.Context) {
 }
 
 func (h *Handler) nodeDestroyByID(c *gin.Context) {
-	node := model.Node{}
-	if err := h.orm.Delete(node, "id = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := h.orm.Delete(&model.Node{}, "id = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, node)
+	c.JSON(http.StatusNoContent, nil)
 }
 
 func (h *Handler) nodeDestroyByUUID(c *gin.Context) {
-	node := model.Node{}
-	if err := h.orm.Delete(node, "id = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := h.orm.Delete(&model.Node{}, "uuid = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, node)
+	c.JSON(http.StatusNoContent, nil)
 }
