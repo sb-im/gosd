@@ -77,9 +77,9 @@ func NewApi(s *store.Store, srv *service.Service) http.Handler {
 
 	sr.POST("nodes", handler.NodeCreate)
 	sr.GET("nodes", handler.NodeIndex)
-	sr.GET("nodes/:id", handler.NodeShow)
-	sr.PUT("nodes/:id", handler.NodeUpdate)
-	sr.DELETE("nodes/:id", handler.NodeDestroy)
+	sr.GET("nodes/:uuid", handler.NodeShow)
+	sr.PUT("nodes/:uuid", handler.NodeUpdate)
+	sr.DELETE("nodes/:uuid", handler.NodeDestroy)
 
 	sr.POST("tasks", handler.TaskCreate)
 	sr.GET("tasks", handler.TaskIndex)
