@@ -30,7 +30,8 @@ var nodeGetCmd = &cobra.Command{
 		}
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintf(w, "ID\t%s\n", node.UUID)
+		fmt.Fprintf(w, "ID\t%d\n", node.ID)
+		fmt.Fprintf(w, "UUID\t%s\n", node.UUID)
 		fmt.Fprintf(w, "Name\t%s\n", node.Name)
 
 		var obj []interface{}

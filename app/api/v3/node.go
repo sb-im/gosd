@@ -92,8 +92,20 @@ func (h *Handler) NodeCreate(c *gin.Context) {
 // @Router /nodes/{id} [GET]
 func (h *Handler) NodeShow(c *gin.Context) {
 	var node model.Node
-	if err := h.orm.First(&node, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+	rawId := c.Param("id")
+	id, _ := strconv.Atoi(rawId)
+	if id != 0 {
+		if err := h.orm.First(&node, "id = ?  AND team_id = ?", id, h.getCurrent(c).TeamID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+	} else if rawId != "" {
+		if err := h.orm.First(&node, "uuid = ? AND team_id = ?", rawId, h.getCurrent(c).TeamID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+	} else {
+		c.JSON(http.StatusNotFound, gin.H{"error": "err.Error()"})
 		return
 	}
 
