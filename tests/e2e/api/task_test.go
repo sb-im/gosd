@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http/httptest"
 	"os"
-	"strconv"
 	"time"
 
 	"sb.im/gosd/app/api"
