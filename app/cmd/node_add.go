@@ -13,6 +13,7 @@ func init() {
 
 	nodeAddCmd.Flags().UintP("team", "t", 0, "Team Id")
 	nodeAddCmd.Flags().String("name", "", "Node name")
+	nodeAddCmd.Flags().String("uuid", "", "Node uuid")
 }
 
 var nodeAddCmd = &cobra.Command{
@@ -41,6 +42,7 @@ var nodeAddCmd = &cobra.Command{
 		return c.cnt.NodeCreate(&map[string]interface{}{
 			"team_id": mustGetUint(c.ctx.Flags(), "team"),
 			"name":    mustGetString(c.ctx.Flags(), "name"),
+			"uuid":    mustGetString(c.ctx.Flags(), "uuid"),
 			"points":  json.RawMessage(points),
 		})
 	}),

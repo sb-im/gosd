@@ -50,11 +50,20 @@ func (h *Handler) NodeCreate(c *gin.Context) {
 		TeamID: h.getCurrent(c).TeamID,
 		Secret: helper.GenSecret(16),
 	}
-	if err := c.Bind(node); err != nil {
+	err := c.Bind(node)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.orm.Create(node).Update("uuid", strconv.Itoa(int(node.ID))).Error; err != nil {
+
+	// If not set uuid, need to create a uuid = id
+	if node.UUID == "" {
+		err = h.orm.Create(node).Update("uuid", strconv.Itoa(int(node.ID))).Error
+	} else {
+		err = h.orm.Create(node).Error
+	}
+
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
