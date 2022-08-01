@@ -54,18 +54,9 @@ func (h *Handler) NodeCreate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.orm.Create(node).Error; err != nil {
+	if err := h.orm.Create(node).Update("uuid", strconv.Itoa(int(node.ID))).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
-	}
-
-	if node.UUID == "" {
-		uuid := strconv.Itoa(int(node.ID))
-		if err := h.orm.Model(&model.Node{}).Where("id = ?", node.ID).Update("uuid", uuid).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		node.UUID = uuid
 	}
 
 	if err := h.srv.MqttAuthReqNode(node.UUID); err != nil {
@@ -200,9 +191,9 @@ func (h *Handler) NodeDestroy(c *gin.Context) {
 
 func (h *Handler) nodeDestroyByID(c *gin.Context) {
 	if err := h.orm.Model(&model.Node{}).
-	Where("id = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).
-	Update("uuid", nil).
-	Delete(&model.Node{}).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+		Where("id = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).
+		Update("uuid", nil).
+		Delete(&model.Node{}).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
@@ -211,9 +202,9 @@ func (h *Handler) nodeDestroyByID(c *gin.Context) {
 
 func (h *Handler) nodeDestroyByUUID(c *gin.Context) {
 	if err := h.orm.Model(&model.Node{}).
-	Where("uuid = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).
-	Update("uuid", nil).
-	Delete(&model.Node{}).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+		Where("uuid = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).
+		Update("uuid", nil).
+		Delete(&model.Node{}).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
