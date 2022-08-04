@@ -22,9 +22,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewHandler(ctx context.Context) http.Handler {
-	cfg := config.Opts()
-
+func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 	log.Debugf("%+v\n", cfg)
 
 	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
@@ -69,7 +67,7 @@ func Daemon() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	log.Warn("Launch gosd V3")
-	handler := NewHandler(ctx)
+	handler := NewHandler(ctx, config.Parse())
 	log.Warn("=== RUN ===")
 	http.ListenAndServe(":8000", handler)
 }

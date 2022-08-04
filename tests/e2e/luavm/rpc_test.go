@@ -3,6 +3,7 @@ package luavm_test
 import (
 	"context"
 	"io/ioutil"
+	"os"
 	"strconv"
 	"time"
 
@@ -79,7 +80,7 @@ var _ = Describe("LuaVM Rpc", func() {
 	go worker.Run(ctx)
 
 	go func() {
-		if err := help.StartNcp(ctx, config.Parse().MqttURL, uuid); err != nil {
+		if err := help.StartNcp(ctx, os.TempDir(), config.Parse().MqttURL, uuid); err != nil {
 			panic(err)
 		}
 	}()

@@ -35,7 +35,7 @@ var _ = Describe("Task", func() {
 		// TODO: need to ApiKey
 		c = client.NewClient(s.URL+api.ApiPrefix, "")
 
-		go help.StartNcp(ctx, config.Parse().MqttURL, uuid)
+		go help.StartNcp(ctx, os.TempDir(), config.Parse().MqttURL, uuid)
 
 		// Wait mqttd server startup && sub topic on broker
 		time.Sleep(100 * time.Millisecond)
