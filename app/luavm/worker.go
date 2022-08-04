@@ -89,7 +89,7 @@ func (w Worker) AddTask(task *model.Task) error {
 	}
 
 	taskID := strconv.Itoa(int(task.ID))
-	nodeID := task.NodeID
+	nodeID := strconv.Itoa(int(task.NodeID))
 
 	// Lock
 	w.lockTaskSet(taskID)
@@ -157,6 +157,19 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 	service.nodes = nodes
 	service.Server = w.rpc
 
+	var node model.Node
+	for _, n := range nodes {
+		if task.NodeID == n.ID {
+			node = n
+		}
+	}
+	log.Debugf("Task: %+v", task)
+	log.Debugf("Node: %+v", node)
+	if node.ID == 0 {
+		// TODO: unit test need change
+		//return errors.New("Not Found This Node: " + task.NodeID)
+	}
+
 	w.mutex.Lock()
 	w.Running[strconv.Itoa(int(task.ID))] = service
 	w.mutex.Unlock()
@@ -198,7 +211,7 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 		Fn:      l.GetGlobal("SD_main"),
 		NRet:    1,
 		Protect: true,
-	}, lua.LString(task.NodeID)); err != nil {
+	}, lua.LString(node.UUID)); err != nil {
 		return err
 	}
 

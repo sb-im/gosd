@@ -12,6 +12,7 @@ func init() {
 	nodeCmd.AddCommand(nodeSetCmd)
 	nodeSetCmd.Flags().Uint("team", 0, "Team ID")
 	nodeSetCmd.Flags().String("name", "", "Node Name")
+	nodeSetCmd.Flags().String("uuid", "", "Node uuid")
 	nodeSetCmd.Flags().String("id", "", "id")
 }
 
@@ -42,6 +43,7 @@ var nodeSetCmd = &cobra.Command{
 		return c.cnt.NodeUpdate(mustGetString(c.ctx.Flags(), "id"), &map[string]interface{}{
 			"team_id": mustGetUint(c.ctx.Flags(), "team"),
 			"name":    mustGetString(c.ctx.Flags(), "name"),
+			"uuid":    mustGetString(c.ctx.Flags(), "uuid"),
 			"points":  json.RawMessage(points),
 		})
 	}),

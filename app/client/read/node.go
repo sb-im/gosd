@@ -16,7 +16,7 @@ const (
 )
 
 type dataNode struct {
-	ID     string   `json:"id"`
+	UUID   string   `json:"uuid"`
 	Name   string   `json:"name"`
 	Points []string `json:"points"`
 }
@@ -71,7 +71,7 @@ func ParseNode(path string) []model.Node {
 		}
 		data, _ := json.Marshal(ps)
 
-		nodes[i].ID = n.ID
+		nodes[i].UUID = n.UUID
 		nodes[i].Name = n.Name
 		nodes[i].Points = data
 	}

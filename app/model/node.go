@@ -1,18 +1,14 @@
 package model
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 	"sb.im/gosd/app/helper"
 )
 
 type Node struct {
-	ID        string         `json:"id" gorm:"primaryKey"`
-	CreatedAt time.Time      `json:"created_at,omitempty"`
-	UpdatedAt time.Time      `json:"updated_at,omitempty"`
-	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+	Model
 
+	UUID   string `json:"uuid" gorm:"uniqueIndex;column:uuid"`
 	Name   string `json:"name" form:"name"`
 	TeamID uint   `json:"-"`
 	Secret string `json:"-"`
@@ -20,10 +16,6 @@ type Node struct {
 }
 
 func (n *Node) BeforeCreate(tx *gorm.DB) error {
-	if n.ID == "" {
-		n.ID = helper.GenNumberSecret(6)
-	}
-
 	if n.Secret == "" {
 		n.Secret = helper.GenSecret(16)
 	}

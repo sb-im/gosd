@@ -29,12 +29,8 @@ import (
 )
 
 var _ = Describe("LuaVM Rpc", func() {
+	uuid := "__e2e_test__luavm_rpc"
 	ctx := context.TODO()
-	task := model.Task{
-		Name:   "E2E Test",
-		NodeID: "1",
-	}
-
 	cfg := config.Parse()
 
 	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
@@ -43,11 +39,18 @@ var _ = Describe("LuaVM Rpc", func() {
 	}
 
 	node := &model.Node{
-		ID:     task.NodeID,
-		TeamID: task.TeamID,
+		UUID:   uuid,
+		TeamID: 1,
+	}
+	if err := orm.FirstOrCreate(node, "uuid = ?", uuid).Error; err != nil {
+		log.Error(err)
 	}
 
-	orm.Save(node)
+	task := model.Task{
+		Name:   "E2E Test",
+		NodeID: node.ID,
+		TeamID: node.TeamID,
+	}
 
 	redisOpt, err := redis.ParseURL(cfg.RedisURL)
 	if err != nil {
@@ -76,7 +79,7 @@ var _ = Describe("LuaVM Rpc", func() {
 	go worker.Run(ctx)
 
 	go func() {
-		if err := help.StartNcp(ctx, config.Parse().MqttURL, task.NodeID); err != nil {
+		if err := help.StartNcp(ctx, config.Parse().MqttURL, uuid); err != nil {
 			panic(err)
 		}
 	}()

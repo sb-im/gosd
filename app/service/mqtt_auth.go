@@ -46,7 +46,7 @@ func (s *Service) MqttAuthAclTeam(teamID uint) error {
 
 	acl := make(map[string]interface{})
 	for _, node := range nodes {
-		acl[fmt.Sprintf(mqttTopicNode, node.ID)] = mqttAuthAccessPubSub
+		acl[fmt.Sprintf(mqttTopicNode, node.UUID)] = mqttAuthAccessPubSub
 	}
 
 	var tasks []model.Task
@@ -64,7 +64,7 @@ func (s *Service) MqttAuthReqNode(nodeID string) error {
 	username := fmt.Sprintf(mqttAuthNode, nodeID)
 
 	var node model.Node
-	if err := s.orm.Take(&node, "id", nodeID).Error; err != nil {
+	if err := s.orm.Take(&node, "uuid", nodeID).Error; err != nil {
 		return err
 	}
 
@@ -87,10 +87,10 @@ func (s *Service) MqttAuthNodeSync() error {
 		return err
 	}
 	for _, v := range nodes {
-		if err := s.MqttAuthReqNode(v.ID); err != nil {
+		if err := s.MqttAuthReqNode(v.UUID); err != nil {
 			return err
 		}
-		if err := s.MqttAuthAclNode(v.ID); err != nil {
+		if err := s.MqttAuthAclNode(v.UUID); err != nil {
 			return err
 		}
 	}
