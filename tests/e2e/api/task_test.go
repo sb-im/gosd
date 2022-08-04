@@ -26,7 +26,7 @@ var _ = Describe("Task", func() {
 	uuid := "__e2e_test__luavm_rpc"
 
 	ctx, cancel := context.WithCancel(context.Background())
-	handler := cmd.NewHandler(ctx)
+	handler := cmd.NewHandler(ctx, config.Parse())
 
 	BeforeEach(func() {
 		ctx, cancel = context.WithCancel(context.Background())
