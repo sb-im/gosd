@@ -4,7 +4,10 @@ import (
 	"context"
 	"os"
 	"os/exec"
+	"path"
 	"strings"
+
+	"sb.im/gosd/app/helper"
 )
 
 func CmdRun(ctx context.Context, str string) ([]byte, error) {
@@ -14,7 +17,7 @@ func CmdRun(ctx context.Context, str string) ([]byte, error) {
 
 func StartNcp(ctx context.Context, mqttAddr, id string) error {
 	mqttRpcRecv, mqttRpcSend := "nodes/%s/rpc/recv", "nodes/%s/rpc/send"
-	mqttdConfigPath := "/tmp/test_mqttd.yml"
+	mqttdConfigPath := path.Join(os.TempDir(), "test_mqttd-"+helper.GenSecret(8)+".yml")
 	var mqttdConfig = `
 mqttd:
   id: ` + id + `
