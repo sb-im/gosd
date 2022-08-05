@@ -17,8 +17,6 @@ var databaseCmd = &cobra.Command{
 	Short: "Database management utility",
 }
 
-func DatabaseOrm() (*gorm.DB, error) {
-	cfg := config.Opts()
-
+func DatabaseOrm(cfg *config.Config) (*gorm.DB, error) {
 	return gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
 }

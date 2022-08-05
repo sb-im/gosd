@@ -9,28 +9,30 @@ import (
 	"sb.im/gosd/app/api"
 	"sb.im/gosd/app/client"
 	"sb.im/gosd/app/cmd"
-	"sb.im/gosd/app/config"
 	"sb.im/gosd/tests/help"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNoAuth(t *testing.T) {
+	t.Setenv("SINGLE_USER", "true")
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	t.Setenv("SINGLE_USER", "true")
+
 	c := help.StartSingleServer(t, ctx)
 	assert.NoError(t, c.ServerStatus(), "Http Error")
 	time.Sleep(1 * time.Second)
 }
 
 func TestAuthApiKey(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 	t.Setenv("SINGLE_USER", "false")
 	t.Setenv("API_KEY", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 
-	cfg := config.Parse()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	cfg := help.Config()
 	cfg.StorageURL = "file://" + t.TempDir()
 
 	server := httptest.NewServer(cmd.NewHandler(ctx, cfg))

@@ -37,7 +37,7 @@ func DefaultConfig() *Config {
 		BaseURL:     "http://localhost:8000/gosd/api/v3",
 		MqttURL:     "mqtt://admin:public@localhost:1883",
 		RedisURL:    "redis://localhost:6379/1",
-		DatabaseURL: "host=localhost user=postgres password=password dbname=gosd port=5432 sslmode=disable TimeZone=Asia/Shanghai",
+		DatabaseURL: "postgres://postgres:password@localhost:5432/gosd?sslmode=disable&TimeZone=Asia/Shanghai",
 		StorageURL:  "file://data/storage",
 		LuaFilePath: "default.lua",
 		Debug:       true,

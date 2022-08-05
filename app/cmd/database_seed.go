@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"sb.im/gosd/app/config"
 	"sb.im/gosd/app/model"
 
 	log "github.com/sirupsen/logrus"
@@ -17,7 +18,7 @@ var databaseSeedCmd = &cobra.Command{
 	Short: "seed",
 	Args:  cobra.ExactArgs(0),
 	RunE: func(c *cobra.Command, args []string) error {
-		orm, err := DatabaseOrm()
+		orm, err := DatabaseOrm(config.Opts())
 		if err != nil {
 			return err
 		}
