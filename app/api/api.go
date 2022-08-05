@@ -19,6 +19,10 @@ import (
 var ApiPrefix = "/gosd/api/v3"
 
 func NewApi(s *store.Store, srv *service.Service) http.Handler {
+	if !s.Cfg().Debug {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	r := gin.Default()
 
 	// CORS Middleware
@@ -54,6 +58,7 @@ func NewApi(s *store.Store, srv *service.Service) http.Handler {
 	sr.GET("/teams", handler.TeamIndex)
 	sr.POST("/teams", handler.TeamCreate)
 	sr.PATCH("/teams/:id", handler.TeamUpdate)
+	sr.DELETE("/teams/:id", handler.TeamDestroy)
 
 	// This api disable
 	// sr.POST("/teams/users", handler.TeamUserAdd)

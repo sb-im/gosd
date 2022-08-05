@@ -58,3 +58,20 @@ func (c *Client) TeamUpdate(id string, team interface{}) error {
 		return err
 	}
 }
+
+func (c *Client) TeamDestroy(id string) error {
+	res, err := c.do(http.MethodDelete, c.endpoint+"/teams/"+id, nil)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode == http.StatusNoContent {
+		return nil
+	} else {
+		err := &errMsg{
+			status: res.Status,
+		}
+		json.NewDecoder(res.Body).Decode(err)
+		return err
+	}
+}

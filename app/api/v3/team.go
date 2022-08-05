@@ -1,10 +1,12 @@
 package v3
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"sb.im/gosd/app/model"
 )
 
@@ -89,6 +91,32 @@ func (h *Handler) TeamUpdate(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, team)
+}
+
+// @Summary Delete a team
+// @Schemes Team
+// @Description delete a new team
+// @Tags team
+// @Security APIKeyHeader
+// @Accept multipart/form-data
+// @Produce json
+// @Param id path uint true "Team ID"
+// @Success 204
+// @Failure 404
+// @Failure 500
+// @Router /teams/{id} [DELETE]
+func (h *Handler) TeamDestroy(c *gin.Context) {
+	if err := h.orm.Model(&model.Team{}).
+		Where("id = ?", c.Param("id")).
+		Update("name", nil).
+		Delete(&model.Node{}).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	} else if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusNoContent, nil)
 }
 
 // @Summary Team Add user
