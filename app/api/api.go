@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"sb.im/gosd/app/api/v3"
+	"sb.im/gosd/app/api/middleware"
 	"sb.im/gosd/app/service"
 	"sb.im/gosd/app/store"
 
@@ -51,6 +52,7 @@ func NewApi(s *store.Store, srv *service.Service) http.Handler {
 	if err := v3.InitAuthMiddleware(sr, handler); err != nil {
 		log.Fatal("JWT Error:" + err.Error())
 	}
+	sr.Use(middleware.RequestId(), middleware.LogContext())
 
 	sr.GET("/status", handler.Status)
 

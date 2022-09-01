@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"sb.im/gosd/app/logger"
 	"sb.im/gosd/app/model"
 )
 
@@ -46,8 +47,14 @@ func (h Handler) getCurrent(c *gin.Context) *Current {
 // @Produce json
 // @Success 200 {object} model.Schedule
 // @Router /current [GET]
-func (h Handler) Current(c *gin.Context) {
+func (h *Handler) Current(c *gin.Context) {
 	current := h.getCurrent(c)
+	logger.Log(c).
+	WithField("teamId", current.TeamID).
+	WithField("userId", current.UserID).
+	WithField("sessId", current.SessID).
+	Infof("%+v", *current)
+
 	if current.isUser() {
 		var user model.User
 		if err := h.orm.Preload("Teams").First(&user, current.UserID).Error; err != nil {
