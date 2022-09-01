@@ -29,8 +29,8 @@ type Service struct {
 	Server *rpc2mqtt.Rpc2mqtt
 }
 
-func NewService(task *model.Task) *Service {
-	ctx, cancel := context.WithCancel(context.Background())
+func NewService(ctx context.Context, task *model.Task) *Service {
+	ctx, cancel := context.WithCancel(ctx)
 	return &Service{
 		timeout: time.Hour,
 

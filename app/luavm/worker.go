@@ -148,7 +148,7 @@ func (w *Worker) doRun(ctx context.Context, task *model.Task, script []byte) err
 
 	luajson.Preload(l)
 
-	service := NewService(task)
+	service := NewService(ctx, task)
 	var nodes []model.Node
 	w.orm.Find(&nodes, "team_id = ?", task.TeamID)
 	service.cfg = w.cfg
@@ -184,6 +184,11 @@ func (w *Worker) doRun(ctx context.Context, task *model.Task, script []byte) err
 
 	service.onStart()
 	defer service.onClose()
+
+	// Patch
+	l.SetGlobal("print", l.NewFunction(patchBasePrint(ctx)))
+
+	// Main
 	l.SetGlobal("SD", luar.New(l, service))
 
 	// Load Lib
