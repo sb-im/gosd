@@ -53,7 +53,7 @@ func TestLuaGetMsg(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := w.doRun(task, []byte(`
+	if err := w.doRun(context.Background(), task, []byte(`
 function main(task)
   print("### RUN GetMsg RUN ###")
 

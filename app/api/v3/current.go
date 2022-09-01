@@ -49,15 +49,15 @@ func (h Handler) getCurrent(c *gin.Context) *Current {
 // @Router /current [GET]
 func (h *Handler) Current(c *gin.Context) {
 	current := h.getCurrent(c)
-	logger.Log(c).
-	WithField("teamId", current.TeamID).
-	WithField("userId", current.UserID).
-	WithField("sessId", current.SessID).
-	Infof("%+v", *current)
+	logger.WithContext(c).
+		WithField("teamId", current.TeamID).
+		WithField("userId", current.UserID).
+		WithField("sessId", current.SessID).
+		Infof("%+v", *current)
 
 	if current.isUser() {
 		var user model.User
-		if err := h.orm.Preload("Teams").First(&user, current.UserID).Error; err != nil {
+		if err := h.orm.WithContext(c).Preload("Teams").First(&user, current.UserID).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}

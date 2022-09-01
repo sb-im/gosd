@@ -10,6 +10,7 @@ import (
 
 	"sb.im/gosd/rpc2mqtt"
 
+	"sb.im/gosd/app/logger"
 	lualib "sb.im/gosd/app/luavm/lua"
 	"sb.im/gosd/app/model"
 	"sb.im/gosd/app/storage"
@@ -18,7 +19,6 @@ import (
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 
-	log "github.com/sirupsen/logrus"
 	lua "github.com/yuin/gopher-lua"
 	luajson "layeh.com/gopher-json"
 	luar "layeh.com/gopher-luar"
@@ -51,10 +51,11 @@ type Worker struct {
 }
 
 func NewWorker(cfg Config, s *store.Store, rpc *rpc2mqtt.Rpc2mqtt, script []byte) *Worker {
+	ctx := context.TODO()
 	// default LuaFile: input > default
 	if len(script) == 0 {
 		if data, err := lualib.LuaFile.ReadFile(cfg.LuaFile); err != nil {
-			log.Error(err)
+			logger.WithContext(ctx).Error(err)
 		} else {
 			script = data
 		}
@@ -62,13 +63,13 @@ func NewWorker(cfg Config, s *store.Store, rpc *rpc2mqtt.Rpc2mqtt, script []byte
 
 	timeout, err := time.ParseDuration(cfg.Timeout)
 	if err != nil {
-		log.Error(err)
+		logger.WithContext(ctx).Error(err)
 		timeout = 2 * time.Hour
 	}
 
 	return &Worker{
 		cfg:    cfg,
-		ctx:    context.TODO(),
+		ctx:    ctx,
 		orm:    s.Orm(),
 		rdb:    s.Rdb(),
 		ofs:    s.Ofs(),
@@ -83,7 +84,7 @@ func NewWorker(cfg Config, s *store.Store, rpc *rpc2mqtt.Rpc2mqtt, script []byte
 	}
 }
 
-func (w Worker) AddTask(task *model.Task) error {
+func (w *Worker) AddTask(ctx context.Context, task *model.Task) error {
 	if err := w.preTaskCheck(task); err != nil {
 		return err
 	}
@@ -96,8 +97,8 @@ func (w Worker) AddTask(task *model.Task) error {
 	w.lockNodeSet(nodeID)
 
 	go func() {
-		if err := w.doRun(task, w.getScript(task)); err != nil {
-			log.Error(err)
+		if err := w.doRun(ctx, task, w.getScript(task)); err != nil {
+			logger.WithContext(ctx).Error(err)
 		}
 
 		// Unlock
@@ -131,17 +132,17 @@ func (w Worker) Run(ctx context.Context) {
 }
 
 func (w Worker) RunTask(task *model.Task, script []byte) error {
-	return w.doRun(task, script)
+	return w.doRun(context.Background(), task, script)
 }
 
-func (w Worker) doRun(task *model.Task, script []byte) error {
+func (w *Worker) doRun(ctx context.Context, task *model.Task, script []byte) error {
 	l := lua.NewState()
 	defer func() {
 		l.Close()
 
 		if r := recover(); r != nil {
-			log.Errorf("Emergency stop taskID: %d", task.ID)
-			log.Error(r)
+			logger.WithContext(ctx).Errorf("Emergency stop taskID: %d", task.ID)
+			logger.WithContext(ctx).Error(r)
 		}
 	}()
 
@@ -163,8 +164,8 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 			node = n
 		}
 	}
-	log.Debugf("Task: %+v", task)
-	log.Debugf("Node: %+v", node)
+	logger.WithContext(ctx).Debugf("Task: %+v", task)
+	logger.WithContext(ctx).Debugf("Node: %+v", node)
 	if node.ID == 0 {
 		// TODO: unit test need change
 		//return errors.New("Not Found This Node: " + task.NodeID)
@@ -178,7 +179,7 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 		w.mutex.Lock()
 		delete(w.Running, strconv.Itoa(int(task.ID)))
 		w.mutex.Unlock()
-		log.Warn("==> luavm END")
+		logger.WithContext(ctx).Warn("==> luavm END")
 	}()
 
 	service.onStart()
@@ -188,7 +189,7 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 	// Load Lib
 	for _, lib := range libs {
 		if f, err := lualib.LuaFile.Open(lib); err != nil {
-			log.Error(err)
+			logger.WithContext(ctx).Error(err)
 			continue
 		} else {
 			if fn, err := l.Load(f, lib); err != nil {
@@ -200,7 +201,7 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 		}
 	}
 
-	log.Debug(string(script))
+	logger.WithContext(ctx).Debug(string(script))
 
 	// Core: Load Script
 	if err := l.DoString(string(script)); err != nil {
@@ -215,7 +216,7 @@ func (w Worker) doRun(task *model.Task, script []byte) error {
 		return err
 	}
 
-	log.Warn("==> luavm no panic")
+	logger.WithContext(ctx).Warn("==> luavm no panic")
 	return nil
 }
 
@@ -225,7 +226,7 @@ func (w *Worker) Kill(taskID string) error {
 	w.mutex.Unlock()
 	if ok {
 		service.Kill()
-		log.Warn("==> luavm Kill")
+		logger.WithContext(w.ctx).Warn("==> luavm Kill")
 		return nil
 	}
 	return errors.New("Not Found This Task")
@@ -238,5 +239,5 @@ func (w *Worker) Close() {
 	}
 	w.mutex.Unlock()
 
-	log.Warn("==> luaVM Worker Close")
+	logger.WithContext(w.ctx).Warn("==> luaVM Worker Close")
 }

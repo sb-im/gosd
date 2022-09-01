@@ -1,6 +1,7 @@
 package luavm
 
 import (
+	"context"
 	"testing"
 
 	"sb.im/gosd/app/config"
@@ -35,7 +36,7 @@ func TestLuaNode(t *testing.T) {
 	task.NodeID = node.ID
 	w := newWorker(t)
 
-	if err := w.doRun(task, []byte(`
+	if err := w.doRun(context.Background(), task, []byte(`
 function main(task)
   print("### RUN Node RUN ###")
 

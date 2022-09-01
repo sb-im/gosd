@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/requestid"
+	"github.com/gin-gonic/gin"
 )
 
 func RequestId() gin.HandlerFunc {

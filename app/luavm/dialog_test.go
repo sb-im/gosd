@@ -21,7 +21,7 @@ func TestLuaDialog(t *testing.T) {
 	ch := make(chan error)
 	go func() {
 		time.Sleep(100 * time.Millisecond)
-		ch <- w.doRun(task, []byte(`
+		ch <- w.doRun(context.Background(), task, []byte(`
 function main(task)
   print("### RUN Dialog RUN ###")
   task:CleanDialog()

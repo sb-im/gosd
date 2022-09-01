@@ -5,8 +5,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func Log(c context.Context) *logrus.Entry {
-  return logrus.WithFields(logrus.Fields{
-    "traceid": c.Value("traceid"),
-  })
+func WithContext(c context.Context) *logrus.Entry {
+	return logrus.WithFields(logrus.Fields{
+		"traceid": c.Value("traceid"),
+	})
 }

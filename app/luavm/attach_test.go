@@ -1,6 +1,7 @@
 package luavm
 
 import (
+	"context"
 	"testing"
 )
 
@@ -8,7 +9,7 @@ func TestLuaAttach(t *testing.T) {
 	task := newTestTask(t)
 
 	w := newWorker(t)
-	if err := w.doRun(task, []byte(`
+	if err := w.doRun(context.Background(), task, []byte(`
 function main(task)
   print("### RUN Attach RUN ###")
 
@@ -29,7 +30,7 @@ end
 	}
 
 	w2 := newWorker(t)
-	if err := w2.doRun(task, []byte(`
+	if err := w2.doRun(context.Background(), task, []byte(`
 function main(task)
   print("### RUN Attach 2 RUN ###")
 

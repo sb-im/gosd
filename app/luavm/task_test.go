@@ -1,6 +1,7 @@
 package luavm
 
 import (
+	"context"
 	"testing"
 )
 
@@ -9,7 +10,7 @@ func TestLuaTaskName(t *testing.T) {
 
 	w := newWorker(t)
 
-	if err := w.doRun(task, []byte(`
+	if err := w.doRun(context.Background(), task, []byte(`
 function main(task)
   print("### RUN Task Name RUN ###")
 

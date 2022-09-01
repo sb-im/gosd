@@ -19,7 +19,7 @@ func TestRunning(t *testing.T) {
 	w := newWorker(t)
 	ch := make(chan error)
 	go func() {
-		ch <- w.doRun(task, []byte(`
+		ch <- w.doRun(context.Background(), task, []byte(`
 function main(task)
   print("### RUN Running RUN ###")
 

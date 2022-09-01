@@ -2,6 +2,7 @@ package service
 
 import (
 	//"encoding/json"
+	"context"
 	"errors"
 
 	"sb.im/gosd/app/model"
@@ -35,7 +36,7 @@ func (s *JSONService) TaskRun(raw []byte) error {
 	//	return err
 	//}
 	s.s.orm.First(params, string(raw))
-	return s.s.TaskRun(params)
+	return s.s.TaskRun(context.Background(), params)
 }
 
 func (s *JSONService) CowSay(raw []byte) error {

@@ -1,13 +1,14 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
 
 	log "github.com/sirupsen/logrus"
 	"sb.im/gosd/app/model"
 )
 
-func (s *Service) TaskRun(task *model.Task) error {
+func (s *Service) TaskRun(ctx context.Context, task *model.Task) error {
 	log.Println(task)
 
 	files := make(map[string]string)
@@ -19,7 +20,7 @@ func (s *Service) TaskRun(task *model.Task) error {
 	log.Println("files: ", files)
 	log.Println("extra: ", extra)
 
-	return s.worker.AddTask(task)
+	return s.worker.AddTask(ctx, task)
 }
 
 func (s *Service) TaskKill(taskId string) error {

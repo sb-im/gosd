@@ -1,6 +1,7 @@
 package luavm
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -82,7 +83,7 @@ func luaScript(t *testing.T, name string) {
 	if script, err := lualib.LuaFile.ReadFile(name); err != nil {
 		t.Error(err)
 	} else {
-		if err := w.doRun(&model.Task{}, script); err != nil {
+		if err := w.doRun(context.Background(), &model.Task{}, script); err != nil {
 			t.Error(err)
 		}
 	}
@@ -108,27 +109,29 @@ end
 	task3 := newTestTask(t)
 	task3.NodeID = 3
 
-	if err := w.AddTask(task); err != nil {
+	ctx := context.Background()
+
+	if err := w.AddTask(ctx, task); err != nil {
 		t.Error(err)
 	}
 
-	if err := w.AddTask(task); err == nil {
+	if err := w.AddTask(ctx, task); err == nil {
 		t.Error("duplicate task")
 	}
 
-	if err := w.AddTask(task2); err == nil {
+	if err := w.AddTask(ctx, task2); err == nil {
 		t.Error("duplicate node, should error")
 	}
 
-	if err := w.AddTask(task2); err == nil {
+	if err := w.AddTask(ctx, task2); err == nil {
 		t.Error("duplicate task2")
 	}
 
-	if err := w.AddTask(task3); err != nil {
+	if err := w.AddTask(ctx, task3); err != nil {
 		t.Error(err)
 	}
 
-	if err := w.AddTask(task3); err == nil {
+	if err := w.AddTask(ctx, task3); err == nil {
 		t.Error("duplicate task")
 	}
 

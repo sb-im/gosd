@@ -41,7 +41,7 @@ func (h *Handler) TaskRunningCreate(c *gin.Context) {
 	}
 	task.Job = &job
 
-	if err := h.srv.TaskRun(&task); err != nil {
+	if err := h.srv.TaskRun(c, &task); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
