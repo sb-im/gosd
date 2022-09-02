@@ -2,9 +2,9 @@ package storage
 
 import (
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path"
-	"strings"
 )
 
 type Storage struct {
@@ -16,13 +16,14 @@ func (s *Storage) LocalPath(name string) string {
 }
 
 func NewStorage(storageURL string) *Storage {
-	path := "data/storage"
-	p := strings.SplitN(storageURL, "://", 2)
-	if len(p) > 1 {
-		path = p[1]
+	u, err := url.Parse(storageURL)
+	if err != nil {
+		panic(err)
 	}
-	os.MkdirAll(path, 0755)
-	return &Storage{path: path}
+	if err := os.MkdirAll(u.Path, 0755); err != nil {
+		panic(err)
+	}
+	return &Storage{path: u.Path}
 }
 
 func (s Storage) Set(key string, data []byte) error {
