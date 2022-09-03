@@ -19,10 +19,10 @@ import (
 // @Param size query uint false "Page Max Count"
 // @Success 200
 // @Router /tasks/{id}/jobs [get]
-func (h Handler) JobIndex(c *gin.Context) {
+func (h *Handler) JobIndex(c *gin.Context) {
 	// verify teams
 	var count int64
-	h.orm.Find(&model.Task{}, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Count(&count)
+	h.orm.WithContext(c).Find(&model.Task{}, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Count(&count)
 	if count == 0 {
 		c.JSON(http.StatusNotFound, nil)
 	}
@@ -31,7 +31,10 @@ func (h Handler) JobIndex(c *gin.Context) {
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
 
-	h.orm.Order("id desc").Offset((page-1)*size).Limit(size).Find(&jobs, "task_id = ?", c.Param("id"))
+	if err := h.orm.WithContext(c).Order("id desc").Offset((page-1)*size).Limit(size).Find(&jobs, "task_id = ?", c.Param("id")).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, jobs)
 }
 

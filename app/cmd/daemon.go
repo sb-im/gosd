@@ -7,6 +7,7 @@ import (
 
 	"sb.im/gosd/app/api"
 	"sb.im/gosd/app/config"
+	"sb.im/gosd/app/logger"
 	"sb.im/gosd/app/luavm"
 	"sb.im/gosd/app/service"
 	"sb.im/gosd/app/storage"
@@ -25,7 +26,9 @@ import (
 func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 	log.Debugf("%+v\n", cfg)
 
-	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
+	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{
+		Logger: logger.NewGorm(),
+	})
 	if err != nil {
 		panic(err)
 	}

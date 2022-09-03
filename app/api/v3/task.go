@@ -25,7 +25,7 @@ func (h *Handler) TaskIndex(c *gin.Context) {
 	var tasks []model.Task
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
-	if err := h.orm.Offset((page-1)*size).Limit(size).Find(&tasks, "team_id = ?", h.getCurrent(c).TeamID).Error; err != nil {
+	if err := h.orm.WithContext(c).Offset((page-1)*size).Limit(size).Find(&tasks, "team_id = ?", h.getCurrent(c).TeamID).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -55,7 +55,7 @@ func (h *Handler) TaskCreate(c *gin.Context) {
 	}
 
 	// Verify: `node_id`
-	if err := h.orm.First(&model.Node{}, "id = ? AND team_id = ?", task.NodeID, h.getCurrent(c).TeamID).Error; err != nil {
+	if err := h.orm.WithContext(c).First(&model.Node{}, "id = ? AND team_id = ?", task.NodeID, h.getCurrent(c).TeamID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		} else {
@@ -64,7 +64,7 @@ func (h *Handler) TaskCreate(c *gin.Context) {
 		return
 	}
 
-	if err := h.orm.Create(task).Error; err != nil {
+	if err := h.orm.WithContext(c).Create(task).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -90,7 +90,7 @@ func (h *Handler) TaskCreate(c *gin.Context) {
 // @Router /tasks/{id} [GET]
 func (h *Handler) TaskShow(c *gin.Context) {
 	var task model.Task
-	if err := h.orm.First(&task, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := h.orm.WithContext(c).First(&task, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Error; errors.Is(err, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
@@ -98,7 +98,7 @@ func (h *Handler) TaskShow(c *gin.Context) {
 	page := mustStringToInt(c.Query("page"))
 	size := mustStringToInt(c.Query("size"))
 
-	if err := h.orm.Order("index desc").Offset((page-1)*size).Limit(size).Find(&task.Jobs, "task_id = ?", c.Param("id")).Error; err != nil {
+	if err := h.orm.WithContext(c).Order("index desc").Offset((page-1)*size).Limit(size).Find(&task.Jobs, "task_id = ?", c.Param("id")).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -132,7 +132,7 @@ func (h *Handler) TaskUpdate(c *gin.Context) {
 	}
 
 	// Verify: `node_id`
-	if err := h.orm.First(&model.Node{}, "id = ? AND team_id = ?", task.NodeID, h.getCurrent(c).TeamID).Error; err != nil {
+	if err := h.orm.WithContext(c).First(&model.Node{}, "id = ? AND team_id = ?", task.NodeID, h.getCurrent(c).TeamID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		} else {
@@ -141,7 +141,7 @@ func (h *Handler) TaskUpdate(c *gin.Context) {
 		return
 	}
 
-	if err := h.orm.Where("id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Updates(&task).Scan(&task).Error; err != nil {
+	if err := h.orm.WithContext(c).Where("id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Updates(&task).Scan(&task).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -165,7 +165,7 @@ func (h *Handler) TaskDestroy(c *gin.Context) {
 		return
 	}
 
-	if err := h.orm.Delete(&model.Task{}, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Error; err != nil {
+	if err := h.orm.WithContext(c).Delete(&model.Task{}, "id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

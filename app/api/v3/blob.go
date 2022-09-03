@@ -41,7 +41,7 @@ func (h *Handler) BlobCreate(c *gin.Context) {
 				Name: filepath.Base(file.Filename),
 			}
 
-			if err := h.orm.Create(blob).Error; err != nil {
+			if err := h.orm.WithContext(c).Create(blob).Error; err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
@@ -76,7 +76,7 @@ func (h *Handler) BlobCreate(c *gin.Context) {
 // @Router /blobs/{blobID} [PUT]
 func (h *Handler) BlobUpdate(c *gin.Context) {
 	blob := model.Blob{}
-	if err := h.orm.Take(&blob, "uxid = ?", c.Param("blobID")).Error; err != nil {
+	if err := h.orm.WithContext(c).Take(&blob, "uxid = ?", c.Param("blobID")).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
@@ -99,7 +99,7 @@ func (h *Handler) BlobUpdate(c *gin.Context) {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			if err := h.orm.Updates(&blob).Error; err != nil {
+			if err := h.orm.WithContext(c).Updates(&blob).Error; err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
@@ -129,7 +129,7 @@ func (h *Handler) blobIsExist(id string) bool {
 // @Router /blobs/{blobID} [GET]
 func (h *Handler) BlobShow(c *gin.Context) {
 	blob := model.Blob{}
-	h.orm.Take(&blob, "uxid = ?", c.Param("blobID"))
+	h.orm.WithContext(c).Take(&blob, "uxid = ?", c.Param("blobID"))
 	if blob.ID != 0 {
 		if utf8string.NewString(blob.Name).IsASCII() {
 			c.FileAttachment(h.ofs.LocalPath(blob.UXID), blob.Name)

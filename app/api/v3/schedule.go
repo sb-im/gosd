@@ -24,7 +24,7 @@ func (h Handler) ScheduleIndex(c *gin.Context) {
 	var schedules []model.Schedule
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
-	if err := h.orm.Offset((page-1)*size).Limit(size).Find(&schedules, "team_id = ?", h.getCurrent(c).TeamID).Error; err != nil {
+	if err := h.orm.WithContext(c).Offset((page-1)*size).Limit(size).Find(&schedules, "team_id = ?", h.getCurrent(c).TeamID).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -53,7 +53,7 @@ func (h Handler) ScheduleCreate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.orm.Create(&schedule).Error; err != nil {
+	if err := h.orm.WithContext(c).Create(&schedule).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	} else {
 		h.srv.ScheduleAdd(schedule)
@@ -78,7 +78,7 @@ func (h Handler) ScheduleCreate(c *gin.Context) {
 // @Router /schedules/{id} [patch]
 func (h Handler) ScheduleUpdate(c *gin.Context) {
 	schedule := model.Schedule{}
-	h.orm.First(&schedule, c.Param("id"))
+	h.orm.WithContext(c).First(&schedule, c.Param("id"))
 	if err := c.ShouldBind(&schedule); err != nil {
 		log.Error(schedule, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -89,7 +89,7 @@ func (h Handler) ScheduleUpdate(c *gin.Context) {
 	// No way to judge whether to change
 	// Field 'enable' will Force Updated
 	// If not 'enable' key, status default to false
-	h.orm.Updates(&schedule).Select("enable").Updates(&schedule)
+	h.orm.WithContext(c).Updates(&schedule).Select("enable").Updates(&schedule)
 	h.srv.ScheduleUpdate(schedule)
 	c.JSON(http.StatusOK, schedule)
 }
@@ -105,11 +105,11 @@ func (h Handler) ScheduleUpdate(c *gin.Context) {
 // @Router /schedules/{id} [delete]
 func (h Handler) ScheduleDestroy(c *gin.Context) {
 	schedule := model.Schedule{}
-	h.orm.First(&schedule, c.Param("id"))
+	h.orm.WithContext(c).First(&schedule, c.Param("id"))
 
 	// Need Destroy cron
 	// h.orm.Delete(&model.Schedule{}, c.Param("id"))
-	h.orm.Delete(&schedule)
+	h.orm.WithContext(c).Delete(&schedule)
 	h.srv.ScheduleDel(schedule)
 	c.JSON(http.StatusNoContent, nil)
 }
@@ -125,7 +125,7 @@ func (h Handler) ScheduleDestroy(c *gin.Context) {
 // @Router /schedules/{id}/trigger [POST]
 func (h *Handler) ScheduleTrigger(c *gin.Context) {
 	schedule := &model.Schedule{}
-	h.orm.First(schedule, c.Param("id"))
+	h.orm.WithContext(c).First(schedule, c.Param("id"))
 	if err := h.srv.JSON.Call(schedule.Method, []byte(schedule.Params)); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}

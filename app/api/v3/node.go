@@ -26,7 +26,7 @@ func (h *Handler) NodeIndex(c *gin.Context) {
 	var nodes []model.Node
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
-	if err := h.orm.Offset((page-1)*size).Limit(size).Find(&nodes, "team_id = ?", h.getCurrent(c).TeamID).Error; err != nil {
+	if err := h.orm.WithContext(c).Offset((page-1)*size).Limit(size).Find(&nodes, "team_id = ?", h.getCurrent(c).TeamID).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -58,9 +58,9 @@ func (h *Handler) NodeCreate(c *gin.Context) {
 
 	// If not set uuid, need to create a uuid = id
 	if node.UUID == "" {
-		err = h.orm.Create(node).Update("uuid", strconv.Itoa(int(node.ID))).Error
+		err = h.orm.WithContext(c).Create(node).Update("uuid", strconv.Itoa(int(node.ID))).Error
 	} else {
-		err = h.orm.Create(node).Error
+		err = h.orm.WithContext(c).Create(node).Error
 	}
 
 	if err != nil {
@@ -101,7 +101,7 @@ func (h *Handler) NodeShow(c *gin.Context) {
 
 func (h *Handler) nodeShowByID(c *gin.Context) {
 	var node model.Node
-	if err := h.orm.First(&node, "id = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).Error; err != nil {
+	if err := h.orm.WithContext(c).First(&node, "id = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
@@ -115,7 +115,7 @@ func (h *Handler) nodeShowByID(c *gin.Context) {
 
 func (h *Handler) nodeShowByUUID(c *gin.Context) {
 	var node model.Node
-	if err := h.orm.First(&node, "uuid = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).Error; err != nil {
+	if err := h.orm.WithContext(c).First(&node, "uuid = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
@@ -156,7 +156,7 @@ func (h *Handler) nodeUpdateByID(c *gin.Context) {
 		return
 	}
 
-	if err := h.orm.Where("id = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).Updates(&node).Scan(&node).Error; err != nil {
+	if err := h.orm.WithContext(c).Where("id = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).Updates(&node).Scan(&node).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -170,7 +170,7 @@ func (h *Handler) nodeUpdateByUUID(c *gin.Context) {
 		return
 	}
 
-	if err := h.orm.Where("uuid = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).Updates(&node).Scan(&node).Error; err != nil {
+	if err := h.orm.WithContext(c).Where("uuid = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).Updates(&node).Scan(&node).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -199,7 +199,8 @@ func (h *Handler) NodeDestroy(c *gin.Context) {
 }
 
 func (h *Handler) nodeDestroyByID(c *gin.Context) {
-	if err := h.orm.Model(&model.Node{}).
+	if err := h.orm.WithContext(c).
+		Model(&model.Node{}).
 		Where("id = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).
 		Update("uuid", nil).
 		Delete(&model.Node{}).Error; errors.Is(err, gorm.ErrRecordNotFound) {
@@ -210,7 +211,8 @@ func (h *Handler) nodeDestroyByID(c *gin.Context) {
 }
 
 func (h *Handler) nodeDestroyByUUID(c *gin.Context) {
-	if err := h.orm.Model(&model.Node{}).
+	if err := h.orm.WithContext(c).
+		Model(&model.Node{}).
 		Where("uuid = ? AND team_id = ?", c.Param("uuid"), h.getCurrent(c).TeamID).
 		Update("uuid", nil).
 		Delete(&model.Node{}).Error; errors.Is(err, gorm.ErrRecordNotFound) {

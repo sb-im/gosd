@@ -25,7 +25,7 @@ import (
 // @Router /profiles/{key} [GET]
 func (h *Handler) ProfileGet(c *gin.Context) {
 	var profile model.Profile
-	if err := h.orm.First(&profile, "key = ? AND user_id = ?", c.Param("key"), h.getCurrent(c).UserID).Error; err != nil {
+	if err := h.orm.WithContext(c).First(&profile, "key = ? AND user_id = ?", c.Param("key"), h.getCurrent(c).UserID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			content, err := defaultProfile(c.Param("key"))
 			if err != nil {
@@ -65,7 +65,7 @@ func (h *Handler) ProfileSet(c *gin.Context) {
 		Data:   data,
 	}
 
-	if err := h.orm.Clauses(clause.OnConflict{
+	if err := h.orm.WithContext(c).Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "user_id"}, {Name: "key"}},
 		DoUpdates: clause.AssignmentColumns([]string{"data"}),
 	}).Create(&profile).Error; err != nil {

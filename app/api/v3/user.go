@@ -24,7 +24,7 @@ func (h *Handler) UserIndex(c *gin.Context) {
 	var users []model.User
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
-	if err := h.orm.Preload("Teams").Offset((page - 1) * size).Limit(size).Find(&users).Error; err != nil {
+	if err := h.orm.WithContext(c).Preload("Teams").Offset((page - 1) * size).Limit(size).Find(&users).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -64,7 +64,7 @@ func (h *Handler) UserCreate(c *gin.Context) {
 	}
 
 	team := model.Team{}
-	if err := h.orm.Take(&team, u.TeamID).Error; err != nil {
+	if err := h.orm.WithContext(c).Take(&team, u.TeamID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
@@ -77,7 +77,7 @@ func (h *Handler) UserCreate(c *gin.Context) {
 		Language: u.Language,
 		Timezone: u.Timezone,
 	}
-	if err := h.orm.Create(user).Error; err != nil {
+	if err := h.orm.WithContext(c).Create(user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -125,7 +125,7 @@ func (h *Handler) UserUpdate(c *gin.Context) {
 	}
 
 	user.ID = mustStringToUint(c.Param("id"))
-	if err := h.orm.Updates(user).Error; err != nil {
+	if err := h.orm.WithContext(c).Updates(user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -149,7 +149,7 @@ func (h *Handler) UserAddTeam(c *gin.Context) {
 		TeamID: mustStringToUint(c.Param("team_id")),
 	}
 
-	if err := h.orm.Create(userTeam).Error; err != nil {
+	if err := h.orm.WithContext(c).Create(userTeam).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

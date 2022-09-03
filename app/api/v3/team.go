@@ -26,7 +26,7 @@ func (h *Handler) TeamIndex(c *gin.Context) {
 	var teams []model.Team
 	page, _ := strconv.Atoi(c.Query("page"))
 	size, _ := strconv.Atoi(c.Query("size"))
-	if err := h.orm.Offset((page - 1) * size).Limit(size).Find(&teams).Error; err != nil {
+	if err := h.orm.WithContext(c).Offset((page - 1) * size).Limit(size).Find(&teams).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -51,7 +51,7 @@ func (h *Handler) TeamCreate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if err := h.orm.Create(team).Error; err != nil {
+	if err := h.orm.WithContext(c).Create(team).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -85,7 +85,7 @@ func (h *Handler) TeamUpdate(c *gin.Context) {
 		return
 	}
 
-	if err := h.orm.Updates(&team).Error; err != nil {
+	if err := h.orm.WithContext(c).Updates(&team).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -106,7 +106,8 @@ func (h *Handler) TeamUpdate(c *gin.Context) {
 // @Failure 500
 // @Router /teams/{id} [DELETE]
 func (h *Handler) TeamDestroy(c *gin.Context) {
-	if err := h.orm.Model(&model.Team{}).
+	if err := h.orm.WithContext(c).
+		Model(&model.Team{}).
 		Where("id = ?", c.Param("id")).
 		Update("name", nil).
 		Delete(&model.Node{}).Error; errors.Is(err, gorm.ErrRecordNotFound) {
@@ -148,7 +149,7 @@ func (h *Handler) TeamUserAdd(c *gin.Context) {
 	}
 
 	var user model.User
-	h.orm.Where("id = ? OR username = ?", form.ID, form.Username).First(&user)
+	h.orm.WithContext(c).Where("id = ? OR username = ?", form.ID, form.Username).First(&user)
 
 	if user.ID == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Not Found User"})
@@ -162,7 +163,7 @@ func (h *Handler) TeamUserAdd(c *gin.Context) {
 			UserID: user.ID,
 			TeamID: current.TeamID,
 		}
-		h.orm.Create(userTeam)
+		h.orm.WithContext(c).Create(userTeam)
 	}
 
 	c.JSON(http.StatusOK, user)
