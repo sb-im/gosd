@@ -5,7 +5,10 @@ import (
 	"context"
 	"errors"
 
+	"sb.im/gosd/app/logger"
 	"sb.im/gosd/app/model"
+
+	"github.com/google/uuid"
 )
 
 func NewJsonService(s *Service) *JSONService {
@@ -35,8 +38,14 @@ func (s *JSONService) TaskRun(raw []byte) error {
 	//if err := json.Unmarshal(raw, params); err != nil {
 	//	return err
 	//}
-	s.s.orm.First(params, string(raw))
-	return s.s.TaskRun(context.Background(), params)
+
+	ctx := context.WithValue(context.Background(), "traceid", uuid.New().String())
+	logger.WithContext(ctx).WithField("src", "cron")
+
+	if err := s.s.orm.WithContext(ctx).First(params, string(raw)).Error; err != nil {
+		return err
+	}
+	return s.s.TaskRun(ctx, params)
 }
 
 func (s *JSONService) CowSay(raw []byte) error {
