@@ -1,6 +1,9 @@
 OS=
 ARCH=
 PROFIX=
+
+# docker, nerdctl
+CTR=docker
 GO_TEST=./state
 VERSION=$(shell git describe --tags || git rev-parse --short HEAD || echo "unknown version")
 BUILD_DATE=$(shell date +%FT%T%z)
@@ -11,12 +14,12 @@ GOBUILD=CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) \
 all: build
 
 cli-redis:
-	docker run -it --network=host \
+	$(CTR) run -it --network=host \
 		-e IREDIS_URL=redis://localhost:6379/1 \
 		dbcliorg/iredis
 
 cli-pg:
-	docker run -it --network=host \
+	$(CTR) run -it --network=host \
 		-e PGHOST=localhost \
 		-e PGPORT=5432 \
 		-e PGUSER=postgres \
@@ -33,7 +36,7 @@ run:
 
 .PHONY: swagger
 swagger:
-	# go install github.com/swaggo/swag/cmd/swag
+	# go install github.com/swaggo/swag/cmd/swag@leatest
 	swag init -g app/app.go -o swag
 	@ rm swag/docs.go
 	@ rm swag/swagger.yaml

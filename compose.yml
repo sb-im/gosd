@@ -6,8 +6,8 @@ services:
     hostname: redis
     ports:
       - "6379:6379/tcp"
-    volumes:
-      - .data/redis:/data
+#    volumes:
+#      - .data/redis:/data
 
 #  mosquitto:
 #    image: eclipse-mosquitto:2.0.8
@@ -36,11 +36,6 @@ services:
     ports:
       - "1883:1883/tcp"
       - "8083:8083/tcp"
-    healthcheck:
-      test: ["CMD", "/opt/emqx/bin/emqx_ctl", "status"]
-      interval: 5s
-      timeout: 25s
-      retries: 5
 
   postgres:
     image: postgres
@@ -52,8 +47,8 @@ services:
       POSTGRES_DB: gosd
       POSTGRES_PASSWORD: 'password'
       PGDATA: '/var/lib/postgresql/data/pgdata'
-    volumes:
-      - .data/pgdata:/var/lib/postgresql/data
+#    volumes:
+#      - .data/pgdata:/var/lib/postgresql/data
 
   swagger:
     image: swaggerapi/swagger-ui
