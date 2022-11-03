@@ -8,8 +8,11 @@ GO_TEST=./state
 VERSION=$(shell git describe --tags || git rev-parse --short HEAD || echo "unknown version")
 BUILD_DATE=$(shell date +%FT%T%z)
 LD_FLAGS='-X "sb.im/gosd/version.Version=$(VERSION)" -X "sb.im/gosd/version.Date=$(BUILD_DATE)"'
+
+# https://pkg.go.dev/time/tzdata
+GO_TAGS=timetzdata
 GOBUILD=CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) \
-				go build -ldflags $(LD_FLAGS)
+				go build -tags $(GO_TAGS) -ldflags $(LD_FLAGS)
 
 all: build
 
