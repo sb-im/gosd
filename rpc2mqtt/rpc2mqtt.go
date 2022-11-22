@@ -7,8 +7,8 @@ import (
 
 	"sb.im/gosd/mqttd"
 
-	"github.com/sb-im/jsonrpc-lite"
 	"github.com/jpillora/backoff"
+	"github.com/sb-im/jsonrpc-lite"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -16,9 +16,9 @@ var (
 	// Every 0.1s Detect Send && Resend
 	loopWait = 100 * time.Millisecond
 
-	// Max Resend interval 1h
+	// Max Resend interval
 	maxRetryTime   = time.Minute
-	commandTimeout = time.Hour
+	commandTimeout = 90 * time.Minute
 )
 
 type Pending struct {
@@ -28,7 +28,7 @@ type Pending struct {
 	Reply chan []byte
 
 	nextTime time.Time
-	backoff *backoff.Backoff
+	backoff  *backoff.Backoff
 }
 
 type Rpc2mqtt struct {
@@ -133,8 +133,8 @@ func (t *Rpc2mqtt) AsyncRpc(id string, req []byte, ch_res chan []byte) error {
 		nextTime: time.Now().Add(time.Second),
 		backoff: &backoff.Backoff{
 			Factor: 2,
-			Min: 2 * time.Second,
-			Max: maxRetryTime,
+			Min:    2 * time.Second,
+			Max:    maxRetryTime,
 		},
 	}:
 	default:
