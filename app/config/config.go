@@ -38,7 +38,7 @@ func DefaultConfig() *Config {
 		MqttURL:     "mqtt://admin:public@localhost:1883",
 		RedisURL:    "redis://localhost:6379/1",
 		DatabaseURL: "postgres://postgres:password@localhost:5432/gosd?sslmode=disable&TimeZone=Asia/Shanghai",
-		StorageURL:  "file:///data/storage",
+		StorageURL:  "file://data/storage",
 		LuaFilePath: "default.lua",
 		Debug:       true,
 		SingleUser:  true,
