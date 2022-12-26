@@ -16,9 +16,9 @@ var (
 	// Every 0.1s Detect Send && Resend
 	loopWait = 100 * time.Millisecond
 
-	// Max Resend interval 1h
+	// Max Resend interval
 	maxRetryTime   = time.Minute
-	commandTimeout = time.Hour
+	commandTimeout = 90 * time.Minute
 )
 
 type Pending struct {
