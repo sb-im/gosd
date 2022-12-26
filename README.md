@@ -38,13 +38,14 @@ DATABASE_URL=postgres://postgres:password@localhost/gosd?sslmode=disable \
 # - TeamId: 1
 # - UserId: 1
 # - SessId: 1
-DATABASE_URL=postgres://postgres:password@localhost/gosd?sslmode=disable \
 ./gosd database seed
 
 # Create User
 # gosd users add <username> <password>
-DATABASE_URL=postgres://postgres:password@localhost/gosd?sslmode=disable \
 ./gosd users add demo demodemo
+
+# Sync node data
+./gosd node sync ./data
 
 # Run
 MQTT_URL=mqtt://admin:public@localhost:1883 \
