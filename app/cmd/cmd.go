@@ -17,9 +17,6 @@ var rootCmd = &cobra.Command{
 			log.SetLevel(log.DebugLevel)
 		}
 	},
-	Run: func(cmd *cobra.Command, args []string) {
-		Daemon()
-	},
 }
 
 func Execute() {

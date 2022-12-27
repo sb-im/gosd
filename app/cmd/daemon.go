@@ -63,6 +63,12 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 	srv := service.NewService(orm, rdb, worker)
 	srv.StartSchedule()
 
+	if cfg.DemoMode {
+		log.Warn("=== Use Demo Mode ===")
+		DatabaseMigrate(orm)
+		DatabaseSeed(orm)
+	}
+
 	return api.NewApi(s, srv)
 }
 
@@ -72,5 +78,6 @@ func Daemon() {
 	log.Warn("Launch gosd V3")
 	handler := NewHandler(ctx, config.Parse())
 	log.Warn("=== RUN ===")
+
 	http.ListenAndServe(":8000", handler)
 }

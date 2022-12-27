@@ -35,7 +35,7 @@ build:
 
 .PHONY: run
 run:
-	@ STORAGE_URL="file://$(shell pwd)/data/storage" go run main.go -v
+	@ STORAGE_URL="file://$(shell pwd)/data/storage" go run main.go server -v
 
 .PHONY: swagger
 swagger:

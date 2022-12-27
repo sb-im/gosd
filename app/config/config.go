@@ -21,6 +21,7 @@ type Config struct {
 	Debug       bool   `env:"DEBUG"`
 	SingleUser  bool   `env:"SINGLE_USER"`
 	BasicAuth   bool   `env:"BASIC_AUTH"`
+	DemoMode    bool   `env:"DEMO_MODE"`
 	Language    string `env:"LANGUAGE"`
 	Timezone    string `env:"TIMEZONE"`
 	ApiKey      string `env:"API_KEY"`
@@ -43,6 +44,7 @@ func DefaultConfig() *Config {
 		Debug:       true,
 		SingleUser:  true,
 		BasicAuth:   true,
+		DemoMode:    false,
 		Language:    "en_US",
 		Timezone:    "Asia/Shanghai",
 		ApiMqtt:     "mqtt://localhost:1883",
