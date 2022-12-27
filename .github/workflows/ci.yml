@@ -1,0 +1,38 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        go: ['1.19', '1.18', '1.17']
+        platform: [ubuntu-latest]
+    runs-on: ${{ matrix.platform }}
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_DB: gosd
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+      redis:
+        image: redis:6-alpine
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: ${{ matrix.go }}
+
+    - name: Test
+      env:
+        DATABASE_URL: "postgres://postgres:password@postgres/gosd?sslmode=disable"
+        REDIS_URL: "redis://redis:6379/5"
+      run: |
+        go run main.go database migrate
+        go run main.go database seed
+        make test-luavm
+
