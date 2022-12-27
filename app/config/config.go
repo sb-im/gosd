@@ -15,6 +15,7 @@ type Config struct {
 	BaseURL     string `env:"BASE_URL"`
 	MqttURL     string `env:"MQTT_URL"`
 	RedisURL    string `env:"REDIS_URL"`
+	ClientURL   string `env:"CLIENT_URL"`
 	DatabaseURL string `env:"DATABASE_URL"`
 	StorageURL  string `env:"STORAGE_URL"`
 	LuaFilePath string `env:"LUA_FILE"`
@@ -38,6 +39,7 @@ func DefaultConfig() *Config {
 		BaseURL:     "http://localhost:8000/gosd/api/v3",
 		MqttURL:     "mqtt://admin:public@localhost:1883",
 		RedisURL:    "redis://localhost:6379/1",
+		ClientURL:   "http://localhost:8000/gosd/api/v3",
 		DatabaseURL: "postgres://postgres:password@localhost:5432/gosd?sslmode=disable&TimeZone=Asia/Shanghai",
 		StorageURL:  "file://data/storage",
 		LuaFilePath: "default.lua",

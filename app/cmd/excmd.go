@@ -17,7 +17,7 @@ func ex(fn func(c *exContext) error) func(cmd *cobra.Command, args []string) err
 	return func(c *cobra.Command, args []string) error {
 		return fn(&exContext{
 			ctx: c,
-			cnt: client.NewClient(config.Opts().BaseURL, config.Opts().ApiKey),
+			cnt: client.NewClient(config.Opts().ClientURL, config.Opts().ApiKey),
 			arg: args,
 		})
 	}
