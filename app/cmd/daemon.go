@@ -72,9 +72,7 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 	return api.NewApi(s, srv)
 }
 
-func Daemon() {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+func Daemon(ctx context.Context) {
 	log.Warn("Launch gosd V3")
 	handler := NewHandler(ctx, config.Parse())
 	log.Warn("=== RUN ===")
