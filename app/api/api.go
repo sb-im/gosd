@@ -72,11 +72,11 @@ func NewApi(s *store.Store, srv *service.Service) http.Handler {
 	sr.POST("/users/:user_id/teams/:team_id", handler.UserAddTeam)
 	// === Manager API } ===
 
-	sr.GET("schedules", handler.ScheduleIndex)
-	sr.POST("schedules", handler.ScheduleCreate)
-	sr.PATCH("schedules/:id", handler.ScheduleUpdate)
-	sr.DELETE("schedules/:id", handler.ScheduleDestroy)
-	sr.POST("/schedules/:id/trigger", handler.ScheduleTrigger)
+	//sr.GET("schedules", handler.ScheduleIndex)
+	//sr.POST("schedules", handler.ScheduleCreate)
+	//sr.PATCH("schedules/:id", handler.ScheduleUpdate)
+	//sr.DELETE("schedules/:id", handler.ScheduleDestroy)
+	//sr.POST("/schedules/:id/trigger", handler.ScheduleTrigger)
 
 	sr.POST("/blobs", handler.BlobCreate)
 	sr.GET("/blobs/:blobID", handler.BlobShow)
