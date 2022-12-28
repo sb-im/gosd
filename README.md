@@ -26,9 +26,28 @@ make swagger
 * Mqtt broker (Mosquitto Or Emqx)
   * Mosquitto >= 1.6
 
-## Run
+## Introduction
 
-```sh
+`gosd` is a `gosd server` and `gosd client`
+
+* server (up gosd daemon)
+  * database
+* client (http client)
+  * node
+  * user
+  * team
+
+### Run as Demo
+
+This Demo Mode auto inserts the demo data
+
+```bash
+DEMO_MODE=true ./gosd server
+```
+
+### Run as Production
+
+```bash
 # Create database tables
 DATABASE_URL=postgres://postgres:password@localhost/gosd?sslmode=disable \
 ./gosd database migrate
@@ -51,20 +70,22 @@ DATABASE_URL=postgres://postgres:password@localhost/gosd?sslmode=disable \
 MQTT_URL=mqtt://admin:public@localhost:1883 \
 REDIS_URL=redis://localhost:6379/0 \
 DATABASE_URL=postgres://postgres:password@localhost/gosd?sslmode=disable \
-./gosd
+./gosd server
 ```
 
 ## Environment Variables
 
-Variable Name  | Description                                              | Default Value
+Variable Name  | Description                                              | Default
 -------------- | -------------------------------------------------------- | -------------------------------------------------------------
 `DEBUG`        | Set the value to `1` to enable debug logs                | Off
+`DEMO_MODE`    | Auto Run `database migrate`, `database seed`, `node sync`| Off
 `DATABASE_URL` | Postgresql connection parameters                         | `postgres://postgres:password@localhost/gosd?sslmode=disable`
 `LISTEN_ADDR`  | Address to listen on (use absolute path for Unix socket) | `127.0.0.1:8000`
 `PORT`         | Override `LISTEN_ADDR` to `0.0.0.0:$PORT` (PaaS)         | None
 `BASE_URL`     | Base URL to generate API links and base path             | `http://localhost:8000/gosd/api/v3`
 `MQTT_URL`     | MQTT broker Server address                               | `mqtt://admin:public@localhost:1883`
 `REDIS_URL`    | Redis Server URL                                         | `redis://localhost:6379/0`
+`CLIENT_URL`   | Only `gosd client` use `BASE_URL`                        | `http://localhost:8000/gosd/api/v3`
 `LOG_FILE`     | Log File                                                 | `STDOUT`
 `LOG_LEVEL`    | Log Level: `panic`, `fatal`, `error`, `warn`, `info`, `debug`, `trace` | `info`
 `LUA_FILE` | Task lua > `LUA_FILE` > System Default (`luavm/lua/default.lua`) | `default.lua`
