@@ -3,6 +3,7 @@
 SuperDock Cloud Server
 
 [![Build Status](https://github.com/sb-im/gosd/workflows/ci/badge.svg)](https://github.com/sb-im/gosd/actions?query=workflow%3Aci)
+[![codecov](https://codecov.io/gh/sb-im/gosd/branch/master/graph/badge.svg)](https://codecov.io/gh/sb-im/gosd)
 [![GitHub release](https://img.shields.io/github/tag/sb-im/gosd.svg?label=release)](https://github.com/sb-im/gosd/releases)
 [![license](https://img.shields.io/github/license/sb-im/gosd.svg?maxAge=2592000)](https://github.com/sb-im/gosd/blob/master/LICENSE)
 
@@ -52,6 +53,8 @@ DEMO_MODE=true ./gosd server
 ### Run as Production
 
 ```bash
+cp dot.env .env
+
 # Create database tables
 DATABASE_URL=postgres://postgres:password@localhost/gosd?sslmode=disable \
 ./gosd database migrate
