@@ -80,6 +80,7 @@ Variable Name  | Description                                              | Defa
 `DEBUG`        | Set the value to `1` to enable debug logs                | Off
 `DEMO_MODE`    | Auto Run `database migrate`, `database seed`, `node sync`| Off
 `DATABASE_URL` | Postgresql connection parameters                         | `postgres://postgres:password@localhost/gosd?sslmode=disable`
+`STORAGE_URL`  | File storage path                                        | `data/storage`
 `LISTEN_ADDR`  | Address to listen on (use absolute path for Unix socket) | `127.0.0.1:8000`
 `PORT`         | Override `LISTEN_ADDR` to `0.0.0.0:$PORT` (PaaS)         | None
 `BASE_URL`     | Base URL to generate API links and base path             | `http://localhost:8000/gosd/api/v3`

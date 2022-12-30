@@ -41,7 +41,7 @@ func DefaultConfig() *Config {
 		RedisURL:    "redis://localhost:6379/1",
 		ClientURL:   "http://localhost:8000/gosd/api/v3",
 		DatabaseURL: "postgres://postgres:password@localhost:5432/gosd?sslmode=disable&TimeZone=Asia/Shanghai",
-		StorageURL:  "file://data/storage",
+		StorageURL:  "data/storage",
 		LuaFilePath: "default.lua",
 		Debug:       true,
 		SingleUser:  true,
