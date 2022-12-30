@@ -2,6 +2,7 @@ luavm/lua.go
 data/storage/
 swag/
 gosd
+coverage.txt
 config.yml
 .data
 .env

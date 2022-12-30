@@ -35,7 +35,7 @@ build:
 
 .PHONY: run
 run:
-	go run main.go server -v
+	DEMO_MODE=true go run main.go server -v
 
 .PHONY: swagger
 swagger:
@@ -59,9 +59,8 @@ test-simulation:
 # \(statements\)(?:\s+)?(\d+(?:\.\d+)?%)
 # https://stackoverflow.com/questions/61246686/go-coverage-over-multiple-package-and-gitlab-coverage-badge
 cover:
-	go test ${GO_TEST} -coverprofile profile.cov
-	go tool cover -func profile.cov
-	@rm profile.cov
+	go test ./app/luavm -coverprofile=coverage.txt -covermode=atomic
+	go tool cover -func coverage.txt
 
 install:
 	install -Dm755 gosd -t ${PROFIX}/usr/bin/gosd

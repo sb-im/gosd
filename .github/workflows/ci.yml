@@ -38,5 +38,8 @@ jobs:
       run: |
         go run main.go database migrate
         go run main.go database seed
-        make test-luavm
+        make cover
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
 
