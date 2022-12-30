@@ -2,6 +2,10 @@
 
 SuperDock Cloud Server
 
+[![Build Status](https://github.com/sb-im/gosd/workflows/ci/badge.svg)](https://github.com/sb-im/gosd/actions?query=workflow%3Aci)
+[![GitHub release](https://img.shields.io/github/tag/sb-im/gosd.svg?label=release)](https://github.com/sb-im/gosd/releases)
+[![license](https://img.shields.io/github/license/sb-im/gosd.svg?maxAge=2592000)](https://github.com/sb-im/gosd/blob/master/LICENSE)
+
 ## Build
 
 * golang >= 1.17.x
