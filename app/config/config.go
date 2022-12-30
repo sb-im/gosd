@@ -11,6 +11,7 @@ func init() {
 }
 
 type Config struct {
+	ListenAddr  string `env:"LISTEN_ADDR"`
 	Instance    string `env:"INSTANCE"`
 	BaseURL     string `env:"BASE_URL"`
 	MqttURL     string `env:"MQTT_URL"`
@@ -35,6 +36,7 @@ var opts = DefaultConfig()
 
 func DefaultConfig() *Config {
 	return &Config{
+		ListenAddr:  "0.0.0.0:8000",
 		Instance:    "gosd.0",
 		BaseURL:     "http://localhost:8000/gosd/api/v3",
 		MqttURL:     "mqtt://admin:public@localhost:1883",

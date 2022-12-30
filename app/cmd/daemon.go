@@ -74,8 +74,9 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 
 func Daemon(ctx context.Context) {
 	log.Warn("Launch gosd V3")
-	handler := NewHandler(ctx, config.Parse())
+	cfg := config.Parse()
+	handler := NewHandler(ctx, cfg)
 	log.Warn("=== RUN ===")
 
-	http.ListenAndServe(":8000", handler)
+	http.ListenAndServe(cfg.ListenAddr, handler)
 }
