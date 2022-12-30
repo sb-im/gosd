@@ -39,7 +39,7 @@ test database:
   before_script:
     - go version
   script:
-    - make cover
+    - make test
 
 test luavm:
   stage: test
