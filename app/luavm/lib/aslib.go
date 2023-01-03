@@ -1,8 +1,8 @@
-package lua
+package lib
 
 import (
 	"embed"
 )
 
 //go:embed *
-var LuaFile embed.FS
+var File embed.FS

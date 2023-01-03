@@ -9,7 +9,7 @@ import (
 
 	"sb.im/gosd/app/config"
 	"sb.im/gosd/app/luavm"
-	lualib "sb.im/gosd/app/luavm/lua"
+	"sb.im/gosd/app/luavm/lib"
 	"sb.im/gosd/app/model"
 	"sb.im/gosd/app/storage"
 	"sb.im/gosd/app/store"
@@ -101,7 +101,7 @@ var _ = Describe("LuaVM Rpc", func() {
 
 	Context("Test Context", func() {
 		It("run luaFile", func() {
-			luaFile, err := lualib.LuaFile.ReadFile("test_rpc.lua")
+			luaFile, err := lib.File.ReadFile("test_rpc.lua")
 			Expect(err).NotTo(HaveOccurred())
 
 			err = worker.RunTask(&task, luaFile)
@@ -111,7 +111,7 @@ var _ = Describe("LuaVM Rpc", func() {
 
 	Context("Test Context Cancel", func() {
 		It("run luaFile no result", func() {
-			luaFile, err := lualib.LuaFile.ReadFile("test_rpc_error.lua")
+			luaFile, err := lib.File.ReadFile("test_rpc_error.lua")
 			Expect(err).NotTo(HaveOccurred())
 
 			ch := make(chan error)

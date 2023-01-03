@@ -10,7 +10,7 @@ import (
 	"sb.im/gosd/rpc2mqtt"
 
 	"sb.im/gosd/app/logger"
-	lualib "sb.im/gosd/app/luavm/lua"
+	"sb.im/gosd/app/luavm/lib"
 	"sb.im/gosd/app/model"
 	"sb.im/gosd/app/storage"
 	"sb.im/gosd/app/store"
@@ -41,7 +41,7 @@ func NewWorker(cfg Config, s *store.Store, rpc *rpc2mqtt.Rpc2mqtt, script []byte
 	ctx := context.TODO()
 	// default LuaFile: input > default
 	if len(script) == 0 {
-		if data, err := lualib.LuaFile.ReadFile(defaultFileLua); err != nil {
+		if data, err := lib.File.ReadFile(defaultFileLua); err != nil {
 			logger.WithContext(ctx).Error(err)
 		} else {
 			script = data
@@ -170,12 +170,12 @@ func (w *Worker) doRun(ctx context.Context, task *model.Task, script []byte) err
 	l.SetGlobal("SD", luar.New(l, service))
 
 	// Load Lib
-	for _, lib := range libs {
-		if f, err := lualib.LuaFile.Open(lib); err != nil {
+	for _, name := range libs {
+		if f, err := lib.File.Open(name); err != nil {
 			logger.WithContext(ctx).Error(err)
 			continue
 		} else {
-			if fn, err := l.Load(f, lib); err != nil {
+			if fn, err := l.Load(f, name); err != nil {
 				return err
 			} else {
 				l.Push(fn)
