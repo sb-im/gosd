@@ -59,7 +59,7 @@ test-simulation:
 # \(statements\)(?:\s+)?(\d+(?:\.\d+)?%)
 # https://stackoverflow.com/questions/61246686/go-coverage-over-multiple-package-and-gitlab-coverage-badge
 cover:
-	go test ./app/luavm -coverprofile=coverage.txt -covermode=atomic
+	go test ./app/... -coverprofile=coverage.txt -covermode=atomic
 	go tool cover -func coverage.txt
 
 install:

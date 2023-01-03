@@ -57,7 +57,10 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 	if err == nil {
 		log.Warn("Use Lua File Path:", cfg.LuaFilePath)
 	}
-	worker := luavm.NewWorker(luavm.DefaultConfig(), s, rpcServer, luaFile)
+	worker := luavm.NewWorker(luavm.Config{
+		Instance: cfg.Instance,
+		BaseURL:  cfg.BaseURL,
+	}, s, rpcServer, luaFile)
 	go worker.Run(ctx)
 
 	srv := service.NewService(orm, rdb, worker)

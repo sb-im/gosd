@@ -1,0 +1,29 @@
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    flags:
+      - -tags=timetzdata
+    ldflags:
+      - -s -w
+      - -X "sb.im/gosd/version.Version={{.Version}}"
+      - -X "sb.im/gosd/version.Date={{.Date}}"
+
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^Merge'
+      - '^build'
+      - '^chore'
+      - '^docs'
+      - '^test'
+      - '^ci'
+
