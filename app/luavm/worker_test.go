@@ -34,7 +34,10 @@ func helpTestNewWorker(t *testing.T, script []byte) *Worker {
 	}
 
 	// use tempDir
-	return NewWorker(DefaultConfig(), store.NewStore(cfg, orm, redis.NewClient(redisOpt), storage.NewStorage(t.TempDir())), nil, script)
+	return NewWorker(Config{
+		Instance: cfg.Instance,
+		BaseURL:  cfg.BaseURL,
+	}, store.NewStore(cfg, orm, redis.NewClient(redisOpt), storage.NewStorage(t.TempDir())), nil, script)
 }
 
 func newTestTask(t *testing.T) *model.Task {

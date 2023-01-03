@@ -6,7 +6,6 @@ import (
 	"errors"
 	"strconv"
 	"sync"
-	"time"
 
 	"sb.im/gosd/rpc2mqtt"
 
@@ -24,16 +23,6 @@ import (
 	luar "layeh.com/gopher-luar"
 )
 
-var (
-	libs = []string{
-		"lib_task.lua",
-		"lib_node.lua",
-		"lib_geo.lua",
-		"lib_log.lua",
-		"lib_main.lua",
-	}
-)
-
 type Worker struct {
 	cfg    Config
 	ctx    context.Context
@@ -44,8 +33,6 @@ type Worker struct {
 	script []byte
 	mutex  *sync.Mutex
 
-	timeout time.Duration
-
 	rpc     *rpc2mqtt.Rpc2mqtt
 	Running map[string]*Service
 }
@@ -54,19 +41,12 @@ func NewWorker(cfg Config, s *store.Store, rpc *rpc2mqtt.Rpc2mqtt, script []byte
 	ctx := context.TODO()
 	// default LuaFile: input > default
 	if len(script) == 0 {
-		if data, err := lualib.LuaFile.ReadFile(cfg.LuaFile); err != nil {
+		if data, err := lualib.LuaFile.ReadFile(defaultFileLua); err != nil {
 			logger.WithContext(ctx).Error(err)
 		} else {
 			script = data
 		}
 	}
-
-	timeout, err := time.ParseDuration(cfg.Timeout)
-	if err != nil {
-		logger.WithContext(ctx).Error(err)
-		timeout = 2 * time.Hour
-	}
-
 	return &Worker{
 		cfg:    cfg,
 		ctx:    ctx,
@@ -76,8 +56,6 @@ func NewWorker(cfg Config, s *store.Store, rpc *rpc2mqtt.Rpc2mqtt, script []byte
 		store:  s,
 		script: script,
 		mutex:  &sync.Mutex{},
-
-		timeout: timeout,
 
 		rpc:     rpc,
 		Running: make(map[string]*Service),
@@ -112,7 +90,7 @@ func (w *Worker) AddTask(ctx context.Context, task *model.Task) error {
 func (w *Worker) getScript(task *model.Task) (script []byte) {
 	files := make(map[string]string)
 	if err := json.Unmarshal(task.Files, &files); err == nil {
-		if key, ok := files[w.cfg.LuaTask]; ok {
+		if key, ok := files[defaultFileKey]; ok {
 			if data, err := w.ofs.Get(key); err == nil {
 				script = data
 			}

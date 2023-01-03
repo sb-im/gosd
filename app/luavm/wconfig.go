@@ -1,21 +1,22 @@
 package luavm
 
-import "os"
+const (
+	defaultFileLua = "default.lua"
+	defaultFileKey = "lua"
+)
+
+// Order is important
+var (
+	libs = []string{
+		"lib_task.lua",
+		"lib_node.lua",
+		"lib_geo.lua",
+		"lib_log.lua",
+		"lib_main.lua",
+	}
+)
 
 type Config struct {
 	Instance string
-	LuaFile  string
-	LuaTask  string
-	Timeout  string
 	BaseURL  string
-}
-
-func DefaultConfig() Config {
-	return Config{
-		Instance: "gosd.0",
-		LuaFile:  "test_min.lua",
-		LuaTask:  "lua",
-		Timeout:  "2h",
-		BaseURL:  os.Getenv("BASE_URL"),
-	}
 }

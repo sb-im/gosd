@@ -76,7 +76,10 @@ var _ = Describe("LuaVM Rpc", func() {
 	if err == nil {
 		log.Warn("Use Lua File Path:", cfg.LuaFilePath)
 	}
-	worker := luavm.NewWorker(luavm.DefaultConfig(), store.NewStore(nil, orm, rdb, ofs), rpcServer, luaFile)
+	worker := luavm.NewWorker(luavm.Config{
+		Instance: cfg.Instance,
+		BaseURL:  cfg.BaseURL,
+	}, store.NewStore(nil, orm, rdb, ofs), rpcServer, luaFile)
 	go worker.Run(ctx)
 
 	go func() {
