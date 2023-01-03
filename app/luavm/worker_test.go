@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"sb.im/gosd/app/config"
-	lualib "sb.im/gosd/app/luavm/lua"
+	"sb.im/gosd/app/luavm/lib"
 	"sb.im/gosd/app/model"
 	"sb.im/gosd/app/storage"
 	"sb.im/gosd/app/store"
@@ -84,7 +84,7 @@ func TestLuaScript(t *testing.T) {
 
 func luaScript(t *testing.T, name string) {
 	w := newWorker(t)
-	if script, err := lualib.LuaFile.ReadFile(name); err != nil {
+	if script, err := lib.File.ReadFile(name); err != nil {
 		t.Error(err)
 	} else {
 		if err := w.doRun(context.Background(), &model.Task{}, script); err != nil {
