@@ -107,6 +107,8 @@ func NewApi(s *store.Store, srv *service.Service) http.Handler {
 	sr.GET("/profiles/:key", handler.ProfileGet)
 	sr.PUT("/profiles/:key", handler.ProfileSet)
 
+	sr.GET("/calender.ics", handler.Calendar)
+
 	r.NoRoute(func(c *gin.Context) {
 		fmt.Println(c.Request.URL)
 		c.JSON(http.StatusNotFound, gin.H{
