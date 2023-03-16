@@ -64,7 +64,9 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 	go worker.Run(ctx)
 
 	srv := service.NewService(orm, rdb, worker)
-	srv.StartSchedule()
+	if cfg.Schedule {
+		srv.StartSchedule()
+	}
 
 	if cfg.DemoMode {
 		log.Warn("=== Use Demo Mode ===")
