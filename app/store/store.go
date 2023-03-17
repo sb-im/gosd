@@ -1,7 +1,7 @@
 package store
 
 import (
-	"context"
+	//"context"
 
 	"sb.im/gosd/app/config"
 	"sb.im/gosd/app/storage"
@@ -19,7 +19,7 @@ type Store struct {
 
 func NewStore(cfg *config.Config, orm *gorm.DB, rdb *redis.Client, ofs *storage.Storage) *Store {
 	// Enable Redis Events
-	rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$K")
+	//rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$K")
 
 	return &Store{
 		cfg: cfg,

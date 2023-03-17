@@ -44,6 +44,7 @@ func (h *Handler) JobIndex(c *gin.Context) {
 // @Tags task
 // @Produce json
 // @Param id path uint true "Task ID"
+// @Param started_at formData string false "Run Started time '2021-02-22T20:12:02+08:00', time format: RFC3339 https://www.rfc-editor.org/rfc/rfc3339"
 // @Success 201
 // @Router /tasks/{id}/jobs [post]
 func (h *Handler) JobCreate(c *gin.Context) {

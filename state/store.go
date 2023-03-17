@@ -22,7 +22,7 @@ func NewState(rawURL string) *State {
 		panic(err)
 	}
 	defer c.Close()
-	c.Do("CONFIG", "SET", "notify-keyspace-events", "K$")
+	//c.Do("CONFIG", "SET", "notify-keyspace-events", "K$")
 
 	return &State{
 		Pool: redis.NewPool(func() (redis.Conn, error) { return redis.DialURL(rawURL) }, 5),

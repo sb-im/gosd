@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
+	"strings"
 	"sync"
 
 	"sb.im/gosd/rpc2mqtt"
@@ -108,7 +110,29 @@ func (w *Worker) getScript(task *model.Task) (script []byte) {
 }
 
 func (w Worker) Run(ctx context.Context) {
-	<-ctx.Done()
+	ch := w.rdb.Subscribe(ctx, fmt.Sprintf("__keyevent@%d__:expired", w.rdb.Options().DB)).Channel()
+	for {
+		select {
+		case m := <-ch:
+			// <prefix>.<jobId>
+			// job.1
+			if data := strings.Split(m.Payload, "."); len(data) > 1 {
+				if data[0] == "job" {
+					jobId := data[1]
+					var job model.Job
+					//var task model.Task
+					//w.orm.Preload("tasks").Find(&job, jobId)
+					w.orm.Find(&job, jobId)
+
+					fmt.Println(job)
+					//fmt.Println(job.Task)
+
+					// TODO: run task
+				}
+			}
+		case <-ctx.Done():
+		}
+	}
 }
 
 func (w Worker) RunTask(task *model.Task, script []byte) error {

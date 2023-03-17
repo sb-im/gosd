@@ -44,6 +44,8 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 	// Ex: luavm
 	rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$KEx")
 
+	//panic(rdb.Options().DB)
+
 	ofs := storage.NewStorage(cfg.StorageURL)
 	s := store.NewStore(cfg, orm, rdb, ofs)
 
@@ -72,6 +74,8 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 	if cfg.Schedule {
 		srv.StartSchedule()
 	}
+
+	srv.StartTaskWorker(ctx)
 
 	if cfg.DemoMode {
 		log.Warn("=== Use Demo Mode ===")

@@ -3,6 +3,7 @@ package v3
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -20,6 +21,12 @@ import (
 // @Failure 500
 // @Router /tasks/{id}/running [POST]
 func (h *Handler) TaskRunningCreate(c *gin.Context) {
+	job := model.Job{}
+	if err := c.Bind(&job); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	var task model.Task
 	if err := h.orm.WithContext(c).Model(&task).Where("id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).UpdateColumn("index", gorm.Expr("index + ?", 1)).Scan(&task).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -31,10 +38,12 @@ func (h *Handler) TaskRunningCreate(c *gin.Context) {
 		}
 	}
 
-	job := model.Job{
-		TaskID: task.ID,
-		Index:  task.Index,
+	job.TaskID = task.ID
+	job.Index = task.Index
+	if job.StartedAt.Before(time.Now()) {
+		job.StartedAt = time.Now()
 	}
+
 	if err := h.orm.WithContext(c).Create(&job).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
