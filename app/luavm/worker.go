@@ -47,6 +47,8 @@ func NewWorker(cfg Config, s *store.Store, rpc *rpc2mqtt.Rpc2mqtt, script []byte
 			script = data
 		}
 	}
+
+	// redis: config set notify-keyspace-events Ex
 	return &Worker{
 		cfg:    cfg,
 		ctx:    ctx,
