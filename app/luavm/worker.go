@@ -120,14 +120,24 @@ func (w Worker) Run(ctx context.Context) {
 				if data[0] == "job" {
 					jobId := data[1]
 					var job model.Job
-					//var task model.Task
-					//w.orm.Preload("tasks").Find(&job, jobId)
-					w.orm.Find(&job, jobId)
+					if err := w.orm.Preload("Task").Find(&job, jobId).Error; err != nil {
+						logger.WithContext(ctx).Errorln(err)
+					}
 
-					fmt.Println(job)
-					//fmt.Println(job.Task)
+					logger.WithContext(ctx).Infof("%+v", job)
 
-					// TODO: run task
+					task := job.Task
+					task.Job = &job
+
+					files := make(map[string]string)
+					extra := make(map[string]string)
+
+					json.Unmarshal(task.Files, &files)
+					json.Unmarshal(task.Extra, &extra)
+
+					logger.WithContext(ctx).Infof("%+v\t%v\t%v", task, files, extra)
+
+					w.AddTask(ctx, &task)
 				}
 			}
 		case <-ctx.Done():
