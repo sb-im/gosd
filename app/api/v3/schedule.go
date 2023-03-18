@@ -56,6 +56,7 @@ func (h Handler) ScheduleCreate(c *gin.Context) {
 	}
 	if err := h.orm.WithContext(c).Create(&schedule).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	} else {
 		h.srv.ScheduleAdd(schedule)
 	}
