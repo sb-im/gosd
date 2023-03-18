@@ -3,7 +3,6 @@ package v3
 import (
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -38,19 +37,10 @@ func (h *Handler) TaskRunningCreate(c *gin.Context) {
 		}
 	}
 
-	job.TaskID = task.ID
-	job.Index = task.Index
-	if job.StartedAt.Before(time.Now()) {
-		job.StartedAt = time.Now()
-	}
-
-	if err := h.orm.WithContext(c).Create(&job).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	task.Job = &job
-
-	if err := h.srv.TaskRun(c, &task); err != nil {
+	if err := h.srv.CreateJob(c, &model.Job{
+		TaskID: task.ID,
+		Index: task.Index,
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

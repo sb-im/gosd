@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/robfig/cron/v3"
+	"github.com/google/uuid"
 	"sb.im/gosd/app/logger"
 	"sb.im/gosd/app/model"
 )
@@ -43,7 +44,11 @@ func (s *Service) scheduleEntryDel(id uint) error {
 func (s *Service) ScheduleAdd(schedule model.Schedule) {
 	if schedule.Enable {
 		if entryID, err := s.cron.AddFunc(schedule.Cron, func() {
-			s.JSON.Call(schedule.Method, []byte(schedule.Params))
+
+			ctx := context.WithValue(context.Background(), "traceid", uuid.New().String())
+			logger.WithContext(ctx).WithField("src", "cron")
+
+			s.ScheduleCreateJob(ctx, schedule.TaskID)
 		}); err != nil {
 			fmt.Println(err)
 		} else {

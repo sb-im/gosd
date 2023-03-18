@@ -1,10 +1,12 @@
 package v3
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"sb.im/gosd/app/model"
 
 	log "github.com/sirupsen/logrus"
@@ -40,8 +42,7 @@ func (h Handler) ScheduleIndex(c *gin.Context) {
 // @Param name formData string true "Name" default(Test Schedule)
 // @Param cron formData string true "cron expression https://pkg.go.dev/github.com/robfig/cron/v3#hdr-Usage" default(@every 1h30m)
 // @Param enable formData bool true "Enable" default(false)
-// @Param method formData string true "Method" default(cowSay)
-// @Param params formData string false "Params" default(Hello, world!)
+// @Param task_id formData uint true "Task ID" default(1)
 // @Success 201 {object} model.Schedule
 // @Router /schedules [post]
 func (h Handler) ScheduleCreate(c *gin.Context) {
@@ -72,8 +73,7 @@ func (h Handler) ScheduleCreate(c *gin.Context) {
 // @Param name formData string false "Name" default(Test Schedule)
 // @Param cron formData string false "cron expression https://pkg.go.dev/github.com/robfig/cron/v3#hdr-Usage" default(@every 1h30m)
 // @Param enable formData bool   false "Enable" default(false)
-// @Param method formData string false "Method" default(cowSay)
-// @Param params formData string false "Params" default(Hello, world!)
+// @Param task_id formData uint true "Task ID" default(1)
 // @Success 200 {object} model.Schedule
 // @Router /schedules/{id} [patch]
 func (h Handler) ScheduleUpdate(c *gin.Context) {
@@ -125,9 +125,19 @@ func (h Handler) ScheduleDestroy(c *gin.Context) {
 // @Router /schedules/{id}/trigger [POST]
 func (h *Handler) ScheduleTrigger(c *gin.Context) {
 	schedule := &model.Schedule{}
-	h.orm.WithContext(c).First(schedule, c.Param("id"))
-	if err := h.srv.JSON.Call(schedule.Method, []byte(schedule.Params)); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := h.orm.WithContext(c).First(schedule, c.Param("id")).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	if err := h.srv.ScheduleCreateJob(c, schedule.TaskID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 	c.JSON(http.StatusOK, schedule)
 }

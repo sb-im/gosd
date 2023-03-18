@@ -9,7 +9,6 @@ import (
 )
 
 type Service struct {
-	JSON   *JSONService
 	orm    *gorm.DB
 	rdb    *redis.Client
 	worker *luavm.Worker
@@ -18,7 +17,5 @@ type Service struct {
 }
 
 func NewService(orm *gorm.DB, rdb *redis.Client, worker *luavm.Worker) *Service {
-	s := &Service{nil, orm, rdb, worker, cron.New()}
-	s.JSON = NewJsonService(s)
-	return s
+	return &Service{orm, rdb, worker, cron.New()}
 }
