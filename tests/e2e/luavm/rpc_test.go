@@ -58,6 +58,7 @@ var _ = Describe("LuaVM Rpc", func() {
 		panic(err)
 	}
 	rdb := redis.NewClient(redisOpt)
+	rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$KEx")
 
 	s2 := state.NewState(cfg.RedisURL)
 
