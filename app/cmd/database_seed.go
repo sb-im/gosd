@@ -69,7 +69,7 @@ func DatabaseSeed(orm *gorm.DB) error {
 
 	// Task
 	if err := orm.FirstOrCreate(&model.Task{
-		Name: "demo-task",
+		Name:   "demo-task",
 		TeamID: team.ID,
 		NodeID: 1,
 	}).Error; err != nil {

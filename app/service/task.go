@@ -26,7 +26,7 @@ func (s *Service) ScheduleCreateJob(ctx context.Context, taskId uint) error {
 	}
 	return s.CreateJob(ctx, &model.Job{
 		TaskID: task.ID,
-		Index: task.Index,
+		Index:  task.Index,
 	})
 }
 

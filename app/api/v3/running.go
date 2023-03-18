@@ -39,7 +39,7 @@ func (h *Handler) TaskRunningCreate(c *gin.Context) {
 
 	if err := h.srv.CreateJob(c, &model.Job{
 		TaskID: task.ID,
-		Index: task.Index,
+		Index:  task.Index,
 	}); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
