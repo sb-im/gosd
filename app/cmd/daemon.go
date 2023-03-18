@@ -72,7 +72,7 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 
 	srv := service.NewService(orm, rdb, worker)
 	if cfg.Schedule {
-		srv.StartSchedule()
+		go srv.RunSchedule(ctx)
 	}
 
 	srv.StartTaskWorker(ctx)
