@@ -33,11 +33,14 @@ func helpTestNewWorker(t *testing.T, script []byte) *Worker {
 		panic(err)
 	}
 
+	rdb := redis.NewClient(redisOpt)
+	rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$KEx")
+
 	// use tempDir
 	return NewWorker(Config{
 		Instance: cfg.Instance,
 		BaseURL:  cfg.BaseURL,
-	}, store.NewStore(cfg, orm, redis.NewClient(redisOpt), storage.NewStorage(t.TempDir())), nil, script)
+	}, store.NewStore(cfg, orm, rdb, storage.NewStorage(t.TempDir())), nil, script)
 }
 
 func newTestTask(t *testing.T) *model.Task {
