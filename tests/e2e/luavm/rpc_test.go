@@ -11,8 +11,8 @@ import (
 	"sb.im/gosd/app/luavm"
 	"sb.im/gosd/app/luavm/lib"
 	"sb.im/gosd/app/model"
+	"sb.im/gosd/app/service"
 	"sb.im/gosd/app/storage"
-	"sb.im/gosd/app/store"
 
 	"sb.im/gosd/rpc2mqtt"
 	"sb.im/gosd/tests/help"
@@ -80,7 +80,7 @@ var _ = Describe("LuaVM Rpc", func() {
 	worker := luavm.NewWorker(luavm.Config{
 		Instance: cfg.Instance,
 		BaseURL:  cfg.BaseURL,
-	}, store.NewStore(nil, orm, rdb, ofs), rpcServer, luaFile)
+	}, service.NewService(nil, orm, rdb, ofs), rpcServer, luaFile)
 	go worker.Run(ctx)
 
 	go func() {
