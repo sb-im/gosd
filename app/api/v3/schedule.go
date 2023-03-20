@@ -136,7 +136,7 @@ func (h *Handler) ScheduleTrigger(c *gin.Context) {
 		}
 	}
 
-	if err := h.srv.ScheduleCreateJob(c, schedule.TaskID); err != nil {
+	if _, err := h.srv.ScheduleCreateJob(c, schedule.TaskID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -6,18 +6,14 @@ import (
 	"fmt"
 	"testing"
 	"time"
-
-	"sb.im/gosd/app/model"
 )
 
 func TestLuaDialog(t *testing.T) {
-	task := &model.Task{}
-	task.ID = 1
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	w := newWorker(t)
+	task := helpTestNewTask(t, "Unit Test Lua Dialog", w)
 	ch := make(chan error)
 	go func() {
 		time.Sleep(100 * time.Millisecond)

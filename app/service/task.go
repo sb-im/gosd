@@ -19,15 +19,17 @@ func (s *Service) StartTaskWorker(ctx context.Context) {
 }
 
 // NOTE: Not Verified. Only Schedule call
-func (s *Service) ScheduleCreateJob(ctx context.Context, taskId uint) error {
+func (s *Service) ScheduleCreateJob(ctx context.Context, taskId uint) (*model.Job, error) {
 	var task model.Task
 	if err := s.orm.WithContext(ctx).Model(&task).Where("id = ?", taskId).UpdateColumn("index", gorm.Expr("index + ?", 1)).Scan(&task).Error; err != nil {
-		return err
+		return nil, err
 	}
-	return s.CreateJob(ctx, &model.Job{
+
+	job := &model.Job{
 		TaskID: task.ID,
 		Index:  task.Index,
-	})
+	}
+	return job, s.CreateJob(ctx, job)
 }
 
 func (s *Service) CreateJob(ctx context.Context, job *model.Job) error {
