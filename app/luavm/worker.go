@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"sb.im/gosd/rpc2mqtt"
 
@@ -109,7 +110,7 @@ func (w *Worker) getScript(task *model.Task) (script []byte) {
 	return
 }
 
-func (w Worker) Run(ctx context.Context) {
+func (w *Worker) Run(ctx context.Context) {
 	ch := w.rdb.Subscribe(ctx, fmt.Sprintf("__keyevent@%d__:expired", w.rdb.Options().DB)).Channel()
 	for {
 		select {
@@ -145,11 +146,12 @@ func (w Worker) Run(ctx context.Context) {
 	}
 }
 
-func (w Worker) RunTask(task *model.Task, script []byte) error {
+func (w *Worker) RunTask(task *model.Task, script []byte) error {
 	return w.doRun(context.Background(), task, script)
 }
 
 func (w *Worker) doRun(ctx context.Context, task *model.Task, script []byte) error {
+	w.setDuration(task.Job, 1)
 	l := lua.NewState()
 	defer func() {
 		l.Close()
@@ -224,6 +226,7 @@ func (w *Worker) doRun(ctx context.Context, task *model.Task, script []byte) err
 
 	// Core: Load Script
 	if err := l.DoString(string(script)); err != nil {
+		w.setDuration(task.Job, -1)
 		return err
 	}
 
@@ -232,11 +235,27 @@ func (w *Worker) doRun(ctx context.Context, task *model.Task, script []byte) err
 		NRet:    1,
 		Protect: true,
 	}, lua.LString(node.UUID)); err != nil {
+		// Min duration 3s
+		duration := int(time.Since(task.Job.StartedAt).Seconds())
+		if duration < 3 {
+			duration = 3
+		}
+		w.setDuration(task.Job, -duration)
 		return err
 	}
 
 	logger.WithContext(ctx).Warn("==> luavm no panic")
-	return nil
+
+	// Min duration 3s
+	duration := int(time.Since(task.Job.StartedAt).Seconds())
+	if duration < 3 {
+		duration = 3
+	}
+	return w.setDuration(task.Job, duration)
+}
+
+func (w *Worker) setDuration(job *model.Job, duration int) error {
+	return w.orm.Model(job).Where("id = ?", job.ID).UpdateColumn("duration", duration).Error
 }
 
 func (w *Worker) Kill(taskID string) error {
