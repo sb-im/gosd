@@ -5,24 +5,23 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
-	"sb.im/gosd/state"
-
+	"github.com/redis/go-redis/v9"
+	"github.com/sb-im/jsonrpc-lite"
 	log "github.com/sirupsen/logrus"
 
 	packets "github.com/eclipse/paho.golang/packets"
 	paho "github.com/eclipse/paho.golang/paho"
-	redis "github.com/gomodule/redigo/redis"
-	"github.com/sb-im/jsonrpc-lite"
 )
 
 type Mqtt struct {
 	Connect *paho.Connect
 	Config  *MqttdConfig
 	Client  *paho.Client
-	State   *state.State
+	rdb     *redis.Client
 	cache   chan MqttRpc
 	I       <-chan MqttRpc
 	O       chan<- MqttRpc
@@ -33,7 +32,7 @@ type MqttRpc struct {
 	Payload []byte
 }
 
-func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- MqttRpc) *Mqtt {
+func NewMqttd(broker string, rdb *redis.Client, i <-chan MqttRpc, o chan<- MqttRpc) *Mqtt {
 	config, err := loadMqttConfigDefault()
 	if err != nil {
 		log.Error(err)
@@ -56,8 +55,8 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 	return &Mqtt{
 		I:      i,
 		O:      o,
+		rdb:    rdb,
 		cache:  cache,
-		State:  store,
 		Config: config,
 		Client: paho.NewClient(paho.ClientConfig{
 			ClientID: fmt.Sprint(config.Client, config.ID),
@@ -77,9 +76,9 @@ func NewMqttd(broker string, store *state.State, i <-chan MqttRpc, o chan<- Mqtt
 						ID:      id,
 						Payload: p.Payload,
 					}
-					store.Record(p.Topic, p.Payload)
+					rdb.Set(context.Background(), p.Topic, p.Payload, 0)
 				default:
-					store.Record(p.Topic, p.Payload)
+					rdb.Set(context.Background(), p.Topic, p.Payload, 0)
 				}
 
 			}),
@@ -205,21 +204,24 @@ func (t *Mqtt) Run(ctx context.Context) {
 	}
 
 	go func() {
-		//keyspace := "__keyspace@0__:%s"
-		keyspace := "__keyspace@*__:%s"
-		psc := redis.PubSubConn{Conn: t.State.Pool.Get()}
-		psc.PSubscribe(fmt.Sprintf(keyspace, "nodes/*"), fmt.Sprintf(keyspace, "tasks/*"))
+		keyspace := "__keyspace@" + strconv.Itoa(t.rdb.Options().DB) + "__:%s"
+		ch := t.rdb.PSubscribe(
+			context.Background(),
+			fmt.Sprintf(keyspace, "nodes/*"),
+			fmt.Sprintf(keyspace, "tasks/*"),
+		).Channel()
 		for {
-			switch v := psc.Receive().(type) {
-			case redis.Message:
-				log.Debugf("%s: message: %s\n", v.Channel, v.Data)
+			select {
+			case m := <-ch:
+				log.Debugf("%s: message: %s\n", m.Channel, m.Payload)
 
 				// topic:
 				// plans/1/running
 				// nodes/4/msg/weather
-				topic := strings.Split(v.Channel, ":")[1]
-				log.Trace(t.State.StringGet(topic))
-				raw, err := t.State.BytesGet(topic)
+				topic := strings.Split(m.Channel, ":")[1]
+				data := t.rdb.Get(context.Background(), topic)
+				log.Trace(data)
+				raw, err := data.Bytes()
 				if err != nil {
 					log.Error(err)
 				}
@@ -264,12 +266,6 @@ func (t *Mqtt) Run(ctx context.Context) {
 				default:
 					log.Warnf("ignore -- %s: %s\n", topic, raw)
 				}
-			case redis.Subscription:
-				log.Warnf("%s: %s %d\n", v.Channel, v.Kind, v.Count)
-			case error:
-				log.Error(v)
-			default:
-				log.Warn("default")
 			}
 		}
 	}()

@@ -10,8 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"sb.im/gosd/state"
-
+	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -44,6 +43,20 @@ func helpGetRedisAddr() string {
 	return redisAddr
 }
 
+func useRedis(t *testing.T) *redis.Client {
+	redisOpt, err := redis.ParseURL(helpGetRedisAddr())
+	if err != nil {
+		t.Error(err)
+	}
+	rdb := redis.NewClient(redisOpt)
+
+	// Enable Redis Events
+	// K: store
+	// Ex: luavm
+	rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$KEx")
+	return rdb
+}
+
 func TestMqttd(t *testing.T) {
 	id := "000"
 	mqttAddr := helpGetMqttAddr()
@@ -53,8 +66,8 @@ func TestMqttd(t *testing.T) {
 	chI := make(chan MqttRpc)
 	chO := make(chan MqttRpc)
 
-	store := state.NewState(helpGetRedisAddr())
-	mqttd := NewMqttd(mqttAddr, store, chI, chO)
+	rdb := useRedis(t)
+	mqttd := NewMqttd(mqttAddr, rdb, chI, chO)
 	go mqttd.Run(ctx)
 
 	// Wait for mqttd to start and subscribe successfully
@@ -68,7 +81,7 @@ func TestMqttd(t *testing.T) {
 	// https://gitlab.com/sbim/superdock/cloud/gosd/-/issues/32#note_528668713
 	time.Sleep(1 * time.Second)
 
-	if msg, err := store.GetNodeMsg(id, "weather"); err != nil {
+	if msg, err := rdb.Get(context.Background(), fmt.Sprintf("nodes/%s/msg/%s", id, "weather")).Result(); err != nil {
 		t.Error(err)
 	} else if string(msg) != rawMsg {
 		t.Errorf("%s\n", msg)
@@ -87,8 +100,8 @@ func TestMqttdRpc(t *testing.T) {
 	chI := make(chan MqttRpc)
 	chO := make(chan MqttRpc)
 
-	store := state.NewState(helpGetRedisAddr())
-	mqttd := NewMqttd(mqttAddr, store, chI, chO)
+	rdb := useRedis(t)
+	mqttd := NewMqttd(mqttAddr, rdb, chI, chO)
 	go mqttd.Run(ctx)
 	//time.Sleep(3 * time.Second)
 

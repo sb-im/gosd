@@ -14,7 +14,6 @@ import (
 	"sb.im/gosd/rpc2mqtt"
 
 	"sb.im/gosd/mqttd"
-	"sb.im/gosd/state"
 
 	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
@@ -45,12 +44,10 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 
 	ofs := storage.NewStorage(cfg.StorageURL)
 
-	store := state.NewState(cfg.RedisURL)
-
 	chI := make(chan mqttd.MqttRpc, 128)
 	chO := make(chan mqttd.MqttRpc, 128)
 
-	mqtt := mqttd.NewMqttd(cfg.MqttURL, store, chI, chO)
+	mqtt := mqttd.NewMqttd(cfg.MqttURL, rdb, chI, chO)
 	go mqtt.Run(ctx)
 
 	rpcServer := rpc2mqtt.NewRpc2Mqtt(chI, chO)

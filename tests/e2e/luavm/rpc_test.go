@@ -18,7 +18,6 @@ import (
 	"sb.im/gosd/tests/help"
 
 	"sb.im/gosd/mqttd"
-	"sb.im/gosd/state"
 
 	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
@@ -60,12 +59,10 @@ var _ = Describe("LuaVM Rpc", func() {
 	rdb := redis.NewClient(redisOpt)
 	rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$KEx")
 
-	s2 := state.NewState(cfg.RedisURL)
-
 	chI := make(chan mqttd.MqttRpc, 128)
 	chO := make(chan mqttd.MqttRpc, 128)
 
-	mqtt := mqttd.NewMqttd(cfg.MqttURL, s2, chI, chO)
+	mqtt := mqttd.NewMqttd(cfg.MqttURL, rdb, chI, chO)
 	go mqtt.Run(ctx)
 
 	rpcServer := rpc2mqtt.NewRpc2Mqtt(chI, chO)
