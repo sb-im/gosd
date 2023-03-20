@@ -9,7 +9,7 @@ SuperDock Cloud Server
 
 ## Build
 
-* golang >= 1.17.x
+* golang >= 1.18.x
 * make
 
 ```bash

@@ -17,10 +17,6 @@ stages:
   script:
     - make build
 
-go1.17 build:
-  image: golang:1.17-buster
-  extends: .gobuild
-
 go1.18 build:
   image: golang:1.18-buster
   extends: .gobuild

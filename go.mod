@@ -1,6 +1,6 @@
 module sb.im/gosd
 
-go 1.17
+go 1.18
 
 require (
 	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2
