@@ -11,7 +11,6 @@ import (
 	"sb.im/gosd/app/luavm"
 	"sb.im/gosd/app/service"
 	"sb.im/gosd/app/storage"
-	"sb.im/gosd/app/store"
 	"sb.im/gosd/rpc2mqtt"
 
 	"sb.im/gosd/mqttd"
@@ -45,7 +44,6 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 	rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$KEx")
 
 	ofs := storage.NewStorage(cfg.StorageURL)
-	s := store.NewStore(cfg, orm, rdb, ofs)
 
 	store := state.NewState(cfg.RedisURL)
 
@@ -58,17 +56,7 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 	rpcServer := rpc2mqtt.NewRpc2Mqtt(chI, chO)
 	go rpcServer.Run(ctx)
 
-	luaFile, err := ioutil.ReadFile(cfg.LuaFilePath)
-	if err == nil {
-		log.Warn("Use Lua File Path:", cfg.LuaFilePath)
-	}
-	worker := luavm.NewWorker(luavm.Config{
-		Instance: cfg.Instance,
-		BaseURL:  cfg.BaseURL,
-	}, s, rpcServer, luaFile)
-	go worker.Run(ctx)
-
-	srv := service.NewService(orm, rdb)
+	srv := service.NewService(cfg, orm, rdb, ofs)
 	if cfg.Schedule {
 		go srv.RunSchedule(ctx)
 	}
@@ -81,7 +69,17 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 		DatabaseSeed(orm)
 	}
 
-	return api.NewApi(s, srv)
+	luaFile, err := ioutil.ReadFile(cfg.LuaFilePath)
+	if err == nil {
+		log.Warn("Use Lua File Path:", cfg.LuaFilePath)
+	}
+	worker := luavm.NewWorker(luavm.Config{
+		Instance: cfg.Instance,
+		BaseURL:  cfg.BaseURL,
+	}, srv, rpcServer, luaFile)
+	go worker.Run(ctx)
+
+	return api.NewApi(srv)
 }
 
 func Daemon(ctx context.Context) {

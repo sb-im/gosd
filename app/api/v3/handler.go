@@ -4,7 +4,6 @@ import (
 	"sb.im/gosd/app/config"
 	"sb.im/gosd/app/service"
 	"sb.im/gosd/app/storage"
-	"sb.im/gosd/app/store"
 
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
@@ -16,18 +15,14 @@ type Handler struct {
 	srv *service.Service
 	cfg *config.Config
 	ofs *storage.Storage
-
-	store *store.Store
 }
 
-func NewHandler(s *store.Store, srv *service.Service) *Handler {
+func NewHandler(srv *service.Service) *Handler {
 	return &Handler{
-		cfg: s.Cfg(),
-		orm: s.Orm(),
-		rdb: s.Rdb(),
-		ofs: s.Ofs(),
+		cfg: srv.Cfg(),
+		orm: srv.Orm(),
+		rdb: srv.Rdb(),
+		ofs: srv.Ofs(),
 		srv: srv,
-
-		store: s,
 	}
 }

@@ -23,25 +23,25 @@ func (w *Worker) preTaskCheck(task *model.Task) error {
 }
 
 func (w *Worker) lockTaskSet(id string) error {
-	return w.store.LockTaskSet(id)
+	return w.srv.LockTaskSet(id)
 }
 
 func (w *Worker) lockTaskGet(id string) (string, error) {
-	return w.store.LockTaskGet(id)
+	return w.srv.LockTaskGet(id)
 }
 
 func (w *Worker) lockTaskDel(id string) error {
-	return w.store.LockTaskDel(id)
+	return w.srv.LockTaskDel(id)
 }
 
 func (w *Worker) lockNodeSet(id string) error {
-	return w.store.LockNodeSet(id)
+	return w.srv.LockNodeSet(id)
 }
 
 func (w *Worker) lockNodeGet(id string) (string, error) {
-	return w.store.LockNodeGet(id)
+	return w.srv.LockNodeGet(id)
 }
 
 func (w *Worker) lockNodeDel(id string) error {
-	return w.store.LockNodeDel(id)
+	return w.srv.LockNodeDel(id)
 }

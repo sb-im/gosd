@@ -8,8 +8,8 @@ import (
 	"sb.im/gosd/app/config"
 	"sb.im/gosd/app/luavm/lib"
 	"sb.im/gosd/app/model"
+	"sb.im/gosd/app/service"
 	"sb.im/gosd/app/storage"
-	"sb.im/gosd/app/store"
 
 	"github.com/go-redis/redis/v8"
 	"gorm.io/driver/postgres"
@@ -40,7 +40,7 @@ func helpTestNewWorker(t *testing.T, script []byte) *Worker {
 	return NewWorker(Config{
 		Instance: cfg.Instance,
 		BaseURL:  cfg.BaseURL,
-	}, store.NewStore(cfg, orm, rdb, storage.NewStorage(t.TempDir())), nil, script)
+	}, service.NewService(cfg, orm, rdb, storage.NewStorage(t.TempDir())), nil, script)
 }
 
 func newTestTask(t *testing.T) *model.Task {

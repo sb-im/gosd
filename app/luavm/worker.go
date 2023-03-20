@@ -15,8 +15,8 @@ import (
 	"sb.im/gosd/app/logger"
 	"sb.im/gosd/app/luavm/lib"
 	"sb.im/gosd/app/model"
+	"sb.im/gosd/app/service"
 	"sb.im/gosd/app/storage"
-	"sb.im/gosd/app/store"
 
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
@@ -27,12 +27,13 @@ import (
 )
 
 type Worker struct {
-	cfg    Config
-	ctx    context.Context
-	orm    *gorm.DB
-	rdb    *redis.Client
-	ofs    *storage.Storage
-	store  *store.Store
+	cfg Config
+	ctx context.Context
+	srv *service.Service
+	orm *gorm.DB
+	rdb *redis.Client
+	ofs *storage.Storage
+
 	script []byte
 	mutex  *sync.Mutex
 
@@ -40,7 +41,7 @@ type Worker struct {
 	Running map[string]*Service
 }
 
-func NewWorker(cfg Config, s *store.Store, rpc *rpc2mqtt.Rpc2mqtt, script []byte) *Worker {
+func NewWorker(cfg Config, srv *service.Service, rpc *rpc2mqtt.Rpc2mqtt, script []byte) *Worker {
 	ctx := context.TODO()
 	// default LuaFile: input > default
 	if len(script) == 0 {
@@ -51,14 +52,14 @@ func NewWorker(cfg Config, s *store.Store, rpc *rpc2mqtt.Rpc2mqtt, script []byte
 		}
 	}
 
-	// redis: config set notify-keyspace-events Ex
 	return &Worker{
-		cfg:    cfg,
-		ctx:    ctx,
-		orm:    s.Orm(),
-		rdb:    s.Rdb(),
-		ofs:    s.Ofs(),
-		store:  s,
+		cfg: cfg,
+		ctx: ctx,
+		srv: srv,
+		orm: srv.Orm(),
+		rdb: srv.Rdb(),
+		ofs: srv.Ofs(),
+
 		script: script,
 		mutex:  &sync.Mutex{},
 

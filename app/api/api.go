@@ -9,7 +9,6 @@ import (
 	"sb.im/gosd/app/api/middleware"
 	"sb.im/gosd/app/api/v3"
 	"sb.im/gosd/app/service"
-	"sb.im/gosd/app/store"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -19,8 +18,8 @@ import (
 
 var ApiPrefix = "/gosd/api/v3"
 
-func NewApi(s *store.Store, srv *service.Service) http.Handler {
-	if !s.Cfg().Debug {
+func NewApi(srv *service.Service) http.Handler {
+	if !srv.Cfg().Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -35,7 +34,7 @@ func NewApi(s *store.Store, srv *service.Service) http.Handler {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	if u, err := url.Parse(s.Cfg().BaseURL); err == nil {
+	if u, err := url.Parse(srv.Cfg().BaseURL); err == nil {
 		ApiPrefix = u.Path
 	}
 
@@ -46,7 +45,7 @@ func NewApi(s *store.Store, srv *service.Service) http.Handler {
 		})
 	})
 
-	handler := v3.NewHandler(s, srv)
+	handler := v3.NewHandler(srv)
 
 	// Init Auth Middleware
 	if err := v3.InitAuthMiddleware(sr, handler); err != nil {
