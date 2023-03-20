@@ -97,22 +97,22 @@ test mosquitto 2.0:
     MQTT_URL: "mqtt://eclipse-mosquitto:1883"
   extends: .test-broker
 
-test emqx latest:
+test emqx 4.4 docker:
   stage: broker
   services:
     - redis:latest
-    - name: emqx/emqx:latest
+    - name: emqx:4.4
       alias: emqx
   variables:
     REDIS_URL: "redis://redis:6379"
     MQTT_URL: "mqtt://emqx:1883"
   extends: .test-broker
 
-test emqx 4.4.1:
+test emqx 4.4:
   stage: broker
   services:
     - redis:latest
-    - name: emqx/emqx:4.4.1
+    - name: emqx/emqx:4.4
       alias: emqx
   variables:
     REDIS_URL: "redis://redis:6379"
@@ -127,8 +127,8 @@ test emqx deb:
     REDIS_URL: "redis://redis:6379"
   before_script:
     - apt-get update -y && apt-get install -y mosquitto-clients
-    - wget https://github.com/emqx/emqx/releases/download/v4.2.3/emqx-debian10-4.2.3-x86_64.deb
-    - dpkg -i emqx-debian10-4.2.3-x86_64.deb
+    - wget https://github.com/emqx/emqx/releases/download/v4.4.16/emqx-4.4.16-otp24.3.4.2-1-debian10-amd64.deb
+    - dpkg -i emqx-4.4.16-otp24.3.4.2-1-debian10-amd64.deb
     - service emqx start
   extends: .test-broker
 
