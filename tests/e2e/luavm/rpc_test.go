@@ -77,7 +77,7 @@ var _ = Describe("LuaVM Rpc", func() {
 	worker := luavm.NewWorker(luavm.Config{
 		Instance: cfg.Instance,
 		BaseURL:  cfg.BaseURL,
-	}, service.NewService(nil, orm, rdb, ofs), rpcServer, luaFile)
+	}, service.NewService(cfg, orm, rdb, ofs), rpcServer, luaFile)
 	go worker.Run(ctx)
 
 	go func() {
