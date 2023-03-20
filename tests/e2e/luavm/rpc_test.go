@@ -20,7 +20,7 @@ import (
 	"sb.im/gosd/mqttd"
 	"sb.im/gosd/state"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
