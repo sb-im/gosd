@@ -111,10 +111,11 @@ func (w *Worker) getScript(task *model.Task) (script []byte) {
 }
 
 func (w *Worker) Run(ctx context.Context) {
-	ch := w.rdb.Subscribe(ctx, fmt.Sprintf("__keyevent@%d__:expired", w.rdb.Options().DB)).Channel()
+	chRun := w.rdb.Subscribe(ctx, fmt.Sprintf("__keyevent@%d__:expired", w.rdb.Options().DB)).Channel()
+	chEnd := w.rdb.Subscribe(ctx, "luavm.kill").Channel()
 	for {
 		select {
-		case m := <-ch:
+		case m := <-chRun:
 			// <prefix>.<jobId>
 			// job.1
 			if data := strings.Split(m.Payload, "."); len(data) > 1 {
@@ -141,6 +142,8 @@ func (w *Worker) Run(ctx context.Context) {
 					w.AddTask(ctx, &task)
 				}
 			}
+		case m := <-chEnd:
+			w.Kill(m.Payload)
 		case <-ctx.Done():
 		}
 	}

@@ -51,5 +51,5 @@ func (s *Service) setWillJob(ctx context.Context, job *model.Job) error {
 }
 
 func (s *Service) TaskKill(taskId string) error {
-	return s.worker.Kill(taskId)
+	return s.rdb.Publish(context.Background(), "luavm.kill", taskId).Err()
 }

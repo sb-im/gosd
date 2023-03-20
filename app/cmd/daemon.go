@@ -68,7 +68,7 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 	}, s, rpcServer, luaFile)
 	go worker.Run(ctx)
 
-	srv := service.NewService(orm, rdb, worker)
+	srv := service.NewService(orm, rdb)
 	if cfg.Schedule {
 		go srv.RunSchedule(ctx)
 	}
