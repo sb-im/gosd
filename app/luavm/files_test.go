@@ -3,21 +3,11 @@ package luavm
 import (
 	"context"
 	"testing"
-
-	"sb.im/gosd/app/model"
 )
 
 func TestLuaFiles(t *testing.T) {
-	task := &model.Task{}
-	task.ID = 1
-
-	job := model.Job{
-		TaskID: task.ID,
-	}
-	task.Job = &job
-	task.Job.ID = 1
-
 	w := newWorker(t)
+	task := helpTestNewTask(t, "Unit Test Lua Files", w)
 	if err := w.doRun(context.Background(), task, []byte(`
 function main(task)
   print("### RUN Files RUN ###")

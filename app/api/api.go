@@ -9,7 +9,6 @@ import (
 	"sb.im/gosd/app/api/middleware"
 	"sb.im/gosd/app/api/v3"
 	"sb.im/gosd/app/service"
-	"sb.im/gosd/app/store"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -19,8 +18,8 @@ import (
 
 var ApiPrefix = "/gosd/api/v3"
 
-func NewApi(s *store.Store, srv *service.Service) http.Handler {
-	if !s.Cfg().Debug {
+func NewApi(srv *service.Service) http.Handler {
+	if !srv.Cfg().Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -35,7 +34,7 @@ func NewApi(s *store.Store, srv *service.Service) http.Handler {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	if u, err := url.Parse(s.Cfg().BaseURL); err == nil {
+	if u, err := url.Parse(srv.Cfg().BaseURL); err == nil {
 		ApiPrefix = u.Path
 	}
 
@@ -46,7 +45,7 @@ func NewApi(s *store.Store, srv *service.Service) http.Handler {
 		})
 	})
 
-	handler := v3.NewHandler(s, srv)
+	handler := v3.NewHandler(srv)
 
 	// Init Auth Middleware
 	if err := v3.InitAuthMiddleware(sr, handler); err != nil {
@@ -72,11 +71,11 @@ func NewApi(s *store.Store, srv *service.Service) http.Handler {
 	sr.POST("/users/:user_id/teams/:team_id", handler.UserAddTeam)
 	// === Manager API } ===
 
-	//sr.GET("schedules", handler.ScheduleIndex)
-	//sr.POST("schedules", handler.ScheduleCreate)
-	//sr.PATCH("schedules/:id", handler.ScheduleUpdate)
-	//sr.DELETE("schedules/:id", handler.ScheduleDestroy)
-	//sr.POST("/schedules/:id/trigger", handler.ScheduleTrigger)
+	sr.GET("/schedules", handler.ScheduleIndex)
+	sr.POST("/schedules", handler.ScheduleCreate)
+	sr.PATCH("/schedules/:id", handler.ScheduleUpdate)
+	sr.DELETE("/schedules/:id", handler.ScheduleDestroy)
+	sr.POST("/schedules/:id/trigger", handler.ScheduleTrigger)
 
 	sr.POST("/blobs", handler.BlobCreate)
 	sr.GET("/blobs/:blobID", handler.BlobShow)
@@ -106,6 +105,8 @@ func NewApi(s *store.Store, srv *service.Service) http.Handler {
 
 	sr.GET("/profiles/:key", handler.ProfileGet)
 	sr.PUT("/profiles/:key", handler.ProfileSet)
+
+	sr.GET("/calendar.ics", handler.Calendar)
 
 	r.NoRoute(func(c *gin.Context) {
 		fmt.Println(c.Request.URL)

@@ -34,7 +34,7 @@ func DatabaseMigrate(orm *gorm.DB) {
 	orm.AutoMigrate(&model.Session{})
 	orm.AutoMigrate(&model.UserTeam{})
 
-	//orm.AutoMigrate(&model.Schedule{})
+	orm.AutoMigrate(&model.Schedule{})
 	orm.AutoMigrate(&model.Node{})
 	orm.AutoMigrate(&model.Task{})
 	orm.AutoMigrate(&model.Blob{})

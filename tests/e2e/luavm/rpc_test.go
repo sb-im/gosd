@@ -11,16 +11,15 @@ import (
 	"sb.im/gosd/app/luavm"
 	"sb.im/gosd/app/luavm/lib"
 	"sb.im/gosd/app/model"
+	"sb.im/gosd/app/service"
 	"sb.im/gosd/app/storage"
-	"sb.im/gosd/app/store"
 
 	"sb.im/gosd/rpc2mqtt"
 	"sb.im/gosd/tests/help"
 
 	"sb.im/gosd/mqttd"
-	"sb.im/gosd/state"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -58,13 +57,12 @@ var _ = Describe("LuaVM Rpc", func() {
 		panic(err)
 	}
 	rdb := redis.NewClient(redisOpt)
-
-	s2 := state.NewState(cfg.RedisURL)
+	rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$KEx")
 
 	chI := make(chan mqttd.MqttRpc, 128)
 	chO := make(chan mqttd.MqttRpc, 128)
 
-	mqtt := mqttd.NewMqttd(cfg.MqttURL, s2, chI, chO)
+	mqtt := mqttd.NewMqttd(cfg.MqttURL, rdb, chI, chO)
 	go mqtt.Run(ctx)
 
 	rpcServer := rpc2mqtt.NewRpc2Mqtt(chI, chO)
@@ -79,7 +77,7 @@ var _ = Describe("LuaVM Rpc", func() {
 	worker := luavm.NewWorker(luavm.Config{
 		Instance: cfg.Instance,
 		BaseURL:  cfg.BaseURL,
-	}, store.NewStore(nil, orm, rdb, ofs), rpcServer, luaFile)
+	}, service.NewService(cfg, orm, rdb, ofs), rpcServer, luaFile)
 	go worker.Run(ctx)
 
 	go func() {

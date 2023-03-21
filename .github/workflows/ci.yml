@@ -6,7 +6,7 @@ jobs:
   build:
     strategy:
       matrix:
-        go: ['1.19', '1.18', '1.17']
+        go: ['1.19', '1.18']
         platform: [ubuntu-latest]
     runs-on: ${{ matrix.platform }}
     services:

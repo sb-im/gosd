@@ -2,6 +2,7 @@
   { "type": "overview" },
   { "type": "plan" },
   { "type": "node" },
+  { "type": "schedule" },
   {
     "icon": "doc",
     "name": "日志",

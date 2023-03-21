@@ -20,6 +20,12 @@ import (
 // @Failure 500
 // @Router /tasks/{id}/running [POST]
 func (h *Handler) TaskRunningCreate(c *gin.Context) {
+	job := model.Job{}
+	if err := c.Bind(&job); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	var task model.Task
 	if err := h.orm.WithContext(c).Model(&task).Where("id = ? AND team_id = ?", c.Param("id"), h.getCurrent(c).TeamID).UpdateColumn("index", gorm.Expr("index + ?", 1)).Scan(&task).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -31,17 +37,10 @@ func (h *Handler) TaskRunningCreate(c *gin.Context) {
 		}
 	}
 
-	job := model.Job{
+	if err := h.srv.CreateJob(c, &model.Job{
 		TaskID: task.ID,
 		Index:  task.Index,
-	}
-	if err := h.orm.WithContext(c).Create(&job).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	task.Job = &job
-
-	if err := h.srv.TaskRun(c, &task); err != nil {
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

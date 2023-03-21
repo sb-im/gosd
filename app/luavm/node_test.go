@@ -4,21 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"sb.im/gosd/app/config"
 	"sb.im/gosd/app/model"
-
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func TestLuaNode(t *testing.T) {
-	task := newTestTask(t)
-	cfg := config.Parse()
-
-	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
+	w := newWorker(t)
+	task := helpTestNewTask(t, "Unit Test Lua Node", w)
 
 	uuid := "__luavm_test__node"
 	nodeName := "__luavm_test__node_name"
@@ -29,12 +20,11 @@ func TestLuaNode(t *testing.T) {
 		TeamID: task.TeamID,
 	}
 
-	if err := orm.FirstOrCreate(node, "uuid = ?", uuid).Error; err != nil {
+	if err := w.orm.FirstOrCreate(node, "uuid = ?", uuid).Error; err != nil {
 		t.Error(err)
 	}
 
 	task.NodeID = node.ID
-	w := newWorker(t)
 
 	if err := w.doRun(context.Background(), task, []byte(`
 function main(task)

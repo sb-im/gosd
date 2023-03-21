@@ -14,9 +14,8 @@ import (
 )
 
 func TestLuaGetMsg(t *testing.T) {
-	task := newTestTask(t)
-
 	w := newWorker(t)
+	task := helpTestNewTask(t, "Unit Test Lua GetMsg", w)
 
 	cfg := config.Parse()
 	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})

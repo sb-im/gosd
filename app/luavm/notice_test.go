@@ -6,18 +6,14 @@ import (
 	"fmt"
 	"testing"
 	"time"
-
-	"sb.im/gosd/app/model"
 )
 
 func TestLuaNotification(t *testing.T) {
-	task := &model.Task{}
-	task.ID = 1
-
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	w := newWorker(t)
+	task := helpTestNewTask(t, "Unit Test Lua Notification", w)
 	ch := make(chan error)
 	go func() {
 		time.Sleep(100 * time.Millisecond)
