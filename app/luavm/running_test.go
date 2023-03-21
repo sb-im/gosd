@@ -5,18 +5,14 @@ import (
 	"fmt"
 	"testing"
 	"time"
-
-	"sb.im/gosd/app/model"
 )
 
 func TestRunning(t *testing.T) {
-	task := &model.Task{}
-	task.ID = 1
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	w := newWorker(t)
+	task := helpTestNewTask(t, "Unit Test Lua Running", w)
 	ch := make(chan error)
 	go func() {
 		ch <- w.doRun(context.Background(), task, []byte(`

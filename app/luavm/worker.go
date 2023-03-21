@@ -4,18 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
+	"strings"
 	"sync"
+	"time"
 
 	"sb.im/gosd/rpc2mqtt"
 
 	"sb.im/gosd/app/logger"
 	"sb.im/gosd/app/luavm/lib"
 	"sb.im/gosd/app/model"
+	"sb.im/gosd/app/service"
 	"sb.im/gosd/app/storage"
-	"sb.im/gosd/app/store"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 
 	lua "github.com/yuin/gopher-lua"
@@ -24,12 +27,13 @@ import (
 )
 
 type Worker struct {
-	cfg    Config
-	ctx    context.Context
-	orm    *gorm.DB
-	rdb    *redis.Client
-	ofs    *storage.Storage
-	store  *store.Store
+	cfg Config
+	ctx context.Context
+	srv *service.Service
+	orm *gorm.DB
+	rdb *redis.Client
+	ofs *storage.Storage
+
 	script []byte
 	mutex  *sync.Mutex
 
@@ -37,7 +41,7 @@ type Worker struct {
 	Running map[string]*Service
 }
 
-func NewWorker(cfg Config, s *store.Store, rpc *rpc2mqtt.Rpc2mqtt, script []byte) *Worker {
+func NewWorker(cfg Config, srv *service.Service, rpc *rpc2mqtt.Rpc2mqtt, script []byte) *Worker {
 	ctx := context.TODO()
 	// default LuaFile: input > default
 	if len(script) == 0 {
@@ -47,13 +51,15 @@ func NewWorker(cfg Config, s *store.Store, rpc *rpc2mqtt.Rpc2mqtt, script []byte
 			script = data
 		}
 	}
+
 	return &Worker{
-		cfg:    cfg,
-		ctx:    ctx,
-		orm:    s.Orm(),
-		rdb:    s.Rdb(),
-		ofs:    s.Ofs(),
-		store:  s,
+		cfg: cfg,
+		ctx: ctx,
+		srv: srv,
+		orm: srv.Orm(),
+		rdb: srv.Rdb(),
+		ofs: srv.Ofs(),
+
 		script: script,
 		mutex:  &sync.Mutex{},
 
@@ -105,15 +111,51 @@ func (w *Worker) getScript(task *model.Task) (script []byte) {
 	return
 }
 
-func (w Worker) Run(ctx context.Context) {
-	<-ctx.Done()
+func (w *Worker) Run(ctx context.Context) {
+	chRun := w.rdb.Subscribe(ctx, fmt.Sprintf("__keyevent@%d__:expired", w.rdb.Options().DB)).Channel()
+	chEnd := w.rdb.Subscribe(ctx, "luavm.kill").Channel()
+	for {
+		select {
+		case m := <-chRun:
+			// <prefix>.<jobId>
+			// job.1
+			if data := strings.Split(m.Payload, "."); len(data) > 1 {
+				if data[0] == "job" {
+					jobId := data[1]
+					var job model.Job
+					if err := w.orm.Preload("Task").Find(&job, jobId).Error; err != nil {
+						logger.WithContext(ctx).Errorln(err)
+					}
+
+					logger.WithContext(ctx).Infof("%+v", job)
+
+					task := job.Task
+					task.Job = &job
+
+					files := make(map[string]string)
+					extra := make(map[string]string)
+
+					json.Unmarshal(task.Files, &files)
+					json.Unmarshal(task.Extra, &extra)
+
+					logger.WithContext(ctx).Infof("%+v\t%v\t%v", task, files, extra)
+
+					w.AddTask(ctx, &task)
+				}
+			}
+		case m := <-chEnd:
+			w.Kill(m.Payload)
+		case <-ctx.Done():
+		}
+	}
 }
 
-func (w Worker) RunTask(task *model.Task, script []byte) error {
+func (w *Worker) RunTask(task *model.Task, script []byte) error {
 	return w.doRun(context.Background(), task, script)
 }
 
 func (w *Worker) doRun(ctx context.Context, task *model.Task, script []byte) error {
+	w.setDuration(task.Job, 1)
 	l := lua.NewState()
 	defer func() {
 		l.Close()
@@ -188,6 +230,7 @@ func (w *Worker) doRun(ctx context.Context, task *model.Task, script []byte) err
 
 	// Core: Load Script
 	if err := l.DoString(string(script)); err != nil {
+		w.setDuration(task.Job, -1)
 		return err
 	}
 
@@ -196,11 +239,27 @@ func (w *Worker) doRun(ctx context.Context, task *model.Task, script []byte) err
 		NRet:    1,
 		Protect: true,
 	}, lua.LString(node.UUID)); err != nil {
+		// Min duration 3s
+		duration := int(time.Since(task.Job.StartedAt).Seconds())
+		if duration < 3 {
+			duration = 3
+		}
+		w.setDuration(task.Job, -duration)
 		return err
 	}
 
 	logger.WithContext(ctx).Warn("==> luavm no panic")
-	return nil
+
+	// Min duration 3s
+	duration := int(time.Since(task.Job.StartedAt).Seconds())
+	if duration < 3 {
+		duration = 3
+	}
+	return w.setDuration(task.Job, duration)
+}
+
+func (w *Worker) setDuration(job *model.Job, duration int) error {
+	return w.orm.Model(job).Where("id = ?", job.ID).UpdateColumn("duration", duration).Error
 }
 
 func (w *Worker) Kill(taskID string) error {

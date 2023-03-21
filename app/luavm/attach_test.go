@@ -6,9 +6,8 @@ import (
 )
 
 func TestLuaAttach(t *testing.T) {
-	task := newTestTask(t)
-
 	w := newWorker(t)
+	task := helpTestNewTask(t, "Unit Test Lua Attach", w)
 	if err := w.doRun(context.Background(), task, []byte(`
 function main(task)
   print("### RUN Attach RUN ###")

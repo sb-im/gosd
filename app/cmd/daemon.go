@@ -11,13 +11,11 @@ import (
 	"sb.im/gosd/app/luavm"
 	"sb.im/gosd/app/service"
 	"sb.im/gosd/app/storage"
-	"sb.im/gosd/app/store"
 	"sb.im/gosd/rpc2mqtt"
 
 	"sb.im/gosd/mqttd"
-	"sb.im/gosd/state"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -39,19 +37,34 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 	}
 	rdb := redis.NewClient(redisOpt)
 
-	ofs := storage.NewStorage(cfg.StorageURL)
-	s := store.NewStore(cfg, orm, rdb, ofs)
+	// Enable Redis Events
+	// K: store
+	// Ex: luavm
+	rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$KEx")
 
-	store := state.NewState(cfg.RedisURL)
+	ofs := storage.NewStorage(cfg.StorageURL)
 
 	chI := make(chan mqttd.MqttRpc, 128)
 	chO := make(chan mqttd.MqttRpc, 128)
 
-	mqtt := mqttd.NewMqttd(cfg.MqttURL, store, chI, chO)
+	mqtt := mqttd.NewMqttd(cfg.MqttURL, rdb, chI, chO)
 	go mqtt.Run(ctx)
 
 	rpcServer := rpc2mqtt.NewRpc2Mqtt(chI, chO)
 	go rpcServer.Run(ctx)
+
+	srv := service.NewService(cfg, orm, rdb, ofs)
+	if cfg.Schedule {
+		go srv.RunSchedule(ctx)
+	}
+
+	srv.StartTaskWorker(ctx)
+
+	if cfg.DemoMode {
+		log.Warn("=== Use Demo Mode ===")
+		DatabaseMigrate(orm)
+		DatabaseSeed(orm)
+	}
 
 	luaFile, err := ioutil.ReadFile(cfg.LuaFilePath)
 	if err == nil {
@@ -60,19 +73,10 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 	worker := luavm.NewWorker(luavm.Config{
 		Instance: cfg.Instance,
 		BaseURL:  cfg.BaseURL,
-	}, s, rpcServer, luaFile)
+	}, srv, rpcServer, luaFile)
 	go worker.Run(ctx)
 
-	srv := service.NewService(orm, rdb, worker)
-	srv.StartSchedule()
-
-	if cfg.DemoMode {
-		log.Warn("=== Use Demo Mode ===")
-		DatabaseMigrate(orm)
-		DatabaseSeed(orm)
-	}
-
-	return api.NewApi(s, srv)
+	return api.NewApi(srv)
 }
 
 func Daemon(ctx context.Context) {

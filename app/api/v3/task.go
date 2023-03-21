@@ -120,7 +120,7 @@ func (h *Handler) TaskShow(c *gin.Context) {
 // @Failure 500
 // @Router /tasks/{id} [PUT]
 func (h *Handler) TaskUpdate(c *gin.Context) {
-	if id, _ := h.store.LockTaskGet(c.Param("id")); id != "" {
+	if id, _ := h.srv.LockTaskGet(c.Param("id")); id != "" {
 		c.JSON(http.StatusConflict, gin.H{"error": "This Task is Running"})
 		return
 	}
@@ -160,7 +160,7 @@ func (h *Handler) TaskUpdate(c *gin.Context) {
 // @Failure 500
 // @Router /tasks/{id} [DELETE]
 func (h *Handler) TaskDestroy(c *gin.Context) {
-	if id, _ := h.store.LockTaskGet(c.Param("id")); id != "" {
+	if id, _ := h.srv.LockTaskGet(c.Param("id")); id != "" {
 		c.JSON(http.StatusConflict, gin.H{"error": "This Task is Running"})
 		return
 	}

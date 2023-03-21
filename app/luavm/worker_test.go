@@ -8,12 +8,17 @@ import (
 	"sb.im/gosd/app/config"
 	"sb.im/gosd/app/luavm/lib"
 	"sb.im/gosd/app/model"
+	"sb.im/gosd/app/service"
 	"sb.im/gosd/app/storage"
-	"sb.im/gosd/app/store"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+)
+
+const (
+	testTeamId = 1
+	testNodeId = 1
 )
 
 func newWorker(t *testing.T) *Worker {
@@ -33,34 +38,32 @@ func helpTestNewWorker(t *testing.T, script []byte) *Worker {
 		panic(err)
 	}
 
+	rdb := redis.NewClient(redisOpt)
+	rdb.ConfigSet(context.Background(), "notify-keyspace-events", "$KEx")
+
 	// use tempDir
 	return NewWorker(Config{
 		Instance: cfg.Instance,
 		BaseURL:  cfg.BaseURL,
-	}, store.NewStore(cfg, orm, redis.NewClient(redisOpt), storage.NewStorage(t.TempDir())), nil, script)
+	}, service.NewService(cfg, orm, rdb, storage.NewStorage(t.TempDir())), nil, script)
 }
 
-func newTestTask(t *testing.T) *model.Task {
-	cfg := config.Parse()
-
-	if orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{}); err != nil {
-		t.Error(err)
-		return nil
-	} else {
-		task := model.Task{
-			Name:   "Unit Test",
-			TeamID: 1,
-			NodeID: 1,
-		}
-		orm.Create(&task)
-
-		job := model.Job{
-			Task: task,
-		}
-		orm.Create(&job)
-		task.Job = &job
-		return &task
+func helpTestNewTask(t *testing.T, name string, w *Worker) *model.Task {
+	task := &model.Task{
+		Name:   name,
+		TeamID: testTeamId,
+		NodeID: testNodeId,
 	}
+	if err := w.srv.Orm().FirstOrCreate(task, model.Task{Name: name}).Error; err != nil {
+		t.Error(err)
+	}
+
+	job, err := w.srv.ScheduleCreateJob(context.Background(), task.ID)
+	if err != nil {
+		t.Error(err)
+	}
+	task.Job = job
+	return task
 }
 
 func TestNewWorker(t *testing.T) {
@@ -84,10 +87,11 @@ func TestLuaScript(t *testing.T) {
 
 func luaScript(t *testing.T, name string) {
 	w := newWorker(t)
+	task := helpTestNewTask(t, "Unit Test Lua Scriptl", w)
 	if script, err := lib.File.ReadFile(name); err != nil {
 		t.Error(err)
 	} else {
-		if err := w.doRun(context.Background(), &model.Task{}, script); err != nil {
+		if err := w.doRun(context.Background(), task, script); err != nil {
 			t.Error(err)
 		}
 	}
@@ -108,9 +112,9 @@ end
 
 	w := helpTestNewWorker(t, script)
 
-	task := newTestTask(t)
-	task2 := newTestTask(t)
-	task3 := newTestTask(t)
+	task := helpTestNewTask(t, "Unit Test MultipleTask 1", w)
+	task2 := helpTestNewTask(t, "Unit Test MultipleTask 2", w)
+	task3 := helpTestNewTask(t, "Unit Test MultipleTask 3", w)
 	task3.NodeID = 3
 
 	ctx := context.Background()

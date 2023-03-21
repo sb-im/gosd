@@ -6,11 +6,11 @@ import (
 )
 
 func TestPreTaskCheck(t *testing.T) {
-	task := newTestTask(t)
+	w := newWorker(t)
+	task := helpTestNewTask(t, "Unit Test PreTaskCheck", w)
+
 	taskID := strconv.Itoa(int(task.ID))
 	nodeID := strconv.Itoa(int(task.NodeID))
-
-	w := newWorker(t)
 
 	// check pass
 	if err := w.preTaskCheck(task); err != nil {

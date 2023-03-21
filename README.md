@@ -9,7 +9,7 @@ SuperDock Cloud Server
 
 ## Build
 
-* golang >= 1.17.x
+* golang >= 1.18.x
 * make
 
 ```bash
@@ -93,6 +93,7 @@ Variable Name  | Description                                              | Defa
 `MQTT_URL`     | MQTT broker Server address                               | `mqtt://admin:public@localhost:1883`
 `REDIS_URL`    | Redis Server URL                                         | `redis://localhost:6379/0`
 `CLIENT_URL`   | Only `gosd client` use `BASE_URL`                        | `http://localhost:8000/gosd/api/v3`
+`SCHEDULE`     | Only Single Node. **Not support cluster**                | `true`
 `LOG_FILE`     | Log File                                                 | `STDOUT`
 `LOG_LEVEL`    | Log Level: `panic`, `fatal`, `error`, `warn`, `info`, `debug`, `trace` | `info`
 `LUA_FILE` | Task lua > `LUA_FILE` > System Default (`luavm/lua/default.lua`) | `default.lua`
