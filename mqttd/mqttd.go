@@ -210,10 +210,14 @@ func (t *Mqtt) Run(ctx context.Context) {
 			fmt.Sprintf(keyspace, "nodes/*"),
 			fmt.Sprintf(keyspace, "tasks/*"),
 		).Channel()
+
 		for {
 			select {
 			case m := <-ch:
 				log.Debugf("%s: message: %s\n", m.Channel, m.Payload)
+				if m.Payload != "set" {
+					continue
+				}
 
 				// topic:
 				// plans/1/running
@@ -224,6 +228,7 @@ func (t *Mqtt) Run(ctx context.Context) {
 				raw, err := data.Bytes()
 				if err != nil {
 					log.Error(err)
+					continue
 				}
 
 				// prefix:
