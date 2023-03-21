@@ -106,7 +106,7 @@ func NewApi(srv *service.Service) http.Handler {
 	sr.GET("/profiles/:key", handler.ProfileGet)
 	sr.PUT("/profiles/:key", handler.ProfileSet)
 
-	sr.GET("/calender.ics", handler.Calendar)
+	sr.GET("/calendar.ics", handler.Calendar)
 
 	r.NoRoute(func(c *gin.Context) {
 		fmt.Println(c.Request.URL)
