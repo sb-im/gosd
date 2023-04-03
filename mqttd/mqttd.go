@@ -255,6 +255,9 @@ func (t *Mqtt) Run(ctx context.Context) {
 						}
 					}
 				case "tasks":
+					if strings.Split(topic, "/")[2] == "term" {
+						continue
+					}
 					res, err := t.Client.Publish(ctx, &paho.Publish{
 						Payload: raw,
 						Topic:   topic,
