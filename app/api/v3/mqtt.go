@@ -20,14 +20,17 @@ func (h *Handler) MqttUserCreate(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	user := h.getCurrent(c)
-	username, password, err := h.srv.MqttAuthReqTeam(user.TeamID)
 
-	u.User = url.UserPassword(username, password)
+	if h.cfg.EmqxAuth {
+		user := h.getCurrent(c)
+		username, password, err := h.srv.MqttAuthReqTeam(user.TeamID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 
-	// TODO: isSuperUser
-	//fmt.Println(user)
-
-	h.srv.MqttAuthAclTeam(user.TeamID)
+		u.User = url.UserPassword(username, password)
+		h.srv.MqttAuthAclTeam(user.TeamID)
+	}
 	c.JSON(http.StatusOK, u.String())
 }

@@ -25,6 +25,7 @@ type Config struct {
 	BasicAuth   bool   `env:"BASIC_AUTH"`
 	DemoMode    bool   `env:"DEMO_MODE"`
 	Schedule    bool   `env:"SCHEDULE"`
+	EmqxAuth    bool   `env:"EMQX_AUTH"`
 	Language    string `env:"LANGUAGE"`
 	Timezone    string `env:"TIMEZONE"`
 	ApiKey      string `env:"API_KEY"`
@@ -51,6 +52,7 @@ func DefaultConfig() *Config {
 		BasicAuth:   true,
 		DemoMode:    false,
 		Schedule:    true,
+		EmqxAuth:    false,
 		Language:    "en_US",
 		Timezone:    "Asia/Shanghai",
 		ApiMqtt:     "mqtt://localhost:1883",
