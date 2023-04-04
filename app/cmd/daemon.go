@@ -22,6 +22,17 @@ import (
 )
 
 func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
+	LevelMap := map[string]log.Level{
+		"panic": log.PanicLevel,
+		"fatal": log.FatalLevel,
+		"error": log.ErrorLevel,
+		"warn":  log.WarnLevel,
+		"info":  log.InfoLevel,
+		"debug": log.DebugLevel,
+		"trace": log.TraceLevel,
+	}
+	log.SetLevel(LevelMap[cfg.LogLevel])
+
 	log.Debugf("%+v\n", cfg)
 
 	orm, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{
