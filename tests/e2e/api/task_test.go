@@ -9,8 +9,8 @@ import (
 
 	"sb.im/gosd/app/api"
 	"sb.im/gosd/app/client"
-	"sb.im/gosd/app/cmd"
 	"sb.im/gosd/app/config"
+	"sb.im/gosd/app/daemon"
 	"sb.im/gosd/app/model"
 
 	"sb.im/gosd/tests/help"
@@ -26,7 +26,7 @@ var _ = Describe("Task", func() {
 	uuid := "__e2e_test__luavm_rpc"
 
 	ctx, cancel := context.WithCancel(context.Background())
-	handler := cmd.NewHandler(ctx, config.Parse())
+	handler := daemon.NewHandler(ctx, config.Parse())
 
 	BeforeEach(func() {
 		ctx, cancel = context.WithCancel(context.Background())

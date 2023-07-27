@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"sb.im/gosd/app/config"
+	"sb.im/gosd/app/daemon"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -24,7 +25,7 @@ var serverCmd = &cobra.Command{
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
-		go Daemon(ctx)
+		go daemon.Daemon(ctx)
 
 		cfg := config.Parse()
 		if cfg.DemoMode {
