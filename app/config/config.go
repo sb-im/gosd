@@ -29,6 +29,7 @@ type Config struct {
 	ListenAddr string `env:"LISTEN_ADDR"`
 
 	// Feature Flags
+	ResetMode   bool   `env:"RESET_MODE"`
 	Schedule    bool   `env:"SCHEDULE"`
 	EmqxAuth    bool   `env:"EMQX_AUTH"`
 	LuaFilePath string `env:"LUA_FILE"`
@@ -63,6 +64,7 @@ func DefaultConfig() *Config {
 		ApiMqttWs:  "ws://localhost:8083/mqtt",
 		ListenAddr: "0.0.0.0:8000",
 
+		ResetMode:   true,
 		Schedule:    true,
 		EmqxAuth:    false,
 		LuaFilePath: "default.lua",

@@ -122,6 +122,7 @@ Variable Name  | Description                                              | Defa
 
 Variable Name  | Description                                              | Default
 -------------- | -------------------------------------------------------- | -------------------------------------------------------------
+`RESET_MODE`   | Enable Auto Reset Status, **NOTE: In cluster**           | `true`
 `SCHEDULE`     | Only Single Node. **Not support cluster**                | `true`
 `EMQX_AUTH`    | Use Emqx redis auth plugin. If Mosquitto, Set `false`    | `false`
 `LUA_FILE`     | Task lua > `LUA_FILE` > Default(`luavm/lua/default.lua`) | `default.lua`

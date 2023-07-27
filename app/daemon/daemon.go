@@ -65,6 +65,10 @@ func NewHandler(ctx context.Context, cfg *config.Config) http.Handler {
 	go rpcServer.Run(ctx)
 
 	srv := service.NewService(cfg, orm, rdb, ofs)
+	if cfg.ResetMode {
+		srv.Reset(ctx)
+	}
+
 	if cfg.Schedule {
 		go srv.RunSchedule(ctx)
 	}
